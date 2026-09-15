@@ -1,0 +1,36 @@
+(function () {
+  const premiumCard = document.getElementById("premium");
+  const checkoutButton = document.querySelector("[data-checkout]");
+  const checkoutStatus = document.querySelector(".checkout-status");
+
+  function highlightPremium() {
+    if (!premiumCard) return;
+    premiumCard.classList.remove("is-targeted");
+    window.requestAnimationFrame(() => premiumCard.classList.add("is-targeted"));
+    window.setTimeout(() => premiumCard.classList.remove("is-targeted"), 1500);
+  }
+
+  document.querySelectorAll(".premium-jump").forEach((link) => link.addEventListener("click", () => window.setTimeout(highlightPremium, 350)));
+  if (window.location.hash === "#premium") window.setTimeout(highlightPremium, 450);
+  if (!checkoutButton || !checkoutStatus) return;
+
+  checkoutButton.addEventListener("click", async () => {
+    const originalLabel = checkoutButton.textContent;
+    checkoutButton.disabled = true;
+    checkoutButton.textContent = "Abriendo pago seguro…";
+    checkoutStatus.textContent = "Conectando con Stripe…";
+    checkoutStatus.classList.remove("error");
+    try {
+      const response = await fetch("/api/checkout", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ plan: "premium-monthly" }) });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.url) throw new Error(data.error || "No se ha podido abrir el pago.");
+      checkoutStatus.textContent = "Redirigiendo a la página segura de Stripe…";
+      window.location.assign(data.url);
+    } catch (error) {
+      checkoutStatus.textContent = error instanceof Error ? error.message : "No se ha podido abrir el pago. Inténtalo de nuevo.";
+      checkoutStatus.classList.add("error");
+      checkoutButton.disabled = false;
+      checkoutButton.textContent = originalLabel;
+    }
+  });
+})();
