@@ -10,8 +10,22 @@
     window.setTimeout(() => premiumCard.classList.remove("is-targeted"), 1500);
   }
 
-  document.querySelectorAll(".premium-jump").forEach((link) => link.addEventListener("click", () => window.setTimeout(highlightPremium, 350)));
-  if (window.location.hash === "#premium") window.setTimeout(highlightPremium, 450);
+  document.querySelectorAll(".premium-jump").forEach((link) => {
+    link.addEventListener("click", (event) => {
+      event.preventDefault();
+      if (!premiumCard) return;
+      premiumCard.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
+      window.history.replaceState(null, "", "#premium");
+      window.setTimeout(highlightPremium, 450);
+    });
+  });
+
+  if (window.location.hash === "#premium" && premiumCard) {
+    window.setTimeout(() => {
+      premiumCard.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
+      highlightPremium();
+    }, 350);
+  }
   if (!checkoutButton || !checkoutStatus) return;
 
   checkoutButton.addEventListener("click", async () => {
