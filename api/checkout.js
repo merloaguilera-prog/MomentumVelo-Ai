@@ -25,6 +25,18 @@ async function findPremiumPrice(stripe) {
   throw new Error("Configura STRIPE_PREMIUM_PRICE_ID con el precio mensual de 49 € de MomentumVelo Premium.");
 }
 
+function getConfigurationMessage(error) {
+  if (!(error instanceof Error)) return null;
+  if (error.message.startsWith("Configura STRIPE_PREMIUM_PRICE_ID")) return error.message;
+  if (error.type === "StripeAuthenticationError") {
+    return "La clave privada de Stripe configurada en Vercel no es válida. Revisa STRIPE_SECRET_KEY.";
+  }
+  if (error.type === "StripeInvalidRequestError" && error.code === "resource_missing") {
+    return "El precio configurado no existe en esta cuenta de Stripe. Revisa STRIPE_PREMIUM_PRICE_ID.";
+  }
+  return null;
+}
+
 module.exports = async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
   if (req.method !== "POST") { res.setHeader("Allow", "POST"); return res.status(405).json({ error: "Método no permitido." }); }
@@ -40,7 +52,7 @@ module.exports = async function handler(req, res) {
     return res.status(200).json({ url: session.url });
   } catch (error) {
     console.error("checkout_session_error", { message: error instanceof Error ? error.message : String(error) });
-    const configurationError = error instanceof Error && error.message.startsWith("Configura STRIPE_PREMIUM_PRICE_ID");
-    return res.status(configurationError ? 503 : 500).json({ error: configurationError ? error.message : "Stripe no ha podido iniciar el pago. Inténtalo de nuevo." });
+    const configurationMessage = getConfigurationMessage(error);
+    return res.status(configurationMessage ? 503 : 500).json({ error: configurationMessage || "Stripe no ha podido iniciar el pago. Inténtalo de nuevo." });
   }
 };
