@@ -410,9 +410,6 @@ footer p {
   grid-template-columns: minmax(0, 780px);
   justify-content: center;
 }
-.pricing-grid.is-premium-view .price-card:not(.premium-card) {
-  display: none;
-}
 .pricing-grid.is-premium-view .premium-card {
   width: 100%;
   max-width: 780px;
