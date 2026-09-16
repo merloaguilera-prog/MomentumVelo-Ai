@@ -1,13 +1,7 @@
 (function () {
   const premiumCard = document.getElementById("premium");
-  const pricingGrid = document.querySelector(".pricing-grid");
   const checkoutButton = document.querySelector("[data-checkout]");
   const checkoutStatus = document.querySelector(".checkout-status");
-
-  function setPremiumView(active) {
-    if (!pricingGrid) return;
-    pricingGrid.classList.toggle("is-premium-view", active);
-  }
 
   function highlightPremium() {
     if (!premiumCard) return;
@@ -16,32 +10,27 @@
     window.setTimeout(() => premiumCard.classList.remove("is-targeted"), 1500);
   }
 
+  function goToPremium() {
+    if (!premiumCard) return;
+    premiumCard.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
+    window.history.replaceState(null, "", "#premium");
+    window.setTimeout(() => {
+      highlightPremium();
+      premiumCard.focus({ preventScroll: true });
+    }, 450);
+  }
+
   document.querySelectorAll(".premium-jump").forEach((link) => {
     link.addEventListener("click", (event) => {
       event.preventDefault();
-      if (!premiumCard) return;
-      setPremiumView(true);
-      premiumCard.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
-      window.history.replaceState(null, "", "#premium");
-      window.setTimeout(() => {
-        highlightPremium();
-        premiumCard.focus({ preventScroll: true });
-      }, 450);
+      goToPremium();
     });
   });
 
-  document.querySelectorAll('a[href="#precios"]').forEach((link) => {
-    link.addEventListener("click", () => setPremiumView(false));
-  });
-
   if (window.location.hash === "#premium" && premiumCard) {
-    setPremiumView(true);
-    window.setTimeout(() => {
-      premiumCard.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
-      highlightPremium();
-      premiumCard.focus({ preventScroll: true });
-    }, 350);
+    window.setTimeout(goToPremium, 350);
   }
+
   if (!checkoutButton || !checkoutStatus) return;
 
   checkoutButton.addEventListener("click", async () => {
@@ -51,7 +40,11 @@
     checkoutStatus.textContent = "Conectando con Stripe…";
     checkoutStatus.classList.remove("error");
     try {
-      const response = await fetch("/api/checkout", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ plan: "premium-monthly" }) });
+      const response = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan: "premium-monthly" })
+      });
       const data = await response.json().catch(() => ({}));
       if (!response.ok || !data.url) throw new Error(data.error || "No se ha podido abrir el pago.");
       checkoutStatus.textContent = "Redirigiendo a la página segura de Stripe…";
