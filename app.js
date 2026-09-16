@@ -1,7 +1,13 @@
 (function () {
   const premiumCard = document.getElementById("premium");
+  const pricingGrid = document.querySelector(".pricing-grid");
   const checkoutButton = document.querySelector("[data-checkout]");
   const checkoutStatus = document.querySelector(".checkout-status");
+
+  function setPremiumView(active) {
+    if (!pricingGrid) return;
+    pricingGrid.classList.toggle("is-premium-view", active);
+  }
 
   function highlightPremium() {
     if (!premiumCard) return;
@@ -14,16 +20,26 @@
     link.addEventListener("click", (event) => {
       event.preventDefault();
       if (!premiumCard) return;
+      setPremiumView(true);
       premiumCard.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
       window.history.replaceState(null, "", "#premium");
-      window.setTimeout(highlightPremium, 450);
+      window.setTimeout(() => {
+        highlightPremium();
+        premiumCard.focus({ preventScroll: true });
+      }, 450);
     });
   });
 
+  document.querySelectorAll('a[href="#precios"]').forEach((link) => {
+    link.addEventListener("click", () => setPremiumView(false));
+  });
+
   if (window.location.hash === "#premium" && premiumCard) {
+    setPremiumView(true);
     window.setTimeout(() => {
       premiumCard.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
       highlightPremium();
+      premiumCard.focus({ preventScroll: true });
     }, 350);
   }
   if (!checkoutButton || !checkoutStatus) return;

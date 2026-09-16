@@ -406,6 +406,41 @@ footer p {
   margin-top: 58px;
   text-align: left;
 }
+.pricing-grid.is-premium-view {
+  grid-template-columns: minmax(0, 780px);
+  justify-content: center;
+}
+.pricing-grid.is-premium-view .price-card:not(.premium-card) {
+  display: none;
+}
+.pricing-grid.is-premium-view .premium-card {
+  width: 100%;
+  max-width: 780px;
+  padding: 42px;
+  border-width: 2px;
+  box-shadow:
+    0 32px 90px rgba(0, 0, 0, 0.48),
+    0 0 70px rgba(37, 230, 131, 0.16);
+}
+.pricing-grid.is-premium-view .premium-card .popular {
+  height: 46px;
+  margin: -42px -42px 34px;
+  padding: 12px 20px;
+  font-size: 14px;
+}
+.pricing-grid.is-premium-view .premium-card h3 {
+  font-size: 30px;
+}
+.pricing-grid.is-premium-view .premium-card > p:not(.payment-note):not(.checkout-status) {
+  font-size: 17px;
+}
+.pricing-grid.is-premium-view .premium-card .price {
+  font-size: 64px;
+}
+.pricing-grid.is-premium-view .premium-card .checkout-button {
+  min-height: 58px;
+  font-size: 17px;
+}
 .price-card {
   position: relative;
   padding: 30px;
@@ -677,6 +712,15 @@ footer {
   }
   .legal {
     flex-direction: column;
+  }
+  .pricing-grid.is-premium-view .premium-card {
+    padding: 26px;
+  }
+  .pricing-grid.is-premium-view .premium-card .popular {
+    margin: -26px -26px 26px;
+  }
+  .pricing-grid.is-premium-view .premium-card .price {
+    font-size: 54px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
