@@ -2,6 +2,19 @@
   const premiumCard = document.getElementById("premium");
   const checkoutButton = document.querySelector("[data-checkout]");
   const checkoutStatus = document.querySelector(".checkout-status");
+  const authLink = document.querySelector("[data-auth-link]");
+
+  if (authLink) {
+    try {
+      const session = JSON.parse(window.localStorage.getItem("momentumvelo.session.v1") || "null");
+      if (session && session.email) {
+        authLink.textContent = "Mi cuenta";
+        authLink.href = "/login?mode=account";
+      }
+    } catch (_error) {
+      // Keep the normal sign-in link if local storage is unavailable.
+    }
+  }
 
   function highlightPremium() {
     if (!premiumCard) return;
