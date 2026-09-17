@@ -4,7 +4,7 @@
   "private": true,
   "description": "Landing y suscripción Premium de MomentumVelo-AI",
   "scripts": {
-    "check": "node --check app.js && node --check success.js && node --check api/checkout.js && node --check api/subscription.js && node --check api/portal.js && node --check api/webhook.js"
+    "check": "node --check app.js && node --check auth.js && node --check success.js && node --check api/checkout.js && node --check api/subscription.js && node --check api/portal.js && node --check api/webhook.js"
   },
   "dependencies": { "stripe": "^18.5.0" },
   "engines": { "node": ">=20" }
