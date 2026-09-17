@@ -9,8 +9,9 @@
   <title>Acceso y registro — MomentumVelo-AI</title>
   <link rel="stylesheet" href="/styles.css">
   <style>
-    .auth-premium-later{border:3px solid #25e683!important;outline:2px solid #fff!important;outline-offset:4px!important;border-radius:16px!important;padding:18px!important;margin:24px 5px 8px!important;box-shadow:0 0 0 7px rgba(37,230,131,.10),0 0 28px rgba(37,230,131,.22)!important}
-    .auth-premium-later a{border:2px solid #fff!important;background:#25e683!important;color:#06120b!important;border-radius:12px!important;padding:12px 18px!important;font-weight:900!important;box-shadow:0 0 0 3px #25e683!important}
+    .premium-double-frame{margin:26px 0 10px;padding:5px;border:3px solid #25e683;border-radius:20px;background:#25e683;box-shadow:0 0 30px rgba(37,230,131,.22)}
+    .premium-double-frame-inner{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:18px 20px;border:3px solid #fff;border-radius:14px;background:#0f151b}
+    .premium-double-frame-inner>div{display:grid;gap:3px}.premium-double-frame-inner strong{font-size:1.05rem;color:#fff}.premium-double-frame-inner span{color:#aeb8c6}.premium-double-frame-inner a{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:0 18px;border:2px solid #25e683;border-radius:11px;background:#25e683;color:#06120b;font-weight:900;white-space:nowrap}@media(max-width:650px){.premium-double-frame-inner{align-items:stretch;flex-direction:column}.premium-double-frame-inner a{width:100%}}
   </style>
   <script src="/auth.js" defer></script>
 </head>
@@ -64,7 +65,7 @@
           </form>
 
           <p class="auth-device-note">Tus datos de acceso se guardan de forma privada en este dispositivo durante esta primera versión.</p>
-          <div class="auth-premium-later"><div><strong>¿Quieres Premium más adelante?</strong><span>Podrás activarlo cuando decidas.</span></div><a href="/#premium">Ver Premium · 49 €/mes</a></div>
+          <div class="premium-double-frame"><div class="premium-double-frame-inner"><div><strong>¿Quieres Premium más adelante?</strong><span>Podrás activarlo cuando decidas.</span></div><a href="/#premium">Ver Premium · 49 €/mes</a></div></div>
         </div>
 
         <div class="account-view" data-account-view hidden>
