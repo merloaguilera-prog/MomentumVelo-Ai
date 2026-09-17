@@ -11,7 +11,7 @@
   <style>
     .premium-double-frame{margin:28px 0 12px;padding:6px;border:3px solid #25e683;border-radius:22px;background:rgba(37,230,131,.05);box-shadow:0 0 5px #25e683,0 0 14px rgba(37,230,131,.95),0 0 34px rgba(37,230,131,.58),inset 0 0 12px rgba(37,230,131,.20)}
     .premium-double-frame-inner{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:19px 21px;border:3px solid #fff;border-radius:15px;background:#0f151b;box-shadow:0 0 5px #fff,0 0 13px rgba(255,255,255,.72),inset 0 0 9px rgba(255,255,255,.12)}
-    .premium-double-frame-inner>div{display:grid;gap:3px}.premium-double-frame-inner strong{font-size:1.08rem;color:#fff;text-shadow:0 0 9px rgba(255,255,255,.32)}.premium-double-frame-inner span{color:#c3ccd3}.premium-double-frame-inner a{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 19px;border:2px solid #25e683;border-radius:11px;background:#25e683;color:#06120b;font-weight:900;white-space:nowrap;box-shadow:0 0 8px rgba(37,230,131,.9),0 0 20px rgba(37,230,131,.48)}@media(max-width:650px){.premium-double-frame-inner{align-items:stretch;flex-direction:column}.premium-double-frame-inner a{width:100%}}
+    .premium-double-frame-inner>div{display:grid;gap:3px}.premium-double-frame-inner strong{font-size:1.08rem;color:#fff;text-shadow:0 0 9px rgba(255,255,255,.32)}.premium-double-frame-inner span{color:#c3ccd3}.premium-pay-button{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 19px;border:2px solid #25e683;border-radius:11px;background:#25e683;color:#06120b;font-weight:900;white-space:nowrap;box-shadow:0 0 8px rgba(37,230,131,.9),0 0 20px rgba(37,230,131,.48);cursor:pointer}.premium-pay-button:disabled{opacity:.72;cursor:wait}.premium-checkout-status{margin:8px 4px 0;color:#aeb8c6;font-size:.88rem}.premium-checkout-status.error{color:#ff6677}@media(max-width:650px){.premium-double-frame-inner{align-items:stretch;flex-direction:column}.premium-pay-button{width:100%}}
   </style>
   <script src="/auth.js" defer></script>
 </head>
@@ -21,63 +21,36 @@
       <a class="brand" href="/" aria-label="Volver a MomentumVelo-AI"><span class="brand-mark" aria-hidden="true">↗</span> MomentumVelo<span class="accent">-AI</span></a>
       <a class="auth-back" href="/">← Volver a la plataforma</a>
     </header>
-
     <div class="auth-layout">
       <section class="auth-intro" aria-labelledby="auth-intro-title">
         <p class="eyebrow">Plan Trader · 0 €/mes</p>
         <h1 id="auth-intro-title">Empieza gratis. <span>Premium puede esperar.</span></h1>
         <p class="lead">Regístrate primero en MomentumVelo-AI y prueba el plan gratuito. Cuando tú quieras, podrás pasar a Premium por 49 €/mes.</p>
-        <ul class="auth-benefits">
-          <li><strong>Sin pago ahora</strong><span>Crear la cuenta gratuita no activa ningún cobro.</span></li>
-          <li><strong>Acceso Trader</strong><span>Hasta 20 activos y señales con 15 minutos de retardo.</span></li>
-          <li><strong>Tú decides después</strong><span>Premium seguirá disponible, pero no es obligatorio.</span></li>
-        </ul>
+        <ul class="auth-benefits"><li><strong>Sin pago ahora</strong><span>Crear la cuenta gratuita no activa ningún cobro.</span></li><li><strong>Acceso Trader</strong><span>Hasta 20 activos y señales con 15 minutos de retardo.</span></li><li><strong>Tú decides después</strong><span>Premium seguirá disponible, pero no es obligatorio.</span></li></ul>
       </section>
-
       <section class="auth-card" aria-labelledby="auth-title">
-        <div class="auth-tabs" role="tablist" aria-label="Acceso a MomentumVelo-AI">
-          <button class="auth-tab is-active" id="signup-tab" type="button" role="tab" aria-selected="true" aria-controls="signup-form" data-auth-mode="signup">Crear cuenta gratis</button>
-          <button class="auth-tab" id="login-tab" type="button" role="tab" aria-selected="false" aria-controls="login-form" data-auth-mode="login">Iniciar sesión</button>
-        </div>
-
+        <div class="auth-tabs" role="tablist" aria-label="Acceso a MomentumVelo-AI"><button class="auth-tab is-active" id="signup-tab" type="button" role="tab" aria-selected="true" aria-controls="signup-form" data-auth-mode="signup">Crear cuenta gratis</button><button class="auth-tab" id="login-tab" type="button" role="tab" aria-selected="false" aria-controls="login-form" data-auth-mode="login">Iniciar sesión</button></div>
         <div class="auth-form-view" data-auth-view>
-          <div class="auth-heading">
-            <p class="eyebrow" data-auth-eyebrow>Registro gratuito</p>
-            <h2 id="auth-title" data-auth-title>Crea tu cuenta</h2>
-            <p data-auth-description>Empieza con el plan Trader de 0 €/mes. No necesitas tarjeta.</p>
-          </div>
-
-          <form class="auth-form" id="signup-form" aria-labelledby="signup-tab" novalidate>
-            <label class="auth-field" for="signup-name"><span>Nombre</span><input id="signup-name" name="name" type="text" autocomplete="name" minlength="2" maxlength="80" required placeholder="Tu nombre"></label>
-            <label class="auth-field" for="signup-email"><span>Correo electrónico</span><input id="signup-email" name="email" type="email" inputmode="email" autocomplete="email" maxlength="180" required placeholder="nombre@correo.com"></label>
-            <label class="auth-field" for="signup-password"><span>Contraseña</span><input id="signup-password" name="password" type="password" autocomplete="new-password" minlength="8" maxlength="128" required placeholder="Mínimo 8 caracteres"></label>
-            <label class="auth-field" for="signup-confirm"><span>Repite la contraseña</span><input id="signup-confirm" name="confirmPassword" type="password" autocomplete="new-password" minlength="8" maxlength="128" required placeholder="Repite tu contraseña"></label>
-            <button class="button auth-submit" type="submit">Crear mi cuenta gratis</button>
-            <p class="auth-safe-note">0 € al mes · Sin tarjeta · Sin cobro automático</p>
-            <p class="auth-status" role="status" aria-live="polite"></p>
-          </form>
-
-          <form class="auth-form" id="login-form" aria-labelledby="login-tab" novalidate hidden>
-            <label class="auth-field" for="login-email"><span>Correo electrónico</span><input id="login-email" name="email" type="email" inputmode="email" autocomplete="email" maxlength="180" required placeholder="nombre@correo.com"></label>
-            <label class="auth-field" for="login-password"><span>Contraseña</span><input id="login-password" name="password" type="password" autocomplete="current-password" minlength="8" maxlength="128" required placeholder="Tu contraseña"></label>
-            <button class="button auth-submit" type="submit">Entrar en MomentumVelo</button>
-            <p class="auth-status" role="status" aria-live="polite"></p>
-          </form>
-
+          <div class="auth-heading"><p class="eyebrow" data-auth-eyebrow>Registro gratuito</p><h2 id="auth-title" data-auth-title>Crea tu cuenta</h2><p data-auth-description>Empieza con el plan Trader de 0 €/mes. No necesitas tarjeta.</p></div>
+          <form class="auth-form" id="signup-form" aria-labelledby="signup-tab" novalidate><label class="auth-field" for="signup-name"><span>Nombre</span><input id="signup-name" name="name" type="text" autocomplete="name" minlength="2" maxlength="80" required placeholder="Tu nombre"></label><label class="auth-field" for="signup-email"><span>Correo electrónico</span><input id="signup-email" name="email" type="email" inputmode="email" autocomplete="email" maxlength="180" required placeholder="nombre@correo.com"></label><label class="auth-field" for="signup-password"><span>Contraseña</span><input id="signup-password" name="password" type="password" autocomplete="new-password" minlength="8" maxlength="128" required placeholder="Mínimo 8 caracteres"></label><label class="auth-field" for="signup-confirm"><span>Repite la contraseña</span><input id="signup-confirm" name="confirmPassword" type="password" autocomplete="new-password" minlength="8" maxlength="128" required placeholder="Repite tu contraseña"></label><button class="button auth-submit" type="submit">Crear mi cuenta gratis</button><p class="auth-safe-note">0 € al mes · Sin tarjeta · Sin cobro automático</p><p class="auth-status" role="status" aria-live="polite"></p></form>
+          <form class="auth-form" id="login-form" aria-labelledby="login-tab" novalidate hidden><label class="auth-field" for="login-email"><span>Correo electrónico</span><input id="login-email" name="email" type="email" inputmode="email" autocomplete="email" maxlength="180" required placeholder="nombre@correo.com"></label><label class="auth-field" for="login-password"><span>Contraseña</span><input id="login-password" name="password" type="password" autocomplete="current-password" minlength="8" maxlength="128" required placeholder="Tu contraseña"></label><button class="button auth-submit" type="submit">Entrar en MomentumVelo</button><p class="auth-status" role="status" aria-live="polite"></p></form>
           <p class="auth-device-note">Tus datos de acceso se guardan de forma privada en este dispositivo durante esta primera versión.</p>
-          <div class="premium-double-frame"><div class="premium-double-frame-inner"><div><strong>¿Quieres Premium más adelante?</strong><span>Podrás activarlo cuando decidas.</span></div><a href="/#premium">Ver Premium · 49 €/mes</a></div></div>
+          <div class="premium-double-frame"><div class="premium-double-frame-inner"><div><strong>¿Quieres Premium más adelante?</strong><span>Podrás activarlo cuando decidas.</span></div><button class="premium-pay-button" id="loginPremiumCheckout" type="button">Premium · 49 €/mes</button></div></div><p class="premium-checkout-status" id="loginPremiumStatus" role="status" aria-live="polite"></p>
         </div>
-
-        <div class="account-view" data-account-view hidden>
-          <p class="eyebrow">Acceso correcto</p>
-          <h2 data-account-title>Tu cuenta está lista</h2>
-          <p data-account-message>Ya puedes volver a MomentumVelo-AI.</p>
-          <dl class="account-summary"><div><dt>Cuenta</dt><dd data-account-email></dd></div><div><dt>Plan actual</dt><dd>Trader · 0 €/mes</dd></div></dl>
-          <div class="account-actions"><a class="button" href="/">Entrar en MomentumVelo</a><a class="button button-secondary" href="/#premium">Ver Premium · 49 €/mes</a></div>
-          <button class="auth-signout" type="button" data-signout>Cerrar sesión</button>
-        </div>
+        <div class="account-view" data-account-view hidden><p class="eyebrow">Acceso correcto</p><h2 data-account-title>Tu cuenta está lista</h2><p data-account-message>Ya puedes volver a MomentumVelo-AI.</p><dl class="account-summary"><div><dt>Cuenta</dt><dd data-account-email></dd></div><div><dt>Plan actual</dt><dd>Trader · 0 €/mes</dd></div></dl><div class="account-actions"><a class="button" href="/">Entrar en MomentumVelo</a><a class="button button-secondary" href="/#premium">Ver Premium · 49 €/mes</a></div><button class="auth-signout" type="button" data-signout>Cerrar sesión</button></div>
       </section>
     </div>
   </main>
+  <script>
+    document.addEventListener('DOMContentLoaded',()=>{
+      const button=document.getElementById('loginPremiumCheckout');
+      const status=document.getElementById('loginPremiumStatus');
+      if(!button||!status)return;
+      button.addEventListener('click',async()=>{
+        const label=button.textContent;button.disabled=true;button.textContent='Abriendo pago seguro…';status.textContent='Conectando con Stripe…';status.classList.remove('error');
+        try{const response=await fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({plan:'premium-monthly'})});const data=await response.json().catch(()=>({}));if(!response.ok||!data.url)throw new Error(data.error||'No se ha podido abrir el pago.');status.textContent='Redirigiendo al pago seguro…';window.location.assign(data.url)}catch(error){status.textContent=error instanceof Error?error.message:'No se ha podido abrir el pago.';status.classList.add('error');button.disabled=false;button.textContent=label}
+      });
+    });
+  </script>
 </body>
 </html>
