@@ -5,17 +5,80 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex">
   <meta name="theme-color" content="#0b0f14">
-  <title>Iniciar sesión — MomentumVelo-AI</title>
+  <title>Acceso gratuito — MomentumVelo-AI</title>
   <link rel="stylesheet" href="/styles.css">
+  <style>
+    .auth-shell{width:min(620px,calc(100% - 28px));margin:38px auto;padding:30px;border:1px solid rgba(148,163,184,.24);border-radius:24px;background:rgba(12,17,24,.96);box-shadow:0 24px 70px rgba(0,0,0,.32)}
+    .auth-head{text-align:center;margin-bottom:22px}.auth-head h1{margin:12px 0 6px}.free-badge{display:inline-block;padding:7px 13px;border:2px solid #25e683;border-radius:999px;color:#75f5ad;font-weight:800}
+    .auth-tabs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:22px 0}.auth-tab{padding:12px;border:1px solid rgba(151,104,255,.55);border-radius:14px;background:#151b25;color:#fff;font-weight:800;cursor:pointer}.auth-tab.active{border-color:#25e683;box-shadow:0 0 0 1px rgba(37,230,131,.2);color:#8bf7ba}
+    .auth-panel{display:none}.auth-panel.active{display:block}.auth-form{display:grid;gap:13px}.auth-form label{font-weight:700;color:#eef2f7}.auth-form input{width:100%;box-sizing:border-box;margin-top:6px;padding:13px 14px;border:1px solid rgba(148,163,184,.35);border-radius:12px;background:#0c1118;color:#fff;font:inherit}.auth-form input:focus{outline:2px solid rgba(37,230,131,.45);border-color:#25e683}.auth-submit{margin-top:5px;padding:14px 18px;border:2px solid #25e683;border-radius:14px;background:#25e683;color:#07110c;font-weight:900;font-size:1rem;cursor:pointer}.auth-note{font-size:.9rem;color:#aeb8c6;line-height:1.5}.auth-message{min-height:22px;margin-top:10px;color:#aeb8c6}
+    .premium-strip{margin-top:28px;padding:22px;border:2px solid #25e683;border-radius:20px;background:linear-gradient(135deg,rgba(37,230,131,.12),rgba(11,15,20,.96));text-align:center}.premium-strip h2{margin:0 0 6px}.premium-price{font-size:1.35rem;font-weight:900;color:#75f5ad}.premium-strip .button{display:block;margin-top:14px;padding:14px;background:#25e683!important;color:#07110c!important;border-color:#25e683!important;font-weight:900}.back-link{display:block;text-align:center;margin-top:18px;color:#bac4d1}
+  </style>
 </head>
 <body class="result-page">
-  <main class="result-card">
-    <a class="brand" href="/"><span class="brand-mark">↗</span> MomentumVelo<span class="accent">-AI</span></a>
-    <p class="eyebrow">Área de usuario</p>
-    <h1>Iniciar sesión</h1>
-    <p>El acceso personal de MomentumVelo-AI está en preparación. Mientras tanto, puedes volver a la plataforma o activar Premium.</p>
-    <a class="button" href="/#premium">Ver Premium · 49 €/mes</a>
-    <a class="button button-secondary" href="/">Volver a MomentumVelo-AI</a>
+  <main class="auth-shell">
+    <div class="auth-head">
+      <a class="brand" href="/"><span class="brand-mark">↗</span> MomentumVelo<span class="accent">-AI</span></a>
+      <p class="eyebrow">Área de usuario</p>
+      <span class="free-badge">Trader · 0 €/mes</span>
+      <h1>Acceso a MomentumVelo</h1>
+      <p>Inicia sesión o crea tu cuenta gratuita. No necesitas contratar Premium para registrarte.</p>
+    </div>
+
+    <div class="auth-tabs" role="tablist" aria-label="Acceso">
+      <button class="auth-tab active" type="button" data-panel="signin">Iniciar sesión</button>
+      <button class="auth-tab" type="button" data-panel="signup">Registrarme gratis</button>
+    </div>
+
+    <section id="signin" class="auth-panel active">
+      <form class="auth-form" id="signinForm">
+        <label>Correo electrónico<input type="email" name="email" autocomplete="email" required></label>
+        <label>Contraseña<input type="password" name="password" autocomplete="current-password" minlength="6" required></label>
+        <button class="auth-submit" type="submit">Iniciar sesión gratis</button>
+      </form>
+      <p class="auth-message" id="signinMessage" aria-live="polite"></p>
+    </section>
+
+    <section id="signup" class="auth-panel">
+      <form class="auth-form" id="signupForm">
+        <label>Nombre<input type="text" name="name" autocomplete="name" required></label>
+        <label>Correo electrónico<input type="email" name="email" autocomplete="email" required></label>
+        <label>Teléfono<input type="tel" name="phone" autocomplete="tel"></label>
+        <label>Contraseña<input type="password" name="password" autocomplete="new-password" minlength="6" required></label>
+        <label>Repite la contraseña<input type="password" name="password2" autocomplete="new-password" minlength="6" required></label>
+        <button class="auth-submit" type="submit">Crear mi cuenta · 0 €</button>
+      </form>
+      <p class="auth-note">El registro es gratuito. La verificación real por correo se activará al conectar el servicio de autenticación.</p>
+      <p class="auth-message" id="signupMessage" aria-live="polite"></p>
+    </section>
+
+    <section class="premium-strip" aria-label="MomentumVelo Premium">
+      <h2>MomentumVelo Premium</h2>
+      <div class="premium-price">49 € / mes</div>
+      <p>¿Quieres dar el siguiente paso? Premium es opcional y está separado de tu registro gratuito.</p>
+      <a class="button" href="/#premium">Unirme a Premium · 49 €/mes</a>
+    </section>
+
+    <a class="back-link" href="/">← Volver a MomentumVelo-AI</a>
   </main>
+  <script>
+    const tabs=[...document.querySelectorAll('.auth-tab')];
+    const panels=[...document.querySelectorAll('.auth-panel')];
+    tabs.forEach(tab=>tab.addEventListener('click',()=>{
+      tabs.forEach(t=>t.classList.toggle('active',t===tab));
+      panels.forEach(p=>p.classList.toggle('active',p.id===tab.dataset.panel));
+    }));
+    document.getElementById('signinForm').addEventListener('submit',e=>{
+      e.preventDefault();
+      document.getElementById('signinMessage').textContent='El acceso gratuito está preparado visualmente; falta conectar el servicio de cuentas para iniciar una sesión real.';
+    });
+    document.getElementById('signupForm').addEventListener('submit',e=>{
+      e.preventDefault();
+      const f=new FormData(e.currentTarget);
+      document.getElementById('signupMessage').textContent=f.get('password')===f.get('password2')
+        ? 'Tus datos están completos. Falta conectar el servicio de cuentas para crear y verificar el usuario por correo.'
+        : 'Las contraseñas no coinciden.';
+    });
+  </script>
 </body>
 </html>
