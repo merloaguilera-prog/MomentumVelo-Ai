@@ -12,6 +12,11 @@
     .premium-double-frame{margin:28px 0 12px;padding:6px;border:3px solid #25e683;border-radius:22px;background:rgba(37,230,131,.05);box-shadow:0 0 5px #25e683,0 0 14px rgba(37,230,131,.95),0 0 34px rgba(37,230,131,.58),inset 0 0 12px rgba(37,230,131,.20)}
     .premium-double-frame-inner{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:19px 21px;border:3px solid #fff;border-radius:15px;background:#0f151b;box-shadow:0 0 5px #fff,0 0 13px rgba(255,255,255,.72),inset 0 0 9px rgba(255,255,255,.12)}
     .premium-double-frame-inner>div{display:grid;gap:3px}.premium-double-frame-inner strong{font-size:1.08rem;color:#fff;text-shadow:0 0 9px rgba(255,255,255,.32)}.premium-double-frame-inner span{color:#c3ccd3}.premium-pay-button{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 19px;border:2px solid #25e683;border-radius:11px;background:#25e683;color:#06120b;font-weight:900;white-space:nowrap;box-shadow:0 0 8px rgba(37,230,131,.9),0 0 20px rgba(37,230,131,.48);cursor:pointer;text-decoration:none}@media(max-width:650px){.premium-double-frame-inner{align-items:stretch;flex-direction:column}.premium-pay-button{width:100%}}
+  
+    .account-enter-button{background:#25e683!important;border:2px solid #25e683!important;color:#041109!important;box-shadow:0 0 12px rgba(37,230,131,.52),0 0 28px rgba(37,230,131,.22)!important}
+    .account-premium-neon{min-height:56px!important;border:3px solid #39ff91!important;border-radius:13px!important;background:#07140d!important;color:#5cff9f!important;font-weight:900!important;letter-spacing:.01em;box-shadow:0 0 5px #39ff91,0 0 14px rgba(57,255,145,.95),0 0 34px rgba(57,255,145,.62),inset 0 0 16px rgba(57,255,145,.18)!important;text-shadow:0 0 8px rgba(92,255,159,.75);transition:transform .18s ease,box-shadow .18s ease!important}
+    .account-premium-neon:hover,.account-premium-neon:focus-visible{transform:translateY(-2px);box-shadow:0 0 7px #39ff91,0 0 20px rgba(57,255,145,1),0 0 46px rgba(57,255,145,.72),inset 0 0 20px rgba(57,255,145,.24)!important}
+    .account-premium-neon span{margin-left:8px;font-size:1.35em;line-height:1}
   </style>
   <script src="/auth.js" defer></script>
 </head>
@@ -29,7 +34,7 @@
           <p class="auth-device-note">Tus datos de acceso se guardan de forma privada en este dispositivo durante esta primera versión.</p>
           <div class="premium-double-frame"><div class="premium-double-frame-inner"><div><strong>¿Quieres Premium más adelante?</strong><span>Podrás activarlo cuando decidas.</span></div><a class="premium-pay-button" href="https://buy.stripe.com/5kQdR89oW8fA3Mn7Tm2VG01">Premium · 49 €/mes</a></div></div>
         </div>
-        <div class="account-view" data-account-view hidden><p class="eyebrow">Acceso correcto</p><h2 data-account-title>Tu cuenta está lista</h2><p data-account-message>Ya puedes volver a MomentumVelo-AI.</p><dl class="account-summary"><div><dt>Cuenta</dt><dd data-account-email></dd></div><div><dt>Plan actual</dt><dd>Trader · 0 €/mes</dd></div></dl><div class="account-actions"><a class="button" href="/">Entrar en MomentumVelo</a><a class="button button-secondary" href="https://buy.stripe.com/5kQdR89oW8fA3Mn7Tm2VG01">Premium · 49 €/mes</a></div><button class="auth-signout" type="button" data-signout>Cerrar sesión</button></div>
+        <div class="account-view" data-account-view hidden><p class="eyebrow">Acceso correcto</p><h2 data-account-title>Tu cuenta está lista</h2><p data-account-message>Ya puedes volver a MomentumVelo-AI.</p><dl class="account-summary"><div><dt>Cuenta</dt><dd data-account-email></dd></div><div><dt>Plan actual</dt><dd>Trader · 0 €/mes</dd></div></dl><div class="account-actions"><a class="button account-enter-button" href="/">Entrar en MomentumVelo</a><a class="button account-premium-neon" href="https://buy.stripe.com/5kQdR89oW8fA3Mn7Tm2VG01">♛ Ver Premium · 49 € al mes <span aria-hidden="true">›</span></a></div><button class="auth-signout" type="button" data-signout>Cerrar sesión</button></div>
       </section>
     </div>
   </main>
