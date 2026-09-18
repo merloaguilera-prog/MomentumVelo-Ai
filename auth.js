@@ -89,6 +89,8 @@
     window.setTimeout(() => firstField.focus(), 0);
   }
 
+  function premiumRequested() { return new URLSearchParams(window.location.search).get("plan") === "premium"; }
+
   function showAccount(email, isNewAccount) {
     const accounts = readJson(ACCOUNTS_KEY, {});
     const account = accounts[email];
@@ -102,6 +104,11 @@
       ? "Tu cuenta gratuita ya está creada. Premium queda como una opción para más adelante."
       : "Has iniciado sesión correctamente en tu cuenta gratuita.";
     document.querySelector("[data-account-email]").textContent = account.email;
+    const premiumLink = document.querySelector("[data-premium-next]");
+    if (premiumLink) premiumLink.href = premiumRequested() ? "https://buy.stripe.com/5kQdR89oW8fA3Mn7Tm2VG01" : "/login?mode=signup&plan=premium";
+    if (premiumRequested()) {
+      document.querySelector("[data-account-message]").textContent = "Paso 1 completado. Continúa al pago seguro de Premium por 49 €/mes.";
+    }
   }
 
   tabs.forEach((tab) => {
@@ -115,6 +122,7 @@
     const formData = new FormData(signupForm);
     const name = String(formData.get("name") || "").trim();
     const email = normalizeEmail(formData.get("email"));
+    const phone = String(formData.get("phone") || "").trim();
     const password = String(formData.get("password") || "");
     const confirmation = String(formData.get("confirmPassword") || "");
     if (password !== confirmation) {
@@ -138,6 +146,7 @@
       accounts[email] = {
         name,
         email,
+        phone,
         salt: bytesToBase64(salt),
         passwordHash,
         plan: "free",
