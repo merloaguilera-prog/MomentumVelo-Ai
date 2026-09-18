@@ -12,3 +12,7 @@ Landing de MomentumVelo-AI con suscripción Premium mensual de 49 € mediante S
 - `STRIPE_PAYMENT_LINK_URL` (alternativa): enlace `buy.stripe.com` ya creado.
 
 El botón superior lleva a la tarjeta Premium central; el botón de esa tarjeta abre Stripe, verifica el pago y permite gestionar o cancelar la suscripción.
+
+## Referencia visual definitiva
+
+La referencia visual aprobada para MomentumVelo es el mockup neón generado el 19/09/2026 (gen_id: da53f8c5-29fa-4cd6-a361-eb90251f4e9c). Mantener esta dirección visual: fondo oscuro, cian/verde neón, CTA Premium destacado, panel Premium a 49 €/mes, portátil con gráficos y tarjetas limpias. No sustituir esta referencia por otro diseño sin aprobación explícita.
