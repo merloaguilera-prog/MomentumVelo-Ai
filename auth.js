@@ -105,7 +105,7 @@
       : "Has iniciado sesión correctamente en tu cuenta gratuita.";
     document.querySelector("[data-account-email]").textContent = account.email;
     const premiumLink = document.querySelector("[data-premium-next]");
-    if (premiumLink) premiumLink.href = premiumRequested() ? "https://buy.stripe.com/8x24gy58G8fA82D5Le2VG02" : "/login?mode=signup&plan=premium";
+    if (premiumLink) premiumLink.href = premiumRequested() ? "https://buy.stripe.com/5kQdR89oW8fA3Mn7Tm2VG01" : "/login?mode=signup&plan=premium";
     if (premiumRequested()) {
       document.querySelector("[data-account-message]").textContent = "Paso 1 completado. Continúa al pago seguro de Premium por 49 €/mes.";
     }
