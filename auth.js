@@ -69,7 +69,17 @@
     const isLogin = activeMode === "login";
     signupForm.hidden = isLogin;
     loginForm.hidden = !isLogin;
-    tabs.forEach((tab) => {
+    const forgotPasswordButton = document.querySelector("[data-forgot-password]");
+  if (forgotPasswordButton) {
+    forgotPasswordButton.addEventListener("click", () => {
+      const email = normalizeEmail(document.getElementById("login-email")?.value);
+      setStatus(loginForm, email
+        ? "La recuperación segura por correo está en preparación. No hemos cambiado tu contraseña ni enviado ningún código todavía."
+        : "Escribe primero tu correo. La recuperación segura por email se activará cuando conectemos el sistema de cuentas real.", "success");
+    });
+  }
+
+  tabs.forEach((tab) => {
       const active = tab.dataset.authMode === activeMode;
       tab.classList.toggle("is-active", active);
       tab.setAttribute("aria-selected", String(active));
@@ -105,7 +115,7 @@
       : "Has iniciado sesión correctamente en tu cuenta gratuita.";
     document.querySelector("[data-account-email]").textContent = account.email;
     const premiumLink = document.querySelector("[data-premium-next]");
-    if (premiumLink) premiumLink.href = premiumRequested() ? "https://buy.stripe.com/5kQdR89oW8fA3Mn7Tm2VG01" : "/login?mode=signup&plan=premium";
+    if (premiumLink) premiumLink.href = premiumRequested() ? "/api/checkout" : "/login?mode=signup&plan=premium";
     if (premiumRequested()) {
       document.querySelector("[data-account-message]").textContent = "Paso 1 completado. Continúa al pago seguro de Premium por 49 €/mes.";
     }
