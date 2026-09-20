@@ -3,7 +3,6 @@
   const checkoutButton = document.querySelector("[data-checkout]");
   const checkoutStatus = document.querySelector(".checkout-status");
   const authLink = document.querySelector("[data-auth-link]");
-  const LIVE_PREMIUM_CHECKOUT = "https://buy.stripe.com/5kQdR89oW8fA3Mn7Tm2VG01";
 
   if (authLink) {
     try {
@@ -36,14 +35,26 @@
   if (window.location.hash === "#premium" && premiumCard) window.setTimeout(goToPremium, 350);
 
   if (checkoutButton) {
-    checkoutButton.addEventListener("click", () => {
+    checkoutButton.addEventListener("click", async () => {
       checkoutButton.disabled = true;
       checkoutButton.textContent = "Abriendo pago seguro…";
       if (checkoutStatus) {
-        checkoutStatus.textContent = "Redirigiendo al pago seguro de Stripe…";
+        checkoutStatus.textContent = "Preparando el pago seguro…";
         checkoutStatus.classList.remove("error");
       }
-      window.location.assign(LIVE_PREMIUM_CHECKOUT);
+      try {
+        const response = await fetch("/api/checkout", { method: "POST", headers: { "Content-Type": "application/json" } });
+        const data = await response.json();
+        if (!response.ok || !data.url) throw new Error(data.error || "No se ha podido abrir el pago.");
+        window.location.assign(data.url);
+      } catch (error) {
+        if (checkoutStatus) {
+          checkoutStatus.textContent = error instanceof Error ? error.message : "No se ha podido abrir el pago seguro.";
+          checkoutStatus.classList.add("error");
+        }
+        checkoutButton.disabled = false;
+        checkoutButton.textContent = "Unirse a MomentumVelo Premium";
+      }
     });
   }
 })();
