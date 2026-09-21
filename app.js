@@ -1,17 +1,28 @@
 (function () {
-  const premiumCard = document.getElementById("premium");
-  const checkoutButton = document.querySelector("[data-checkout]");
-  const checkoutStatus = document.querySelector(".checkout-status");
-  const authLink = document.querySelector("[data-auth-link]");
+  "use strict";
 
-  if (authLink) {
-    try {
-      const session = JSON.parse(window.localStorage.getItem("momentumvelo.session.v1") || "null");
-      if (session && session.email) {
-        authLink.textContent = "Mi cuenta";
-        authLink.href = "/login?mode=account";
-      }
-    } catch (_error) {}
+  const ACCOUNTS_KEY = "momentumvelo.accounts.v1";
+  const SESSION_KEY = "momentumvelo.session.v1";
+  const premiumCard = document.getElementById("premium");
+  const authLink = document.querySelector("[data-auth-link]");
+  const signupLink = document.querySelector("[data-signup-link]");
+
+  try {
+    const session = JSON.parse(window.localStorage.getItem(SESSION_KEY) || "null");
+    const accounts = JSON.parse(window.localStorage.getItem(ACCOUNTS_KEY) || "{}");
+    const account = session && session.email ? accounts[String(session.email).toLowerCase()] : null;
+    if (authLink && account) {
+      const firstName = String(account.name || "").trim().split(/\s+/)[0];
+      authLink.textContent = firstName ? `Hola, ${firstName}` : "Mi cuenta";
+      authLink.href = "/login?mode=account";
+      authLink.setAttribute("aria-label", `Abrir mi cuenta${account.name ? ` de ${account.name}` : ""}`);
+    }
+    if (signupLink && account) {
+      signupLink.textContent = "Entrar en mi cuenta";
+      signupLink.href = "/login?mode=account";
+    }
+  } catch (_error) {
+    // Si el navegador bloquea el almacenamiento, los enlaces conservan su estado público.
   }
 
   function highlightPremium() {
@@ -33,28 +44,4 @@
   });
 
   if (window.location.hash === "#premium" && premiumCard) window.setTimeout(goToPremium, 350);
-
-  if (checkoutButton) {
-    checkoutButton.addEventListener("click", async () => {
-      checkoutButton.disabled = true;
-      checkoutButton.textContent = "Abriendo pago seguro…";
-      if (checkoutStatus) {
-        checkoutStatus.textContent = "Preparando el pago seguro…";
-        checkoutStatus.classList.remove("error");
-      }
-      try {
-        const response = await fetch("/api/checkout", { method: "POST", headers: { "Content-Type": "application/json" } });
-        const data = await response.json();
-        if (!response.ok || !data.url) throw new Error(data.error || "No se ha podido abrir el pago.");
-        window.location.assign(data.url);
-      } catch (error) {
-        if (checkoutStatus) {
-          checkoutStatus.textContent = error instanceof Error ? error.message : "No se ha podido abrir el pago seguro.";
-          checkoutStatus.classList.add("error");
-        }
-        checkoutButton.disabled = false;
-        checkoutButton.textContent = "Unirse a MomentumVelo Premium";
-      }
-    });
-  }
 })();

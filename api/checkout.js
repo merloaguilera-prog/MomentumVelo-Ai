@@ -1,7 +1,19 @@
-// Checkout estable de MomentumVelo Premium.
-// El pago público usa el Payment Link LIVE verificado de Stripe y no depende
-// de una clave privada de Vercel para iniciar el cobro.
-const LIVE_PREMIUM_CHECKOUT = "https://buy.stripe.com/5kQdR89oW8fA3Mn7Tm2VG01";
+const Stripe = require("stripe");
+
+const VERIFIED_PAYMENT_LINK = "https://buy.stripe.com/5kQdR89oW8fA3Mn7Tm2VG01";
+
+function getSiteUrl() {
+  if (process.env.PUBLIC_SITE_URL) return process.env.PUBLIC_SITE_URL.replace(/\/$/, "");
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+    return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL.replace(/\/$/, "")}`;
+  }
+  return "https://momentum-velo.vercel.app";
+}
+
+function validEmail(value) {
+  const email = String(value || "").trim().toLowerCase();
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? email : null;
+}
 
 module.exports = async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
@@ -9,9 +21,46 @@ module.exports = async function handler(req, res) {
     res.setHeader("Allow", "POST");
     return res.status(405).json({ error: "Método no permitido." });
   }
-  return res.status(200).json({
-    url: LIVE_PREMIUM_CHECKOUT,
-    mode: "subscription",
-    plan: "premium-monthly"
-  });
+
+  const paymentLink = process.env.STRIPE_PAYMENT_LINK_URL || VERIFIED_PAYMENT_LINK;
+  const secretKey = process.env.STRIPE_SECRET_KEY;
+  const priceId = process.env.STRIPE_PREMIUM_PRICE_ID;
+
+  if (!secretKey || !priceId) {
+    return res.status(200).json({
+      url: paymentLink,
+      mode: "subscription",
+      plan: "premium-monthly",
+      source: "verified-payment-link"
+    });
+  }
+
+  try {
+    const stripe = new Stripe(secretKey, { apiVersion: "2026-07-29.dahlia" });
+    const siteUrl = getSiteUrl();
+    const email = validEmail(req.body?.email);
+    const session = await stripe.checkout.sessions.create({
+      mode: "subscription",
+      line_items: [{ price: priceId, quantity: 1 }],
+      success_url: `${siteUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${siteUrl}/cancel`,
+      customer_email: email || undefined,
+      metadata: { plan: "premium-monthly" },
+      subscription_data: { metadata: { plan: "premium-monthly" } },
+      integration_identifier: "momentumvelo_web_qmztrkpa"
+    });
+    return res.status(200).json({
+      url: session.url,
+      mode: "subscription",
+      plan: "premium-monthly",
+      source: "checkout-session"
+    });
+  } catch (error) {
+    console.error("checkout_session_error", {
+      message: error instanceof Error ? error.message : String(error)
+    });
+    return res.status(502).json({
+      error: "No se ha podido preparar el pago seguro. Inténtalo de nuevo en unos instantes."
+    });
+  }
 };

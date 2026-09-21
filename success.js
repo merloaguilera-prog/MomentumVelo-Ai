@@ -11,6 +11,15 @@
     if (!response.ok || !data.active) throw new Error(data.error || "No se ha podido verificar el pago.");
     message.textContent = data.email ? `Suscripción activa para ${data.email}.` : "Tu suscripción Premium está activa.";
     status.textContent = data.telegramUrl ? "Ya puedes acceder al canal de alertas Premium." : "Pago confirmado. Te enviaremos el acceso Premium a tu correo.";
+    try {
+      const accounts = JSON.parse(window.localStorage.getItem("momentumvelo.accounts.v1") || "{}");
+      const accountEmail = String(data.email || "").trim().toLowerCase();
+      if (accountEmail && accounts[accountEmail]) {
+        accounts[accountEmail].plan = "premium";
+        accounts[accountEmail].premiumVerifiedAt = new Date().toISOString();
+        window.localStorage.setItem("momentumvelo.accounts.v1", JSON.stringify(accounts));
+      }
+    } catch (_error) {}
     if (data.telegramUrl) { telegramLink.href = data.telegramUrl; telegramLink.hidden = false; }
     portalButton.hidden = false;
   } catch (error) { message.textContent = "Tu pago se ha recibido, pero la verificación está tardando más de lo normal."; status.textContent = error instanceof Error ? error.message : "Vuelve a intentarlo en unos minutos."; status.classList.add("error"); }

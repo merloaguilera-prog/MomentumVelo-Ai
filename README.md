@@ -11,7 +11,9 @@ Landing de MomentumVelo-AI con suscripción Premium mensual de 49 € mediante S
 - `TELEGRAM_PREMIUM_INVITE_URL`: enlace privado de invitación al canal Premium.
 - `STRIPE_PAYMENT_LINK_URL` (alternativa): enlace `buy.stripe.com` ya creado.
 
-El botón superior lleva a la tarjeta Premium central; el botón de esa tarjeta abre Stripe, verifica el pago y permite gestionar o cancelar la suscripción.
+La portada separa claramente el registro gratuito, el inicio de sesión y Premium. El pago se abre solo después de crear o recuperar la cuenta. Si Stripe y el precio están configurados, la API crea una Checkout Session con retorno verificable; el Payment Link queda como respaldo para que el botón no se rompa si falta una variable.
+
+La cuenta de esta primera versión se guarda únicamente en el navegador del usuario. Antes de ofrecer acceso multidispositivo o recuperación real por correo/móvil hay que conectar un proveedor de identidad y almacenamiento de cuentas.
 
 ## Referencia visual definitiva
 

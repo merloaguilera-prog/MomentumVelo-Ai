@@ -11,6 +11,10 @@
   const eyebrow = document.querySelector("[data-auth-eyebrow]");
   const description = document.querySelector("[data-auth-description]");
   const tabs = Array.from(document.querySelectorAll("[data-auth-mode]"));
+  const premiumLinks = Array.from(document.querySelectorAll("[data-premium-next]"));
+  const premiumStatus = document.querySelector("[data-premium-status]");
+  const forgotPasswordButton = document.querySelector("[data-forgot-password]");
+  const signoutButton = document.querySelector("[data-signout]");
 
   function readJson(key, fallback) {
     try {
@@ -41,7 +45,9 @@
   }
 
   async function makePasswordHash(password, salt) {
-    if (!window.crypto || !window.crypto.subtle) throw new Error("Este navegador no permite proteger la contraseña.");
+    if (!window.crypto || !window.crypto.subtle) {
+      throw new Error("Este navegador no permite proteger la contraseña.");
+    }
     const key = await window.crypto.subtle.importKey(
       "raw",
       new TextEncoder().encode(password),
@@ -69,17 +75,7 @@
     const isLogin = activeMode === "login";
     signupForm.hidden = isLogin;
     loginForm.hidden = !isLogin;
-    const forgotPasswordButton = document.querySelector("[data-forgot-password]");
-  if (forgotPasswordButton) {
-    forgotPasswordButton.addEventListener("click", () => {
-      const email = normalizeEmail(document.getElementById("login-email")?.value);
-      setStatus(loginForm, email
-        ? "La recuperación segura por correo está en preparación. No hemos cambiado tu contraseña ni enviado ningún código todavía."
-        : "Escribe primero tu correo. La recuperación segura por email se activará cuando conectemos el sistema de cuentas real.", "success");
-    });
-  }
-
-  tabs.forEach((tab) => {
+    tabs.forEach((tab) => {
       const active = tab.dataset.authMode === activeMode;
       tab.classList.toggle("is-active", active);
       tab.setAttribute("aria-selected", String(active));
@@ -99,31 +95,111 @@
     window.setTimeout(() => firstField.focus(), 0);
   }
 
-  function premiumRequested() { return new URLSearchParams(window.location.search).get("plan") === "premium"; }
+  function premiumRequested() {
+    return new URLSearchParams(window.location.search).get("plan") === "premium";
+  }
 
   function showAccount(email, isNewAccount) {
-    const accounts = readJson(ACCOUNTS_KEY, {});
-    const account = accounts[email];
+    const account = readJson(ACCOUNTS_KEY, {})[email];
     if (!account) return;
     authView.hidden = true;
     accountView.hidden = false;
     document.querySelector("[data-account-title]").textContent = isNewAccount
       ? `¡Bienvenida, ${account.name}!`
       : `Hola de nuevo, ${account.name}`;
-    document.querySelector("[data-account-message]").textContent = isNewAccount
-      ? "Tu cuenta gratuita ya está creada. Premium queda como una opción para más adelante."
-      : "Has iniciado sesión correctamente en tu cuenta gratuita.";
+    document.querySelector("[data-account-message]").textContent = premiumRequested()
+      ? "Paso 1 completado. Continúa al pago seguro de Premium por 49 €/mes."
+      : isNewAccount
+        ? "Tu cuenta gratuita ya está creada. Premium queda como una opción para más adelante."
+        : "Has iniciado sesión correctamente en tu cuenta gratuita.";
     document.querySelector("[data-account-email]").textContent = account.email;
-    const premiumLink = document.querySelector("[data-premium-next]");
-    if (premiumLink) premiumLink.href = premiumRequested() ? "/api/checkout" : "/login?mode=signup&plan=premium";
-    if (premiumRequested()) {
-      document.querySelector("[data-account-message]").textContent = "Paso 1 completado. Continúa al pago seguro de Premium por 49 €/mes.";
+    document.querySelector("[data-account-plan]").textContent = account.plan === "premium"
+      ? "Premium · 49 €/mes"
+      : "Trader · 0 €/mes";
+    const premiumButton = accountView.querySelector("[data-premium-next]");
+    if (premiumButton) premiumButton.hidden = account.plan === "premium";
+    if (account.plan === "premium") {
+      document.querySelector("[data-account-message]").textContent = "Tu suscripción Premium está activa.";
+    }
+    if (premiumStatus) {
+      premiumStatus.textContent = "";
+      premiumStatus.classList.remove("error");
+    }
+  }
+
+  async function openPremiumCheckout(button) {
+    const session = readJson(SESSION_KEY, null);
+    const accounts = readJson(ACCOUNTS_KEY, {});
+    const account = session && session.email ? accounts[normalizeEmail(session.email)] : null;
+    if (!account) {
+      const url = new URL(window.location.href);
+      url.searchParams.set("mode", "signup");
+      url.searchParams.set("plan", "premium");
+      window.history.replaceState(null, "", url);
+      authView.hidden = false;
+      accountView.hidden = true;
+      setMode("signup", false);
+      setStatus(signupForm, "Crea primero tu cuenta gratuita. Al terminar podrás continuar al pago Premium.", "success");
+      return;
+    }
+
+    const originalText = button.textContent;
+    button.disabled = true;
+    button.textContent = "Abriendo pago seguro…";
+    if (premiumStatus) {
+      premiumStatus.textContent = "Preparando Stripe Checkout…";
+      premiumStatus.classList.remove("error");
+    }
+    try {
+      const response = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: account.email })
+      });
+      const data = await response.json();
+      if (!response.ok || !data.url) throw new Error(data.error || "No se ha podido abrir el pago seguro.");
+      window.location.assign(data.url);
+    } catch (error) {
+      if (premiumStatus) {
+        premiumStatus.textContent = error instanceof Error ? error.message : "No se ha podido abrir el pago seguro.";
+        premiumStatus.classList.add("error");
+      }
+      button.disabled = false;
+      button.textContent = originalText;
     }
   }
 
   tabs.forEach((tab) => {
     tab.addEventListener("click", () => setMode(tab.dataset.authMode, true));
   });
+
+  premiumLinks.forEach((link) => {
+    link.addEventListener("click", (event) => {
+      event.preventDefault();
+      openPremiumCheckout(link);
+    });
+  });
+
+  if (forgotPasswordButton) {
+    forgotPasswordButton.addEventListener("click", () => {
+      const email = normalizeEmail(document.getElementById("login-email")?.value);
+      const accounts = readJson(ACCOUNTS_KEY, {});
+      if (!email) {
+        setStatus(loginForm, "Escribe primero el correo de tu cuenta.", "error");
+        document.getElementById("login-email")?.focus();
+        return;
+      }
+      if (!accounts[email]) {
+        setStatus(loginForm, "No encontramos una cuenta con ese correo en este dispositivo.", "error");
+        return;
+      }
+      setStatus(
+        loginForm,
+        "La recuperación por correo o móvil todavía no está conectada. No hemos cambiado tu contraseña ni enviado ningún código.",
+        "success"
+      );
+    });
+  }
 
   signupForm.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -181,8 +257,7 @@
     const formData = new FormData(loginForm);
     const email = normalizeEmail(formData.get("email"));
     const password = String(formData.get("password") || "");
-    const accounts = readJson(ACCOUNTS_KEY, {});
-    const account = accounts[email];
+    const account = readJson(ACCOUNTS_KEY, {})[email];
     if (!account) {
       setStatus(loginForm, "No encontramos una cuenta con ese correo. Créala gratis primero.", "error");
       return;
@@ -207,12 +282,14 @@
     }
   });
 
-  document.querySelector("[data-signout]").addEventListener("click", () => {
-    window.localStorage.removeItem(SESSION_KEY);
-    accountView.hidden = true;
-    authView.hidden = false;
-    setMode("login", true);
-  });
+  if (signoutButton) {
+    signoutButton.addEventListener("click", () => {
+      window.localStorage.removeItem(SESSION_KEY);
+      accountView.hidden = true;
+      authView.hidden = false;
+      setMode("login", true);
+    });
+  }
 
   const params = new URLSearchParams(window.location.search);
   const session = readJson(SESSION_KEY, null);

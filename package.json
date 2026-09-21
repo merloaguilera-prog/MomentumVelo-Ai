@@ -6,6 +6,10 @@
   "scripts": {
     "check": "node --check app.js && node --check auth.js && node --check success.js && node --check api/checkout.js && node --check api/subscription.js && node --check api/portal.js && node --check api/webhook.js"
   },
-  "dependencies": { "stripe": "^18.5.0" },
-  "engines": { "node": ">=20" }
+  "dependencies": {
+    "stripe": "^22.4.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
 }
