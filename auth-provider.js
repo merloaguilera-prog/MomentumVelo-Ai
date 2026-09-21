@@ -92,6 +92,7 @@
     if (localView) localView.hidden = true;
     if (managedView) managedView.hidden = true;
     accountView.hidden = false;
+    document.body.classList.add("is-account");
 
     const name = user.firstName || user.fullName || "de nuevo";
     const plan = user.publicMetadata?.plan === "premium" ? "premium" : "free";
