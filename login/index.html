@@ -8,69 +8,33 @@
   <meta name="description" content="Crea tu cuenta gratuita o inicia sesión en MomentumVelo-AI.">
   <title>Acceso y registro — MomentumVelo-AI</title>
   <link rel="stylesheet" href="/styles.css">
+  <style>
+    .premium-double-frame{margin:28px 0 12px;padding:6px;border:3px solid #25e683;border-radius:22px;background:rgba(37,230,131,.05);box-shadow:0 0 5px #25e683,0 0 14px rgba(37,230,131,.95),0 0 34px rgba(37,230,131,.58),inset 0 0 12px rgba(37,230,131,.20)}
+    .premium-double-frame-inner{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:19px 21px;border:3px solid #fff;border-radius:15px;background:#0f151b;box-shadow:0 0 5px #fff,0 0 13px rgba(255,255,255,.72),inset 0 0 9px rgba(255,255,255,.12)}
+    .premium-double-frame-inner>div{display:grid;gap:3px}.premium-double-frame-inner strong{font-size:1.08rem;color:#fff;text-shadow:0 0 9px rgba(255,255,255,.32)}.premium-double-frame-inner span{color:#c3ccd3}.premium-pay-button{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 19px;border:2px solid #25e683;border-radius:11px;background:#25e683;color:#06120b;font-weight:900;white-space:nowrap;box-shadow:0 0 8px rgba(37,230,131,.9),0 0 20px rgba(37,230,131,.48);cursor:pointer;text-decoration:none}@media(max-width:650px){.premium-double-frame-inner{align-items:stretch;flex-direction:column}.premium-pay-button{width:100%}}
+  
+    .account-enter-button{background:#25e683!important;border:2px solid #25e683!important;color:#041109!important;box-shadow:0 0 12px rgba(37,230,131,.52),0 0 28px rgba(37,230,131,.22)!important}
+    .account-premium-neon{min-height:58px!important;border:4px solid #39ff91!important;border-radius:14px!important;background:#07140d!important;color:#5cff9f!important;font-weight:950!important;letter-spacing:.01em;box-shadow:0 0 6px #39ff91,0 0 16px #39ff91,0 0 34px rgba(57,255,145,.92),0 0 58px rgba(57,255,145,.48),inset 0 0 18px rgba(57,255,145,.24)!important;text-shadow:0 0 7px #39ff91,0 0 14px rgba(92,255,159,.8);transition:transform .18s ease,box-shadow .18s ease!important}
+    .account-premium-neon:hover,.account-premium-neon:focus-visible{transform:translateY(-2px);box-shadow:0 0 7px #39ff91,0 0 20px rgba(57,255,145,1),0 0 46px rgba(57,255,145,.72),inset 0 0 20px rgba(57,255,145,.24)!important}
+    .account-premium-neon span{margin-left:8px;font-size:1.35em;line-height:1}
+  .neon-field{padding:10px 12px;border:1px solid rgba(92,255,159,.72);border-radius:12px;box-shadow:0 0 12px rgba(57,255,145,.20),inset 0 0 10px rgba(57,255,145,.06)}.neon-field>span{color:#baffd2;text-shadow:0 0 8px rgba(57,255,145,.55)}.premium-methods{margin:12px 0 0;text-align:center;color:#baffd2;font-size:12px;font-weight:750}.premium-methods b{color:#fff}.forgot-password{border:0;background:transparent;color:#5cff9f;font-weight:800;text-decoration:underline;cursor:pointer;text-align:center;padding:4px;text-shadow:0 0 8px rgba(57,255,145,.38)}.forgot-password:hover,.forgot-password:focus-visible{color:#fff}</style>
   <script src="/auth.js" defer></script>
 </head>
 <body class="auth-page">
   <main class="auth-shell">
-    <header class="auth-topbar">
-      <a class="brand" href="/" aria-label="Volver a MomentumVelo-AI"><span class="brand-mark" aria-hidden="true">↗</span> MomentumVelo<span class="accent">-AI</span></a>
-      <a class="auth-back" href="/">← Volver a la plataforma</a>
-    </header>
-
+    <header class="auth-topbar"><a class="brand" href="/" aria-label="Volver a MomentumVelo-AI"><span class="brand-mark" aria-hidden="true">↗</span> MomentumVelo<span class="accent">-AI</span></a><a class="auth-back" href="/">← Volver a la plataforma</a></header>
     <div class="auth-layout">
-      <section class="auth-intro" aria-labelledby="auth-intro-title">
-        <p class="eyebrow">Plan Trader · 0 €/mes</p>
-        <h1 id="auth-intro-title">Empieza gratis. <span>Premium puede esperar.</span></h1>
-        <p class="lead">Regístrate primero en MomentumVelo-AI y prueba el plan gratuito. Cuando tú quieras, podrás pasar a Premium por 49 €/mes.</p>
-        <ul class="auth-benefits">
-          <li><strong>Sin pago ahora</strong><span>Crear la cuenta gratuita no activa ningún cobro.</span></li>
-          <li><strong>Acceso Trader</strong><span>Hasta 20 activos y señales con 15 minutos de retardo.</span></li>
-          <li><strong>Tú decides después</strong><span>Premium seguirá disponible, pero no es obligatorio.</span></li>
-        </ul>
-      </section>
-
+      <section class="auth-intro" aria-labelledby="auth-intro-title"><p class="eyebrow">Plan Trader · 0 €/mes</p><h1 id="auth-intro-title">Empieza gratis. <span>Premium puede esperar.</span></h1><p class="lead">Regístrate primero en MomentumVelo-AI y prueba el plan gratuito. Cuando tú quieras, podrás pasar a Premium por 49 €/mes.</p><ul class="auth-benefits"><li><strong>Sin pago ahora</strong><span>Crear la cuenta gratuita no activa ningún cobro.</span></li><li><strong>Acceso Trader</strong><span>Hasta 20 activos y señales con 15 minutos de retardo.</span></li><li><strong>Tú decides después</strong><span>Premium seguirá disponible, pero no es obligatorio.</span></li></ul></section>
       <section class="auth-card" aria-labelledby="auth-title">
-        <div class="auth-tabs" role="tablist" aria-label="Acceso a MomentumVelo-AI">
-          <button class="auth-tab is-active" id="signup-tab" type="button" role="tab" aria-selected="true" aria-controls="signup-form" data-auth-mode="signup">Crear cuenta gratis</button>
-          <button class="auth-tab" id="login-tab" type="button" role="tab" aria-selected="false" aria-controls="login-form" data-auth-mode="login">Iniciar sesión</button>
-        </div>
-
+        <div class="auth-tabs" role="tablist" aria-label="Acceso a MomentumVelo-AI"><button class="auth-tab is-active" id="signup-tab" type="button" role="tab" aria-selected="true" aria-controls="signup-form" data-auth-mode="signup">Crear cuenta gratis</button><button class="auth-tab" id="login-tab" type="button" role="tab" aria-selected="false" aria-controls="login-form" data-auth-mode="login">Iniciar sesión</button></div>
         <div class="auth-form-view" data-auth-view>
-          <div class="auth-heading">
-            <p class="eyebrow" data-auth-eyebrow>Registro gratuito</p>
-            <h2 id="auth-title" data-auth-title>Crea tu cuenta</h2>
-            <p data-auth-description>Empieza con el plan Trader de 0 €/mes. No necesitas tarjeta.</p>
-          </div>
-
-          <form class="auth-form" id="signup-form" aria-labelledby="signup-tab" novalidate>
-            <label class="auth-field" for="signup-name"><span>Nombre</span><input id="signup-name" name="name" type="text" autocomplete="name" minlength="2" maxlength="80" required placeholder="Tu nombre"></label>
-            <label class="auth-field neon-field" for="signup-email"><span>✉ Correo electrónico</span><input id="signup-email" name="email" type="email" inputmode="email" autocomplete="email" maxlength="180" required placeholder="nombre@correo.com"></label><label class="auth-field neon-field" for="signup-phone"><span>☎ Número de móvil</span><input id="signup-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" minlength="7" maxlength="24" required placeholder="+34 600 000 000"></label>
-            <label class="auth-field" for="signup-password"><span>Contraseña</span><input id="signup-password" name="password" type="password" autocomplete="new-password" minlength="8" maxlength="128" required placeholder="Mínimo 8 caracteres"></label>
-            <label class="auth-field" for="signup-confirm"><span>Repite la contraseña</span><input id="signup-confirm" name="confirmPassword" type="password" autocomplete="new-password" minlength="8" maxlength="128" required placeholder="Repite tu contraseña"></label>
-            <button class="button auth-submit" type="submit">Crear mi cuenta gratis</button>
-            <p class="auth-safe-note">0 € al mes · Sin tarjeta · Sin cobro automático</p>
-            <p class="auth-status" role="status" aria-live="polite"></p>
-          </form>
-
-          <form class="auth-form" id="login-form" aria-labelledby="login-tab" novalidate hidden>
-            <label class="auth-field" for="login-email"><span>Correo electrónico</span><input id="login-email" name="email" type="email" inputmode="email" autocomplete="email" maxlength="180" required placeholder="nombre@correo.com"></label>
-            <label class="auth-field" for="login-password"><span>Contraseña</span><input id="login-password" name="password" type="password" autocomplete="current-password" minlength="8" maxlength="128" required placeholder="Tu contraseña"></label>
-            <button class="button auth-submit" type="submit">Entrar en MomentumVelo</button>
-            <p class="auth-status" role="status" aria-live="polite"></p>
-          </form>
-
+          <div class="auth-heading"><p class="eyebrow" data-auth-eyebrow>Registro gratuito</p><h2 id="auth-title" data-auth-title>Crea tu cuenta</h2><p data-auth-description>Empieza con el plan Trader de 0 €/mes. No necesitas tarjeta.</p></div>
+          <form class="auth-form" id="signup-form" aria-labelledby="signup-tab" novalidate><label class="auth-field" for="signup-name"><span>Nombre</span><input id="signup-name" name="name" type="text" autocomplete="name" minlength="2" maxlength="80" required placeholder="Tu nombre"></label><label class="auth-field neon-field" for="signup-email"><span>✉ Correo electrónico</span><input id="signup-email" name="email" type="email" inputmode="email" autocomplete="email" maxlength="180" required placeholder="nombre@correo.com"></label><label class="auth-field neon-field" for="signup-phone"><span>☎ Número de móvil</span><input id="signup-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" minlength="7" maxlength="24" required placeholder="+34 600 000 000"></label><label class="auth-field" for="signup-password"><span>Contraseña</span><input id="signup-password" name="password" type="password" autocomplete="new-password" minlength="8" maxlength="128" required placeholder="Mínimo 8 caracteres"></label><label class="auth-field" for="signup-confirm"><span>Repite la contraseña</span><input id="signup-confirm" name="confirmPassword" type="password" autocomplete="new-password" minlength="8" maxlength="128" required placeholder="Repite tu contraseña"></label><button class="button auth-submit" type="submit">Crear mi cuenta gratis</button><p class="auth-safe-note">0 € al mes · Sin tarjeta · Sin cobro automático</p><p class="auth-status" role="status" aria-live="polite"></p></form>
+          <form class="auth-form" id="login-form" aria-labelledby="login-tab" novalidate hidden><label class="auth-field" for="login-email"><span>Correo electrónico</span><input id="login-email" name="email" type="email" inputmode="email" autocomplete="email" maxlength="180" required placeholder="nombre@correo.com"></label><label class="auth-field" for="login-password"><span>Contraseña</span><input id="login-password" name="password" type="password" autocomplete="current-password" minlength="8" maxlength="128" required placeholder="Tu contraseña"></label><button class="button auth-submit" type="submit">Entrar en MomentumVelo</button><button class="forgot-password" type="button" data-forgot-password>¿Has olvidado tu contraseña?</button><p class="auth-status" role="status" aria-live="polite"></p></form>
           <p class="premium-methods"><b>Pago Premium seguro:</b> tarjeta · cuenta bancaria · PayPal cuando esté habilitado por el proveedor de pago</p><p class="auth-device-note">Tus datos de acceso se guardan de forma privada en este dispositivo durante esta primera versión.</p>
-          <div class="auth-premium-later"><div><strong>Premium · segundo paso</strong><span>Primero crea tu cuenta. Después podrás elegir el pago seguro.</span></div><a href="/#premium">Ver Continuar a Premium · 49 €/mes</a></div>
+          <div class="premium-double-frame"><div class="premium-double-frame-inner"><div><strong>Premium · segundo paso</strong><span>Primero crea tu cuenta. Después podrás elegir el pago seguro.</span></div><a class="premium-pay-button" href="/login?mode=signup&amp;plan=premium" data-premium-next>Continuar a Premium · 49 €/mes</a></div></div>
         </div>
-
-        <div class="account-view" data-account-view hidden>
-          <p class="eyebrow">Acceso correcto</p>
-          <h2 data-account-title>Tu cuenta está lista</h2>
-          <p data-account-message>Ya puedes volver a MomentumVelo-AI.</p>
-          <dl class="account-summary"><div><dt>Cuenta</dt><dd data-account-email></dd></div><div><dt>Plan actual</dt><dd>Trader · 0 €/mes</dd></div></dl>
-          <div class="account-actions"><a class="button" href="/">Entrar en MomentumVelo</a><a class="button button-secondary" href="/#premium">Ver Premium · 49 €/mes</a></div>
-          <button class="auth-signout" type="button" data-signout>Cerrar sesión</button>
-        </div>
+        <div class="account-view" data-account-view hidden><p class="eyebrow">Acceso correcto</p><h2 data-account-title>Tu cuenta está lista</h2><p data-account-message>Ya puedes volver a MomentumVelo-AI.</p><dl class="account-summary"><div><dt>Cuenta</dt><dd data-account-email></dd></div><div><dt>Plan actual</dt><dd>Trader · 0 €/mes</dd></div></dl><div class="account-actions"><a class="button account-enter-button" href="/">Entrar en MomentumVelo</a><a class="button account-premium-neon" aria-label="Ver Premium 49 euros al mes y pagar de forma segura con Stripe" href="/login?mode=signup&amp;plan=premium" data-premium-next>♛ Continuar a Premium · 49 € al mes <span aria-hidden="true">›</span></a></div><button class="auth-signout" type="button" data-signout>Cerrar sesión</button></div>
       </section>
     </div>
   </main>
