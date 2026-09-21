@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#050b11">
+  <meta name="description" content="Centro de ayuda, seguridad y ventas de MomentumVelo-AI.">
+  <title>Ayuda y ventas — MomentumVelo-AI</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/ayuda.js" defer></script>
+  <script src="/site.js" defer></script>
+</head>
+<body>
+  <header class="site-header simple-header">
+    <a class="brand" href="/" aria-label="MomentumVelo-AI, inicio"><span class="brand-mark" aria-hidden="true">↗</span><span>MomentumVelo<span class="accent">-AI</span></span></a>
+    <nav aria-label="Navegación de ayuda"><a href="#respuestas">Respuestas</a><a href="#seguridad">Seguridad</a><a href="#contacto">Contactar</a></nav>
+    <a class="button button-small button-secondary" href="/login?mode=login">Mi cuenta</a>
+  </header>
+
+  <main class="help-main">
+    <section class="help-hero">
+      <p class="eyebrow">Centro de ayuda y ventas</p>
+      <h1>Avanza con <span>seguridad.</span></h1>
+      <p class="lead">Encuentra una respuesta clara sobre cuentas, Premium, pagos, señales o soluciones para empresas. Si necesitas ayuda personal, cuéntanos tu caso.</p>
+      <label class="help-search">
+        <span class="sr-only">Buscar en el centro de ayuda</span>
+        <span aria-hidden="true">⌕</span>
+        <input type="search" data-help-search placeholder="Buscar: recuperar cuenta, cancelar Premium, seguridad…" autocomplete="off">
+      </label>
+      <ul class="help-trust-row" aria-label="Compromisos de MomentumVelo">
+        <li>✓ Pago procesado por Stripe</li>
+        <li>✓ Tú decides cada operación</li>
+        <li>✓ Soporte humano</li>
+      </ul>
+    </section>
+
+    <section class="help-content" id="respuestas">
+      <div class="help-categories" role="group" aria-label="Filtrar respuestas">
+        <button class="help-chip is-active" type="button" data-help-category="all">Todo</button>
+        <button class="help-chip" type="button" data-help-category="inicio">Primeros pasos</button>
+        <button class="help-chip" type="button" data-help-category="cuenta">Cuenta</button>
+        <button class="help-chip" type="button" data-help-category="premium">Premium y pagos</button>
+        <button class="help-chip" type="button" data-help-category="producto">Señales</button>
+        <button class="help-chip" type="button" data-help-category="seguridad">Seguridad</button>
+        <button class="help-chip" type="button" data-help-category="empresas">Empresas</button>
+      </div>
+      <p class="help-result-count" data-help-count aria-live="polite"></p>
+
+      <div class="help-grid">
+        <article class="help-item" data-help-item data-category="inicio" data-keywords="empezar gratis registro tarjeta trader plan cero">
+          <span class="help-topic">Primeros pasos</span>
+          <h2>¿Cómo empiezo?</h2>
+          <p>Crea una cuenta Trader gratuita. No necesitas tarjeta para registrarte. Cuando quieras más funciones, puedes activar Premium desde tu cuenta.</p>
+          <a href="/login?mode=signup&amp;plan=free">Crear cuenta gratis →</a>
+        </article>
+        <article class="help-item" data-help-item data-category="cuenta" data-keywords="iniciar sesión contraseña recuperar correo móvil dispositivo cuenta acceso">
+          <span class="help-topic">Cuenta</span>
+          <h2>¿Cómo recupero el acceso?</h2>
+          <p>En el acceso seguro, selecciona «¿Has olvidado tu contraseña?» y sigue la verificación por correo. Si tu cuenta pertenece a la versión local de prueba, escríbenos y te guiaremos en la migración.</p>
+          <a href="#contacto" data-topic-link="Cuenta y acceso">Necesito ayuda con mi cuenta →</a>
+        </article>
+        <article class="help-item" data-help-item data-category="premium" data-keywords="premium precio 49 mensual qué incluye telegram tiempo real ilimitado">
+          <span class="help-topic">Premium</span>
+          <h2>¿Qué incluye Premium?</h2>
+          <p>Por 49 €/mes incluye alertas Premium en Telegram, señales sin retardo, activos ilimitados, análisis explicado, radar de cartera, control de riesgo y backtesting ilimitado.</p>
+          <a href="/login?mode=signup&amp;plan=premium">Ver activación Premium →</a>
+        </article>
+        <article class="help-item" data-help-item data-category="premium" data-keywords="pago tarjeta banco paypal stripe seguro datos facturación">
+          <span class="help-topic">Pagos</span>
+          <h2>¿Cómo se protege mi pago?</h2>
+          <p>Stripe procesa el pago en su entorno seguro. MomentumVelo no almacena el número completo de tu tarjeta. Los métodos disponibles dependen del país y de la configuración de Stripe.</p>
+          <a href="/legal#privacidad">Privacidad y proveedores →</a>
+        </article>
+        <article class="help-item" data-help-item data-category="premium" data-keywords="cancelar suscripción renovación portal cliente baja reembolso">
+          <span class="help-topic">Suscripción</span>
+          <h2>¿Puedo cancelar Premium?</h2>
+          <p>Sí. Puedes cancelar las futuras renovaciones desde el portal de cliente vinculado a tu pago. Mantendrás el acceso durante el periodo ya abonado, salvo que la ley aplicable indique otra cosa.</p>
+          <a href="#contacto" data-topic-link="Cancelación de Premium">Ayuda con una cancelación →</a>
+        </article>
+        <article class="help-item" data-help-item data-category="producto" data-keywords="señal convicción entrada salida comprar vender orden asesoramiento">
+          <span class="help-topic">Señales</span>
+          <h2>¿MomentumVelo opera por mí?</h2>
+          <p>No. La plataforma presenta información y herramientas de análisis. No accede a tu bróker ni ejecuta compras o ventas. La decisión final siempre es tuya.</p>
+          <a href="/legal#riesgos">Leer el aviso de riesgos →</a>
+        </article>
+        <article class="help-item" data-help-item data-category="producto" data-keywords="inteligencia artificial ia garantía rentabilidad acierto riesgo perder dinero">
+          <span class="help-topic">IA y riesgo</span>
+          <h2>¿Las señales garantizan resultados?</h2>
+          <p>No. Los mercados son inciertos y puedes perder capital. Una puntuación alta expresa la lectura del modelo, no una promesa de rentabilidad ni asesoramiento financiero personal.</p>
+          <a href="/legal#riesgos">Cómo interpretar el riesgo →</a>
+        </article>
+        <article class="help-item" id="seguridad" data-help-item data-category="seguridad" data-keywords="seguridad datos privacidad contraseña cuenta protección cifrado stripe clerk">
+          <span class="help-topic">Seguridad</span>
+          <h2>¿Cómo se protege mi cuenta?</h2>
+          <p>La configuración de producción utiliza acceso gestionado y sesiones verificadas. Los pagos se delegan a Stripe y las claves privadas solo se usan en el servidor. Nunca te pediremos tu contraseña por correo.</p>
+          <a href="/legal#privacidad">Ver privacidad y seguridad →</a>
+        </article>
+        <article class="help-item" data-help-item data-category="empresas" data-keywords="fondo gestora equipo api webhook empresa precio medida ventas demo integración">
+          <span class="help-topic">Fondo y empresas</span>
+          <h2>¿Necesitas una solución a medida?</h2>
+          <p>Cuéntanos el tamaño del equipo, los mercados, la latencia y las integraciones necesarias. Prepararemos una propuesta clara antes de cualquier compromiso.</p>
+          <a href="#contacto" data-topic-link="Plan Fondo / empresas">Hablar con ventas →</a>
+        </article>
+      </div>
+      <div class="help-empty" data-help-empty hidden>
+        <h2>No encontramos una respuesta exacta.</h2>
+        <p>Escríbenos abajo. Guardaremos tu búsqueda en el mensaje para entender mejor lo que necesitas.</p>
+        <a class="button" href="#contacto">Preguntar al equipo</a>
+      </div>
+    </section>
+
+    <section class="contact-section" id="contacto">
+      <div>
+        <p class="eyebrow">Estamos para ayudarte</p>
+        <h2>Cuéntanos qué necesitas.</h2>
+        <p class="section-intro">Cuenta, Premium, facturación o una solución para fondos. Describe el caso con tranquilidad; te responderemos en el correo indicado.</p>
+        <div class="contact-assurance"><strong>No envíes contraseñas ni datos completos de tarjeta.</strong><span>Para localizar un pago basta con el correo utilizado y, si lo tienes, el identificador de Stripe.</span></div>
+      </div>
+      <form class="contact-form" data-contact-form novalidate>
+        <label>Nombre<input name="name" type="text" autocomplete="name" maxlength="80" required></label>
+        <label>Correo<input name="email" type="email" autocomplete="email" maxlength="180" required></label>
+        <label>Tema<select name="topic" data-contact-topic><option>Ayuda general</option><option>Cuenta y acceso</option><option>Premium y pagos</option><option>Cancelación de Premium</option><option>Plan Fondo / empresas</option><option>Privacidad y seguridad</option></select></label>
+        <label>Tu consulta<textarea name="message" rows="6" maxlength="3000" minlength="10" required placeholder="Explícanos qué quieres hacer y en qué punto necesitas ayuda."></textarea></label>
+        <label class="honeypot" aria-hidden="true">Sitio web<input name="website" type="text" tabindex="-1" autocomplete="off"></label>
+        <label class="privacy-check"><input name="privacy" type="checkbox" required><span>Acepto que se usen estos datos para responder a mi consulta según la <a href="/legal#privacidad">política de privacidad</a>.</span></label>
+        <button class="button" type="submit">Enviar consulta</button>
+        <p class="contact-status" data-contact-status role="status" aria-live="polite"></p>
+        <p class="contact-fallback">También puedes escribir a <a href="mailto:hola@momentumvelo.ai">hola@momentumvelo.ai</a>.</p>
+      </form>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-grid compact-footer"><div><a class="brand" href="/"><span class="brand-mark">↗</span> MomentumVelo<span class="accent">-AI</span></a><p>Información clara para tomar decisiones con criterio.</p></div><div><b>Ayuda</b><a href="#respuestas">Buscar respuestas</a><a href="#contacto">Contactar</a></div><div><b>Legal</b><a href="/legal#privacidad">Privacidad</a><a href="/legal#condiciones">Condiciones</a><a href="/legal#riesgos">Riesgos</a></div></div>
+    <div class="legal"><span>© 2026 MomentumVelo-AI.</span><span>Invertir conlleva riesgo de pérdida de capital.</span></div>
+  </footer>
+</body>
+</html>

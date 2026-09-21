@@ -1,4 +1,5 @@
 const Stripe = require("stripe");
+const { getAuthenticatedUser } = require("./_clerk");
 module.exports = async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
   if (req.method !== "GET") { res.setHeader("Allow", "GET"); return res.status(405).json({ error: "Método no permitido." }); }
@@ -8,6 +9,12 @@ module.exports = async function handler(req, res) {
   try {
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2026-07-29.dahlia" });
     const session = await stripe.checkout.sessions.retrieve(sessionId, { expand: ["subscription", "line_items.data.price"] });
+    if (process.env.CLERK_SECRET_KEY) {
+      const authenticatedUser = await getAuthenticatedUser(req);
+      if (!authenticatedUser || session.client_reference_id !== authenticatedUser.userId) {
+        return res.status(403).json({ active: false, error: "Inicia sesión con la cuenta que realizó el pago." });
+      }
+    }
     const subscriptionStatus = typeof session.subscription === "object" ? session.subscription.status : null;
     const premiumLine = session.line_items?.data?.some((item) => item.price?.currency === "eur" && item.price?.unit_amount === 4900 && item.price?.recurring?.interval === "month");
     const active = session.status === "complete" && premiumLine && ["active", "trialing"].includes(subscriptionStatus);

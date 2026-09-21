@@ -10,10 +10,21 @@ Landing de MomentumVelo-AI con suscripción Premium mensual de 49 € mediante S
 - `PUBLIC_SITE_URL`: URL pública sin barra final.
 - `TELEGRAM_PREMIUM_INVITE_URL`: enlace privado de invitación al canal Premium.
 - `STRIPE_PAYMENT_LINK_URL` (alternativa): enlace `buy.stripe.com` ya creado.
+- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`: clave pública del acceso gestionado con Clerk.
+- `CLERK_SECRET_KEY`: clave privada de Clerk, solo en el servidor.
+- `RESEND_API_KEY`: clave de Resend para enviar las consultas de soporte.
+- `SUPPORT_EMAIL_TO`: buzón que recibe las consultas de ayuda y ventas.
+- `SUPPORT_EMAIL_FROM`: remitente verificado en Resend.
 
 La portada separa claramente el registro gratuito, el inicio de sesión y Premium. El pago se abre solo después de crear o recuperar la cuenta. Si Stripe y el precio están configurados, la API crea una Checkout Session con retorno verificable; el Payment Link queda como respaldo para que el botón no se rompa si falta una variable.
 
-La cuenta de esta primera versión se guarda únicamente en el navegador del usuario. Antes de ofrecer acceso multidispositivo o recuperación real por correo/móvil hay que conectar un proveedor de identidad y almacenamiento de cuentas.
+Cuando Clerk está configurado, el registro, el inicio de sesión, las sesiones y la recuperación por correo son gestionados y multidispositivo. Sin esas variables, se mantiene el acceso local de demostración como respaldo; ese modo solo reconoce la cuenta en el navegador donde fue creada.
+
+Stripe debe enviar los eventos `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.payment_succeeded` e `invoice.payment_failed` a `/api/webhook`. El webhook vincula el estado Premium con los metadatos de la cuenta Clerk y conserva un margen de acceso cuando el pago figura temporalmente como `past_due`. El portal de cliente permite cancelar renovaciones y está protegido por la identidad de la cuenta cuando Clerk está activo.
+
+El formulario de `/ayuda` usa Resend. Si el envío todavía no está configurado, ofrece de forma explícita abrir un correo dirigido a `hola@momentumvelo.ai`, sin perder el texto de la consulta.
+
+Antes de abrir la contratación comercial, completar en `legal.html` la razón social o nombre del titular, NIF/CIF, domicilio y datos registrales, y revisar los textos con asesoría jurídica aplicable al país de operación.
 
 ## Referencia visual definitiva
 

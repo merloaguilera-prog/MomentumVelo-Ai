@@ -1,4 +1,5 @@
 const Stripe = require("stripe");
+const { getAuthenticatedUser } = require("./_clerk");
 
 const VERIFIED_PAYMENT_LINK = "https://buy.stripe.com/5kQdR89oW8fA3Mn7Tm2VG01";
 
@@ -25,6 +26,14 @@ module.exports = async function handler(req, res) {
   const paymentLink = process.env.STRIPE_PAYMENT_LINK_URL || VERIFIED_PAYMENT_LINK;
   const secretKey = process.env.STRIPE_SECRET_KEY;
   const priceId = process.env.STRIPE_PREMIUM_PRICE_ID;
+  const managedAuthRequired = Boolean(process.env.CLERK_SECRET_KEY);
+  const authenticatedUser = managedAuthRequired ? await getAuthenticatedUser(req) : null;
+
+  if (managedAuthRequired && !authenticatedUser) {
+    return res.status(401).json({
+      error: "Inicia sesión en tu cuenta antes de activar Premium."
+    });
+  }
 
   if (!secretKey || !priceId) {
     return res.status(200).json({
@@ -45,8 +54,17 @@ module.exports = async function handler(req, res) {
       success_url: `${siteUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${siteUrl}/cancel`,
       customer_email: email || undefined,
-      metadata: { plan: "premium-monthly" },
-      subscription_data: { metadata: { plan: "premium-monthly" } },
+      client_reference_id: authenticatedUser?.userId || undefined,
+      metadata: {
+        plan: "premium-monthly",
+        clerkUserId: authenticatedUser?.userId || ""
+      },
+      subscription_data: {
+        metadata: {
+          plan: "premium-monthly",
+          clerkUserId: authenticatedUser?.userId || ""
+        }
+      },
       integration_identifier: "momentumvelo_web_qmztrkpa"
     });
     return res.status(200).json({

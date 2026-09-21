@@ -1,5 +1,8 @@
-(function () {
+(async function () {
   "use strict";
+
+  const managedAuthEnabled = await (window.MomentumVeloAuthReady || Promise.resolve(false));
+  if (managedAuthEnabled) return;
 
   const ACCOUNTS_KEY = "momentumvelo.accounts.v1";
   const SESSION_KEY = "momentumvelo.session.v1";
@@ -195,9 +198,12 @@
       }
       setStatus(
         loginForm,
-        "La recuperación por correo o móvil todavía no está conectada. No hemos cambiado tu contraseña ni enviado ningún código.",
+        "Esta cuenta está guardada en este dispositivo. Consulta Ayuda para recuperar el acceso o activar una cuenta segura multidispositivo.",
         "success"
       );
+      window.setTimeout(() => {
+        window.location.href = `/ayuda?tema=cuenta&correo=${encodeURIComponent(email)}#contacto`;
+      }, 1400);
     });
   }
 
