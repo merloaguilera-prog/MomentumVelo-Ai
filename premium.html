@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#05080d"><meta name="description" content="MomentumVelo Pulse — radar mundial de momentum y detección de movimientos de mercado.">
+<title>MomentumVelo Pulse — Radar mundial</title>
+<link rel="stylesheet" href="/premium.css">
+<script src="/premium.js" defer></script>
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="/"><span class="brandmark">↗</span>MomentumVelo <b>Pulse</b></a>
+  <div class="status"><span class="dot"></span><span id="dataStatus">MODO DEMO · proveedor pendiente</span></div>
+  <a class="ghost" href="/">← Inicio</a>
+</header>
+<main>
+<section class="hero">
+  <div><p class="kicker">RADAR MUNDIAL · IA DE MOMENTUM</p><h1>Detecta el cambio.<br><span>Entiende la señal.</span></h1>
+  <p>Centro de mando para vigilar mercados, detectar movimientos anómalos y explicar qué factores activan cada alerta. Las predicciones son probabilísticas y no garantizan resultados.</p></div>
+  <div class="pulseOrb"><span>PULSE</span><strong id="pulseScore">72</strong><small>INTENSIDAD DEMO</small></div>
+</section>
+
+<section class="controls panel">
+  <label>Buscar empresa o ticker<input id="assetSearch" type="search" placeholder="Ej. Apple, AAPL, ASML…" autocomplete="off"></label>
+  <label>Región<select id="region"><option value="all">Todo el mundo</option><option>Europa</option><option>Norteamérica</option><option>Asia</option><option>Latinoamérica</option><option>África</option><option>Oceanía</option></select></label>
+  <label>Tipo de aviso<select id="alertMode"><option value="all">Todos</option><option value="up">Posible subida</option><option value="down">Posible bajada</option><option value="volume">Salto de volumen</option></select></label>
+  <button id="scanBtn">⚡ Escanear radar</button>
+</section>
+
+<section class="layout">
+  <article class="panel world">
+    <div class="panelHead"><div><small>01 · RADAR</small><h2>Radar mundial</h2></div><span class="demo">DEMO</span></div>
+    <div class="map" aria-label="Mapa estilizado de mercados">
+      <button data-region="Norteamérica" style="left:17%;top:35%">●<span>Norteamérica</span></button>
+      <button data-region="Latinoamérica" style="left:29%;top:69%">●<span>Latinoamérica</span></button>
+      <button data-region="Europa" style="left:49%;top:31%">●<span>Europa</span></button>
+      <button data-region="África" style="left:52%;top:59%">●<span>África</span></button>
+      <button data-region="Asia" style="left:72%;top:38%">●<span>Asia</span></button>
+      <button data-region="Oceanía" style="left:83%;top:72%">●<span>Oceanía</span></button>
+      <svg viewBox="0 0 900 430" role="img" aria-label="Visualización abstracta del mundo"><path d="M76 115l91-55 91 21 40 58-34 46-83 1-39 58-66-25-31-54zM235 242l48 22 33 79-23 67-36-25-22-86zM400 86l69-27 55 25 16 43-54 23-42-18-48 19-29-29zM438 166l62-4 42 46-12 110-57 49-42-78-26-66zM539 91l143-38 129 45 32 67-63 42-86-17-65 41-75-40-52-61zM722 286l87 17 36 57-58 40-77-29z"/></svg>
+    </div>
+    <div class="markets" id="marketChips"><button data-region="Europa">Europa</button><button data-region="Norteamérica">Norteamérica</button><button data-region="Asia">Asia</button><button data-region="Latinoamérica">Latinoamérica</button><button data-region="África">África</button><button data-region="Oceanía">Oceanía</button></div>
+  </article>
+
+  <article class="panel watch">
+    <div class="panelHead"><div><small>02 · VIGILANCIA</small><h2>Mi radar</h2></div><span id="watchCount">5 activos</span></div>
+    <div id="watchlist"></div>
+    <button class="wide" id="addDemo">＋ Añadir activo</button>
+  </article>
+</section>
+
+<section class="layout lower">
+  <article class="panel">
+    <div class="panelHead"><div><small>03 · DETECCIÓN</small><h2>Detector de saltos</h2></div><span class="demo">SIMULACIÓN UI</span></div>
+    <div class="chart" id="chart" aria-label="Gráfico demostrativo"></div>
+    <div class="metrics"><div><small>Precio</small><b id="mPrice">—</b></div><div><small>Momentum</small><b id="mMomentum">—</b></div><div><small>Volumen</small><b id="mVolume">—</b></div><div><small>Volatilidad</small><b id="mVolatility">—</b></div></div>
+  </article>
+
+  <article class="panel ai">
+    <div class="panelHead"><div><small>04 · IA EXPLICABLE</small><h2>¿Por qué me avisas?</h2></div><span class="aiBadge">AI</span></div>
+    <div id="explanation"><h3>Selecciona una señal</h3><p>MomentumVelo mostrará aquí los factores observados, los factores que contradicen la hipótesis y el contexto de riesgo.</p></div>
+    <div class="ask"><button data-q="why">¿Por qué?</button><button data-q="change">¿Qué cambió?</button><button data-q="against">¿Qué la contradice?</button><button data-q="compare">Compárala</button></div>
+  </article>
+</section>
+
+<section class="panel alerts">
+  <div class="panelHead"><div><small>05 · ALERTAS</small><h2>Movimientos que requieren atención</h2></div><button id="importantOnly" class="toggle" aria-pressed="false">Solo importantes</button></div>
+  <div id="alertsList"></div>
+</section>
+
+<section class="panel history">
+ <div class="panelHead"><div><small>06 · VERIFICACIÓN</small><h2>Historial de señales</h2></div><span>aciertos y fallos visibles</span></div>
+ <p class="note">Cuando el motor real esté conectado, cada predicción quedará registrada antes de conocer el resultado. Así podremos medir anticipación, falsos positivos, drawdown y rendimiento sin ocultar fallos.</p>
+ <div class="historyGrid"><div><b>Hora de señal</b><span>Registro inmutable</span></div><div><b>Hipótesis</b><span>Alcista / bajista / neutral</span></div><div><b>Resultado</b><span>Pendiente / acertó / falló</span></div><div><b>Calidad</b><span>Métrica verificable</span></div></div>
+</section>
+</main>
+<footer>MomentumVelo Pulse · desarrollo funcional · Ninguna señal constituye una garantía de rentabilidad.</footer>
+</body></html>
