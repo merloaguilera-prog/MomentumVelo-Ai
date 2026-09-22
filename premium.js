@@ -10,13 +10,13 @@ const alerts=[
 {symbol:"NPN",dir:"down",label:"Debilitamiento relevante",score:79,reason:"La simulación combina pérdida de momentum y volatilidad elevada."},
 {symbol:"MELI",dir:"up",label:"Salto de volumen",score:88,reason:"Volumen anómalo y aceleración del movimiento en el escenario demo."},
 {symbol:"7203",dir:"down",label:"Presión bajista",score:65,reason:"Momentum bajo y persistencia negativa en la simulación."}];
-let selected=assets[1],important=false;
+let selected=assets[1],important=false;\nconst watched=new Set(assets.slice(0,5).map(a=>a.symbol));
 const $=s=>document.querySelector(s);
 function renderWatch(filter=""){
  const reg=$("#region").value, q=filter.trim().toLowerCase();
  const list=assets.filter(a=>(reg==="all"||a.region===reg)&&(!q||a.symbol.toLowerCase().includes(q)||a.name.toLowerCase().includes(q)));
  $("#watchlist").innerHTML=list.map(a=>`<div class="watchRow" data-symbol="${a.symbol}"><div><b>${a.symbol} · ${a.name}</b><small>${a.region}</small></div><span class="move ${a.move<0?"down":""}">${a.move>0?"+":""}${a.move.toFixed(1)}% DEMO</span></div>`).join("")||"<p class='note'>No hay activos demo con ese filtro.</p>";
- $("#watchCount").textContent=list.length+" activos";
+ $("#watchCount").textContent=watched.size+" vigilados";
  document.querySelectorAll(".watchRow").forEach(el=>el.onclick=()=>selectAsset(el.dataset.symbol));
 }
 function chart(score,down=false){
@@ -41,6 +41,17 @@ $("#alertMode").addEventListener("change",renderAlerts);
 document.querySelectorAll("[data-region]").forEach(b=>b.onclick=()=>{$("#region").value=b.dataset.region;renderWatch($("#assetSearch").value);document.querySelectorAll(".markets button").forEach(x=>x.classList.toggle("active",x.dataset.region===b.dataset.region))});
 $("#importantOnly").onclick=e=>{important=!important;e.currentTarget.setAttribute("aria-pressed",important);renderAlerts()};
 $("#scanBtn").onclick=()=>{renderWatch($("#assetSearch").value);renderAlerts();$("#dataStatus").textContent="ESCANEO DEMO COMPLETADO · feed real pendiente";setTimeout(()=>$("#dataStatus").textContent="MODO DEMO · proveedor pendiente",2500)};
-$("#addDemo").onclick=()=>$("#assetSearch").focus();
+$("#addDemo").onclick=()=>{
+ const q=$("#assetSearch").value.trim().toLowerCase();
+ const candidate=assets.find(a=>a.symbol.toLowerCase()===q||a.name.toLowerCase().includes(q))||selected;
+ watched.add(candidate.symbol);
+ $("#dataStatus").textContent=candidate.symbol+" AÑADIDO A VIGILANCIA · DEMO";
+ renderWatch($("#assetSearch").value);
+ setTimeout(()=>$("#dataStatus").textContent="MODO DEMO · proveedor pendiente",2200);
+};
+document.addEventListener("keydown",e=>{
+ if(e.key==="/"){e.preventDefault();$("#assetSearch").focus()}
+ if(e.key==="Escape"){$("#assetSearch").value="";renderWatch()}
+});
 document.querySelectorAll(".ask button").forEach(b=>b.onclick=()=>{const map={why:"La alerta se explica por los factores cuantitativos que la activan. En esta versión son datos demostrativos.",change:"La versión real comparará ventanas temporales para señalar qué variables cambiaron y cuándo.",against:"La IA también mostrará factores que contradigan la hipótesis para evitar una lectura unilateral.",compare:"La versión conectada comparará el patrón actual con históricos y situaciones semejantes."};$("#explanation").innerHTML=`<h3>${b.textContent}</h3><p>${map[b.dataset.q]}</p>`});
 renderWatch();renderAlerts();selectAsset("ASML");
