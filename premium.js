@@ -15,8 +15,8 @@ const watched=new Set(assets.slice(0,5).map(a=>a.symbol));
 const $=s=>document.querySelector(s);
 function renderWatch(filter=""){
  const reg=$("#region").value, q=filter.trim().toLowerCase();
- const list=assets.filter(a=>(reg==="all"||a.region===reg)&&(!q||a.symbol.toLowerCase().includes(q)||a.name.toLowerCase().includes(q)));
- $("#watchlist").innerHTML=list.map(a=>`<div class="watchRow" data-symbol="${a.symbol}"><div><b>${a.symbol} · ${a.name}</b><small>${a.region}</small></div><span class="move ${a.move<0?"down":""}">${a.move>0?"+":""}${a.move.toFixed(1)}% DEMO</span></div>`).join("")||"<p class='note'>No hay activos demo con ese filtro.</p>";
+ const list=assets.filter(a=>watched.has(a.symbol)&&(reg==="all"||a.region===reg)&&(!q||a.symbol.toLowerCase().includes(q)||a.name.toLowerCase().includes(q)));
+ $("#watchlist").innerHTML=list.map(a=>`<button type="button" class="watchRow" data-symbol="${a.symbol}" aria-label="Ver ${a.symbol}, ${a.name}"><div><b>${a.symbol} · ${a.name}</b><small>${a.region}</small></div><span class="move ${a.move<0?"down":""}">${a.move>0?"+":""}${a.move.toFixed(1)}% DEMO</span></button>`).join("")||"<p class='note'>No hay activos vigilados con ese filtro.</p>";
  $("#watchCount").textContent=watched.size+" vigilados";
  document.querySelectorAll(".watchRow").forEach(el=>el.onclick=()=>selectAsset(el.dataset.symbol));
 }
@@ -33,7 +33,7 @@ function selectAsset(symbol){
 function renderAlerts(){
  const mode=$("#alertMode").value;
  const list=alerts.filter(a=>(!important||a.score>=80)&&(mode==="all"||mode===a.dir||(mode==="volume"&&a.label.toLowerCase().includes("volumen"))));
- $("#alertsList").innerHTML=list.map(a=>`<div class="alertRow" data-symbol="${a.symbol}"><b>${a.symbol}</b><span class="alertDir ${a.dir}">${a.dir==="up"?"▲ ALCISTA":"▼ BAJISTA"}</span><span>${a.label} · <small>DEMO</small></span><div class="strength" title="Intensidad demo ${a.score}/100"><i style="width:${a.score}%"></i></div></div>`).join("")||"<p class='note'>No hay alertas con este filtro.</p>";
+ $("#alertsList").innerHTML=list.map(a=>`<button type="button" class="alertRow" data-symbol="${a.symbol}" aria-label="Ver alerta demo de ${a.symbol}"><b>${a.symbol}</b><span class="alertDir ${a.dir}">${a.dir==="up"?"▲ ALCISTA":"▼ BAJISTA"}</span><span>${a.label} · <small>DEMO</small></span><div class="strength" title="Intensidad demo ${a.score}/100"><i style="width:${a.score}%"></i></div></button>`).join("")||"<p class='note'>No hay alertas con este filtro.</p>";
  document.querySelectorAll(".alertRow").forEach(el=>el.onclick=()=>selectAsset(el.dataset.symbol));
 }
 $("#assetSearch").addEventListener("input",e=>renderWatch(e.target.value));
@@ -44,14 +44,16 @@ $("#importantOnly").onclick=e=>{important=!important;e.currentTarget.setAttribut
 $("#scanBtn").onclick=()=>{renderWatch($("#assetSearch").value);renderAlerts();$("#dataStatus").textContent="ESCANEO DEMO COMPLETADO · feed real pendiente";setTimeout(()=>$("#dataStatus").textContent="MODO DEMO · proveedor pendiente",2500)};
 $("#addDemo").onclick=()=>{
  const q=$("#assetSearch").value.trim().toLowerCase();
- const candidate=assets.find(a=>a.symbol.toLowerCase()===q||a.name.toLowerCase().includes(q))||selected;
+ const candidate=q&&assets.find(a=>a.symbol.toLowerCase()===q||a.name.toLowerCase().includes(q));
+ if(!candidate){$("#dataStatus").textContent="NO ENCONTRAMOS ESE ACTIVO EN LA DEMO";setTimeout(()=>$("#dataStatus").textContent="MODO DEMO · proveedor pendiente",2200);return}
  watched.add(candidate.symbol);
  $("#dataStatus").textContent=candidate.symbol+" AÑADIDO A VIGILANCIA · DEMO";
  renderWatch($("#assetSearch").value);
  setTimeout(()=>$("#dataStatus").textContent="MODO DEMO · proveedor pendiente",2200);
 };
 document.addEventListener("keydown",e=>{
- if(e.key==="/"){e.preventDefault();$("#assetSearch").focus()}
+ const typing=/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)||e.target.isContentEditable;
+ if(e.key==="/"&&!typing){e.preventDefault();$("#assetSearch").focus()}
  if(e.key==="Escape"){$("#assetSearch").value="";renderWatch()}
 });
 document.querySelectorAll(".ask button").forEach(b=>b.onclick=()=>{const map={why:"La alerta se explica por los factores cuantitativos que la activan. En esta versión son datos demostrativos.",change:"La versión real comparará ventanas temporales para señalar qué variables cambiaron y cuándo.",against:"La IA también mostrará factores que contradigan la hipótesis para evitar una lectura unilateral.",compare:"La versión conectada comparará el patrón actual con históricos y situaciones semejantes."};$("#explanation").innerHTML=`<h3>${b.textContent}</h3><p>${map[b.dataset.q]}</p>`});
