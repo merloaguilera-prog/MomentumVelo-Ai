@@ -18,14 +18,14 @@
     let visible = 0;
     items.forEach((item) => {
       const haystack = normalize(`${item.textContent} ${item.dataset.keywords || ""}`);
-      const matchesQuery = !query || haystack.includes(query);
+      const terms = query.split(/\\s+/).filter(Boolean);\n      const matchesQuery = !terms.length || terms.every((term) => haystack.includes(term));
       const matchesCategory = category === "all" || item.dataset.category === category;
       const show = matchesQuery && matchesCategory;
       item.hidden = !show;
       if (show) visible += 1;
     });
     if (count) count.textContent = `${visible} ${visible === 1 ? "respuesta" : "respuestas"}`;
-    if (empty) empty.hidden = visible !== 0;
+    if (empty) empty.hidden = visible !== 0;\n    if (visible === 0 && form?.elements.message && query.length >= 3 && !form.elements.message.value) {\n      form.elements.message.value = `No encontré respuesta para: ${search.value.trim()}`;\n    }
   }
 
   search?.addEventListener("input", applyFilters);
