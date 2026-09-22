@@ -10,7 +10,8 @@ const alerts=[
 {symbol:"NPN",dir:"down",label:"Debilitamiento relevante",score:79,reason:"La simulación combina pérdida de momentum y volatilidad elevada."},
 {symbol:"MELI",dir:"up",label:"Salto de volumen",score:88,reason:"Volumen anómalo y aceleración del movimiento en el escenario demo."},
 {symbol:"7203",dir:"down",label:"Presión bajista",score:65,reason:"Momentum bajo y persistencia negativa en la simulación."}];
-let selected=assets[1],important=false;\nconst watched=new Set(assets.slice(0,5).map(a=>a.symbol));
+let selected=assets[1],important=false;
+const watched=new Set(assets.slice(0,5).map(a=>a.symbol));
 const $=s=>document.querySelector(s);
 function renderWatch(filter=""){
  const reg=$("#region").value, q=filter.trim().toLowerCase();
