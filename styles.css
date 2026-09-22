@@ -1191,3 +1191,28 @@ body{background:
   .legal-index strong { grid-column: auto; }
   .privacy-notice { right: 10px; bottom: 10px; left: 10px; align-items: stretch; flex-direction: column; gap: 10px; }
 }
+
+/* Navegación rápida y accesible */
+html { scroll-padding-top: 92px; }
+a, button, input, select, textarea { -webkit-tap-highlight-color: transparent; }
+a, button { touch-action: manipulation; }
+button:focus-visible,
+nav a:focus-visible,
+.header-login:focus-visible,
+.footer-grid a:focus-visible,
+.help-chip:focus-visible,
+.privacy-notice button:focus-visible {
+  outline: 3px solid rgba(180,255,214,.82);
+  outline-offset: 3px;
+}
+@media (hover: hover) {
+  a, button { transition-duration: .14s; }
+}
+@media (max-width: 620px) {
+  .site-header nav {
+    scroll-snap-type: x proximity;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  .site-header nav a { scroll-snap-align: start; }
+}
