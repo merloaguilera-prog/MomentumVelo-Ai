@@ -24,6 +24,13 @@ module.exports = async function handler(req, res) {
   }
 
   const paymentLink = process.env.STRIPE_PAYMENT_LINK_URL || VERIFIED_PAYMENT_LINK;
+  const premiumSalesEnabled = process.env.PREMIUM_SALES_ENABLED === "true";
+  if (!premiumSalesEnabled) {
+    return res.status(503).json({
+      error: "Premium está en preparación. La contratación se abrirá cuando sus funciones estén verificadas.",
+      helpUrl: "/ayuda?tema=premium#contacto"
+    });
+  }
   const secretKey = process.env.STRIPE_SECRET_KEY;
   const priceId = process.env.STRIPE_PREMIUM_PRICE_ID;
   const managedAuthRequired = Boolean(process.env.CLERK_SECRET_KEY);
