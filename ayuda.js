@@ -15,23 +15,28 @@
 
   function applyFilters() {
     const query = normalize(search?.value);
+    const terms = query.split(/\s+/).filter(Boolean);
     let visible = 0;
+
     items.forEach((item) => {
       const haystack = normalize(`${item.textContent} ${item.dataset.keywords || ""}`);
-      const terms = query.split(/\s+/).filter(Boolean);
       const matchesQuery = !terms.length || terms.every((term) => haystack.includes(term));
       const matchesCategory = category === "all" || item.dataset.category === category;
       const show = matchesQuery && matchesCategory;
       item.hidden = !show;
       if (show) visible += 1;
     });
+
     if (count) count.textContent = `${visible} ${visible === 1 ? "respuesta" : "respuestas"}`;
     if (empty) empty.hidden = visible !== 0;
-    if (visible === 0 && form?.elements.message && query.length >= 3 && !form.elements.message.value) {\n      form.elements.message.value = `No encontré respuesta para: ${search.value.trim()}`;
+
+    if (visible === 0 && form?.elements.message && query.length >= 3 && !form.elements.message.value) {
+      form.elements.message.value = `No encontré respuesta para: ${search.value.trim()}`;
     }
   }
 
   search?.addEventListener("input", applyFilters);
+
   chips.forEach((chip) => {
     chip.addEventListener("click", () => {
       category = chip.dataset.helpCategory || "all";
@@ -51,6 +56,7 @@
   const requestedTopic = normalize(params.get("tema"));
   const categoryChip = chips.find((chip) => chip.dataset.helpCategory === requestedTopic);
   if (categoryChip) categoryChip.click();
+
   const suppliedEmail = params.get("correo");
   if (suppliedEmail && form?.elements.email) form.elements.email.value = suppliedEmail;
   applyFilters();
@@ -59,6 +65,7 @@
     event.preventDefault();
     const status = document.querySelector("[data-contact-status]");
     if (!form.reportValidity()) return;
+
     const button = form.querySelector("button[type='submit']");
     const data = new FormData(form);
     const payload = {
@@ -69,10 +76,12 @@
       website: data.get("website"),
       acceptedPrivacy: data.get("privacy") === "on"
     };
+
     button.disabled = true;
     button.textContent = "Enviando…";
     status.classList.remove("error", "success");
     status.textContent = "Enviando tu consulta de forma segura…";
+
     try {
       const response = await fetch("/api/contact", {
         method: "POST",
@@ -80,6 +89,7 @@
         body: JSON.stringify(payload)
       });
       const result = await response.json();
+
       if (!response.ok) {
         if (result.contactEmail) {
           const subject = encodeURIComponent(`MomentumVelo: ${payload.topic}`);
@@ -90,6 +100,7 @@
         }
         throw new Error(result.error || "No se ha podido enviar la consulta.");
       }
+
       form.reset();
       status.textContent = "Consulta enviada. Gracias; ya tenemos la información necesaria para ayudarte.";
       status.classList.add("success");
