@@ -107,6 +107,7 @@
     if (!account) return;
     authView.hidden = true;
     accountView.hidden = false;
+    document.body.classList.add("is-account");
     document.querySelector("[data-account-title]").textContent = isNewAccount
       ? `¡Bienvenida, ${account.name}!`
       : `Hola de nuevo, ${account.name}`;
@@ -141,6 +142,7 @@
       window.history.replaceState(null, "", url);
       authView.hidden = false;
       accountView.hidden = true;
+      document.body.classList.remove("is-account");
       setMode("signup", false);
       setStatus(signupForm, "Crea primero tu cuenta gratuita. Al terminar podrás continuar al pago Premium.", "success");
       return;
@@ -293,6 +295,7 @@
       window.localStorage.removeItem(SESSION_KEY);
       accountView.hidden = true;
       authView.hidden = false;
+      document.body.classList.remove("is-account");
       setMode("login", true);
     });
   }
