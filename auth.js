@@ -112,7 +112,7 @@
       ? `¡Bienvenida, ${account.name}!`
       : `Hola de nuevo, ${account.name}`;
     document.querySelector("[data-account-message]").textContent = premiumRequested()
-      ? "Paso 1 completado. Continúa al pago seguro de Premium por 49 €/mes."
+      ? "Paso 1 completado. Tu cuenta gratuita está lista. Premium se activará cuando la contratación pública esté abierta."
       : isNewAccount
         ? "Tu cuenta gratuita ya está creada. Premium queda como una opción para más adelante."
         : "Has iniciado sesión correctamente en tu cuenta gratuita.";
@@ -144,7 +144,7 @@
       accountView.hidden = true;
       document.body.classList.remove("is-account");
       setMode("signup", false);
-      setStatus(signupForm, "Crea primero tu cuenta gratuita. Al terminar podrás continuar al pago Premium.", "success");
+      setStatus(signupForm, "Crea primero tu cuenta gratuita. Premium quedará disponible cuando se abra la contratación pública.", "success");
       return;
     }
 
