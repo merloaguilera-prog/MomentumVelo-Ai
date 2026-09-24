@@ -28,33 +28,16 @@
       || "Cuenta verificada";
   }
 
-  async function openCheckout(button) {
-    const originalText = button.textContent;
+  function showPremiumPreparation(button) {
     const status = document.querySelector("[data-premium-status]");
     button.disabled = true;
-    button.textContent = "Abriendo pago seguro…";
-    if (status) status.textContent = "Preparando Stripe Checkout…";
-    try {
-      const token = await window.Clerk.session.getToken();
-      const response = await fetch("/api/checkout", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ email: primaryEmail(window.Clerk.user) })
-      });
-      const data = await response.json();
-      if (!response.ok || !data.url) throw new Error(data.error || "No se ha podido abrir el pago.");
-      window.location.assign(data.url);
-    } catch (error) {
-      if (status) {
-        status.textContent = error instanceof Error ? error.message : "No se ha podido abrir el pago seguro.";
-        status.classList.add("error");
-      }
-      button.disabled = false;
-      button.textContent = originalText;
+    if (status) {
+      status.textContent = "Premium está en preparación. Te llevamos a la información actual antes de abrir la contratación.";
+      status.classList.remove("error");
     }
+    window.setTimeout(() => {
+      window.location.href = "/ayuda?tema=premium#contacto";
+    }, 450);
   }
 
   async function openPortal(button) {
@@ -108,7 +91,7 @@
     const premiumButton = accountView.querySelector("[data-premium-next]");
     if (premiumButton) {
       premiumButton.hidden = plan === "premium";
-      premiumButton.addEventListener("click", () => openCheckout(premiumButton), { once: true });
+      premiumButton.addEventListener("click", () => showPremiumPreparation(premiumButton), { once: true });
     }
 
     const portalButton = accountView.querySelector("[data-manage-subscription]");
