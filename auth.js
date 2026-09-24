@@ -131,11 +131,9 @@
     }
   }
 
-  async function openPremiumCheckout(button) {
-    const session = readJson(SESSION_KEY, null);
-    const accounts = readJson(ACCOUNTS_KEY, {});
-    const account = session && session.email ? accounts[normalizeEmail(session.email)] : null;
-    if (!account) {
+  function showPremiumPreparation(button) {
+    const account = readJson(SESSION_KEY, null);
+    if (!account || !account.email) {
       const url = new URL(window.location.href);
       url.searchParams.set("mode", "signup");
       url.searchParams.set("plan", "premium");
@@ -148,30 +146,14 @@
       return;
     }
 
-    const originalText = button.textContent;
-    button.disabled = true;
-    button.textContent = "Abriendo pago seguro…";
     if (premiumStatus) {
-      premiumStatus.textContent = "Preparando Stripe Checkout…";
+      premiumStatus.textContent = "Premium está en preparación. Te llevamos a la información actual antes de abrir la contratación.";
       premiumStatus.classList.remove("error");
     }
-    try {
-      const response = await fetch("/api/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: account.email })
-      });
-      const data = await response.json();
-      if (!response.ok || !data.url) throw new Error(data.error || "No se ha podido abrir el pago seguro.");
-      window.location.assign(data.url);
-    } catch (error) {
-      if (premiumStatus) {
-        premiumStatus.textContent = error instanceof Error ? error.message : "No se ha podido abrir el pago seguro.";
-        premiumStatus.classList.add("error");
-      }
-      button.disabled = false;
-      button.textContent = originalText;
-    }
+    button.disabled = true;
+    window.setTimeout(() => {
+      window.location.href = "/ayuda?tema=premium#contacto";
+    }, 450);
   }
 
   tabs.forEach((tab) => {
@@ -181,7 +163,7 @@
   premiumLinks.forEach((link) => {
     link.addEventListener("click", (event) => {
       event.preventDefault();
-      openPremiumCheckout(link);
+      showPremiumPreparation(link);
     });
   });
 
