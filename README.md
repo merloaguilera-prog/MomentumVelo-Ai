@@ -8,7 +8,6 @@ Landing de MomentumVelo-AI con suscripción Premium mensual de 49 € mediante S
 - `STRIPE_PREMIUM_PRICE_ID`: identificador del precio recurrente mensual de 49 €.
 - `STRIPE_WEBHOOK_SECRET`: firma del webhook de Stripe.
 - `PUBLIC_SITE_URL`: URL pública sin barra final.
-- `TELEGRAM_PREMIUM_INVITE_URL`: enlace privado de invitación al canal Premium.
 - `STRIPE_PAYMENT_LINK_URL` (alternativa): enlace `buy.stripe.com` ya creado.
 - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`: clave pública del acceso gestionado con Clerk.
 - `CLERK_SECRET_KEY`: clave privada de Clerk, solo en el servidor.
@@ -16,7 +15,7 @@ Landing de MomentumVelo-AI con suscripción Premium mensual de 49 € mediante S
 - `SUPPORT_EMAIL_TO`: buzón que recibe las consultas de ayuda y ventas.
 - `SUPPORT_EMAIL_FROM`: remitente verificado en Resend.
 
-La portada separa claramente el registro gratuito, el inicio de sesión y Premium. El pago se abre solo después de crear o recuperar la cuenta. Si Stripe y el precio están configurados, la API crea una Checkout Session con retorno verificable; el Payment Link queda como respaldo para que el botón no se rompa si falta una variable.
+La portada separa claramente el registro gratuito, el inicio de sesión y Premium. Mientras Premium esté en preparación, la contratación permanece bloqueada mediante `PREMIUM_SALES_ENABLED`. Cuando se abra de forma deliberada y Stripe esté correctamente configurado, la API podrá crear una Checkout Session con retorno verificable; el Payment Link solo actúa como respaldo de configuración.
 
 Cuando Clerk está configurado, el registro, el inicio de sesión, las sesiones y la recuperación por correo son gestionados y multidispositivo. Sin esas variables, se mantiene el acceso local de demostración como respaldo; ese modo solo reconoce la cuenta en el navegador donde fue creada.
 
