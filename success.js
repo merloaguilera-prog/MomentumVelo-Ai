@@ -25,7 +25,7 @@
       }
     } catch (_error) {}
     portalButton.hidden = false;
-  } catch (error) { message.textContent = "Tu pago se ha recibido, pero la verificación está tardando más de lo normal."; status.textContent = error instanceof Error ? error.message : "Vuelve a intentarlo en unos minutos."; status.classList.add("error"); }
+  } catch (error) { message.textContent = "No hemos podido confirmar todavía el estado de la suscripción."; status.textContent = error instanceof Error ? error.message : "Vuelve a intentarlo en unos minutos."; status.classList.add("error"); }
   portalButton.addEventListener("click", async () => {
     portalButton.disabled = true; portalButton.textContent = "Abriendo Stripe…";
     try {
