@@ -1,7 +1,6 @@
 const Stripe = require("stripe");
 const { getAuthenticatedUser } = require("./_clerk");
 
-const VERIFIED_PAYMENT_LINK = "https://buy.stripe.com/5kQdR89oW8fA3Mn7Tm2VG01";
 
 function getSiteUrl() {
   if (process.env.PUBLIC_SITE_URL) return process.env.PUBLIC_SITE_URL.replace(/\/$/, "");
@@ -23,7 +22,6 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: "Método no permitido." });
   }
 
-  const paymentLink = process.env.STRIPE_PAYMENT_LINK_URL || VERIFIED_PAYMENT_LINK;
   const premiumSalesEnabled = process.env.PREMIUM_SALES_ENABLED === "true";
   if (!premiumSalesEnabled) {
     return res.status(503).json({
@@ -42,17 +40,22 @@ module.exports = async function handler(req, res) {
     });
   }
 
-  if (!secretKey || !priceId) {
-    return res.status(200).json({
-      url: paymentLink,
-      mode: "subscription",
-      plan: "premium-monthly",
-      source: "verified-payment-link"
+  if (!managedAuthRequired || !authenticatedUser || !secretKey || !priceId || !process.env.STRIPE_WEBHOOK_SECRET) {
+    return res.status(503).json({
+      error: "La contratación Premium aún no está configurada para vincular el pago a una cuenta.",
+      helpUrl: "/ayuda?tema=premium#contacto"
     });
   }
 
   try {
     const stripe = new Stripe(secretKey, { apiVersion: "2026-07-29.dahlia" });
+    const price = await stripe.prices.retrieve(priceId);
+    if (price.active !== true || price.currency !== "eur" || price.unit_amount !== 4900 || price.recurring?.interval !== "month" || price.recurring?.interval_count !== 1) {
+      return res.status(503).json({
+        error: "El precio Premium configurado no corresponde a 49 € al mes. La contratación sigue cerrada.",
+        helpUrl: "/ayuda?tema=premium#contacto"
+      });
+    }
     const siteUrl = getSiteUrl();
     const email = validEmail(req.body?.email);
     const session = await stripe.checkout.sessions.create({
