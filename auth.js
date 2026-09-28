@@ -112,18 +112,18 @@
       ? `¡Bienvenida, ${account.name}!`
       : `Hola de nuevo, ${account.name}`;
     document.querySelector("[data-account-message]").textContent = premiumRequested()
-      ? "Paso 1 completado. Tu cuenta gratuita está lista. Premium se activará cuando la contratación pública esté abierta."
+      ? "Tu cuenta local de prueba está lista en este dispositivo. Premium requerirá una contratación independiente cuando se abra al público."
       : isNewAccount
         ? "Tu cuenta gratuita ya está creada. Premium queda como una opción para más adelante."
         : "Has iniciado sesión correctamente en tu cuenta gratuita.";
     document.querySelector("[data-account-email]").textContent = account.email;
     document.querySelector("[data-account-plan]").textContent = account.plan === "premium"
-      ? "Premium · 49 €/mes"
+      ? "Premium · estado local sin verificar"
       : "Trader · 0 €/mes";
     const premiumButton = accountView.querySelector("[data-premium-next]");
     if (premiumButton) premiumButton.hidden = account.plan === "premium";
     if (account.plan === "premium") {
-      document.querySelector("[data-account-message]").textContent = "Tu suscripción Premium está activa.";
+      document.querySelector("[data-account-message]").textContent = "Este navegador conserva una marca Premium antigua; consulta soporte para verificar tu suscripción.";
     }
     if (premiumStatus) {
       premiumStatus.textContent = "";
@@ -182,7 +182,7 @@
       }
       setStatus(
         loginForm,
-        "Esta cuenta está guardada en este dispositivo. Consulta Ayuda para recuperar el acceso o activar una cuenta segura multidispositivo.",
+        "Esta cuenta de prueba solo está guardada en este dispositivo. No hay restablecimiento automático; consulta Ayuda para conocer las opciones.",
         "success"
       );
       window.setTimeout(() => {
