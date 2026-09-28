@@ -155,6 +155,24 @@
       managedView.hidden = false;
       const mount = managedView.querySelector("[data-clerk-mount]");
       const mode = new URLSearchParams(window.location.search).get("mode");
+      const activeMode = mode === "signup" ? "signup" : "login";
+      mount.id = "managed-auth-mount";
+      mount.setAttribute("role", "tabpanel");
+      mount.setAttribute("aria-labelledby", `${activeMode}-tab`);
+      document.querySelectorAll("[data-auth-mode]").forEach((tab) => {
+        const selected = tab.dataset.authMode === activeMode;
+        tab.classList.toggle("is-active", selected);
+        tab.setAttribute("aria-selected", String(selected));
+        tab.setAttribute("aria-controls", mount.id);
+        tab.tabIndex = 0;
+        tab.addEventListener("click", () => {
+          if (tab.dataset.authMode === activeMode) return;
+          const url = new URL(window.location.href);
+          url.searchParams.set("mode", tab.dataset.authMode);
+          if (tab.dataset.authMode === "login") url.searchParams.delete("plan");
+          window.location.assign(url.href);
+        });
+      });
       const appearance = {
         variables: {
           colorPrimary: "#25e683",
@@ -165,7 +183,7 @@
           borderRadius: "0.75rem"
         }
       };
-      if (mode === "signup") {
+      if (activeMode === "signup") {
         window.Clerk.mountSignUp(mount, { appearance, signInUrl: "/login?mode=login" });
       } else {
         window.Clerk.mountSignIn(mount, { appearance, signUpUrl: "/login?mode=signup" });
