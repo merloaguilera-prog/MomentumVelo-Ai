@@ -1,5 +1,6 @@
 (function () {
   "use strict";
+  let premiumSalesEnabled = false;
 
   function loadScript(src, attributes = {}) {
     return new Promise((resolve, reject) => {
@@ -38,6 +39,33 @@
     window.setTimeout(() => {
       window.location.href = "/ayuda?tema=premium#contacto";
     }, 450);
+  }
+
+  async function startPremium(button) {
+    if (!premiumSalesEnabled) return showPremiumPreparation(button);
+    const status = document.querySelector("[data-premium-status]");
+    const originalText = button.textContent;
+    button.disabled = true;
+    button.textContent = "Preparando pago seguro…";
+    try {
+      const token = await window.Clerk.session.getToken();
+      if (!token) throw new Error("Inicia sesión para activar Premium.");
+      const response = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: "{}"
+      });
+      const data = await response.json();
+      if (!response.ok || !data.url) throw new Error(data.error || "No se ha podido preparar el pago.");
+      window.location.assign(data.url);
+    } catch (error) {
+      if (status) {
+        status.textContent = error instanceof Error ? error.message : "No se ha podido preparar el pago.";
+        status.classList.add("error");
+      }
+      button.disabled = false;
+      button.textContent = originalText;
+    }
   }
 
   async function openPortal(button) {
@@ -91,7 +119,11 @@
     const premiumButton = accountView.querySelector("[data-premium-next]");
     if (premiumButton) {
       premiumButton.hidden = plan === "premium";
-      premiumButton.addEventListener("click", () => showPremiumPreparation(premiumButton), { once: true });
+      if (premiumSalesEnabled) {
+        premiumButton.innerHTML = '♛ Activar Premium · 49 €/mes <span aria-hidden="true">›</span>';
+        premiumButton.setAttribute("aria-label", "Activar Premium por 49 euros al mes");
+      }
+      premiumButton.addEventListener("click", () => startPremium(premiumButton));
     }
 
     const portalButton = accountView.querySelector("[data-manage-subscription]");
@@ -129,6 +161,7 @@
       const response = await fetch("/api/auth-config", { cache: "no-store" });
       if (!response.ok) return false;
       const config = await response.json();
+      premiumSalesEnabled = config.premiumSalesEnabled === true;
       const domain = config.enabled && config.publishableKey
         ? clerkDomain(config.publishableKey)
         : "";

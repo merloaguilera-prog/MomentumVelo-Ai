@@ -1,7 +1,7 @@
 const Stripe = require("stripe");
-const { getAuthenticatedUser } = require("./_clerk");
-
-const VERIFIED_PAYMENT_LINK = "https://buy.stripe.com/5kQdR89oW8fA3Mn7Tm2VG01";
+const { getAuthenticatedUser, getUserStripeCustomerId } = require("./_clerk");
+const { randomBytes } = require("node:crypto");
+const { isPremiumPrice, isPremiumSubscription } = require("./_billing");
 
 function getSiteUrl() {
   if (process.env.PUBLIC_SITE_URL) return process.env.PUBLIC_SITE_URL.replace(/\/$/, "");
@@ -11,11 +11,6 @@ function getSiteUrl() {
   return "https://momentum-velo.vercel.app";
 }
 
-function validEmail(value) {
-  const email = String(value || "").trim().toLowerCase();
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? email : null;
-}
-
 module.exports = async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
   if (req.method !== "POST") {
@@ -23,7 +18,6 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: "Método no permitido." });
   }
 
-  const paymentLink = process.env.STRIPE_PAYMENT_LINK_URL || VERIFIED_PAYMENT_LINK;
   const premiumSalesEnabled = process.env.PREMIUM_SALES_ENABLED === "true";
   if (!premiumSalesEnabled) {
     return res.status(503).json({
@@ -33,34 +27,37 @@ module.exports = async function handler(req, res) {
   }
   const secretKey = process.env.STRIPE_SECRET_KEY;
   const priceId = process.env.STRIPE_PREMIUM_PRICE_ID;
-  const managedAuthRequired = Boolean(process.env.CLERK_SECRET_KEY);
-  const authenticatedUser = managedAuthRequired ? await getAuthenticatedUser(req) : null;
-
-  if (managedAuthRequired && !authenticatedUser) {
+  if (!process.env.CLERK_SECRET_KEY || !secretKey || !priceId || !process.env.STRIPE_WEBHOOK_SECRET) {
+    return res.status(503).json({ error: "La contratación Premium todavía no está configurada." });
+  }
+  const authenticatedUser = await getAuthenticatedUser(req);
+  if (!authenticatedUser) {
     return res.status(401).json({
       error: "Inicia sesión en tu cuenta antes de activar Premium."
     });
   }
 
-  if (!secretKey || !priceId) {
-    return res.status(200).json({
-      url: paymentLink,
-      mode: "subscription",
-      plan: "premium-monthly",
-      source: "verified-payment-link"
-    });
-  }
-
   try {
-    const stripe = new Stripe(secretKey, { apiVersion: "2026-07-29.dahlia" });
+    const stripe = new Stripe(secretKey, { apiVersion: "2026-08-26.dahlia" });
+    const price = await stripe.prices.retrieve(priceId);
+    if (!isPremiumPrice(price) || !price.active) {
+      return res.status(503).json({ error: "El precio Premium de 49 €/mes no está configurado correctamente." });
+    }
+    const customerId = await getUserStripeCustomerId(authenticatedUser.userId);
+    if (customerId) {
+      const subscriptions = await stripe.subscriptions.list({ customer: customerId, status: "all", limit: 100 });
+      if (subscriptions.data.some((subscription) => isPremiumSubscription(subscription)
+        && ["active", "trialing", "past_due", "incomplete"].includes(subscription.status))) {
+        return res.status(409).json({ error: "Ya tienes una suscripción Premium. Puedes gestionarla desde tu cuenta." });
+      }
+    }
     const siteUrl = getSiteUrl();
-    const email = validEmail(req.body?.email);
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       line_items: [{ price: priceId, quantity: 1 }],
       success_url: `${siteUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${siteUrl}/cancel`,
-      customer_email: email || undefined,
+      customer: customerId || undefined,
       client_reference_id: authenticatedUser?.userId || undefined,
       metadata: {
         plan: "premium-monthly",
@@ -72,7 +69,7 @@ module.exports = async function handler(req, res) {
           clerkUserId: authenticatedUser?.userId || ""
         }
       },
-      integration_identifier: "momentumvelo_web_qmztrkpa"
+      integration_identifier: `momentumvelo_web_${Array.from(randomBytes(8), (byte) => String.fromCharCode(97 + byte % 26)).join("")}`
     });
     return res.status(200).json({
       url: session.url,
