@@ -35,6 +35,11 @@ async function getAuthenticatedUser(req) {
 async function updateUserPlan(userId, plan, details = {}) {
   if (!process.env.CLERK_SECRET_KEY || !userId) return false;
   const clerk = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
+  const user = await clerk.users.getUser(userId);
+  const currentSubscriptionId = user.privateMetadata?.stripeSubscriptionId;
+  // A late event from an old subscription must not replace the current paid plan.
+  if (user.publicMetadata?.plan === "premium" && currentSubscriptionId
+      && details.subscriptionId && currentSubscriptionId !== details.subscriptionId) return false;
   await clerk.users.updateUserMetadata(userId, {
     publicMetadata: {
       plan,
