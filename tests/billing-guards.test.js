@@ -4,6 +4,7 @@ const assert = require('node:assert/strict');
 const checkout = require('../api/checkout');
 const subscription = require('../api/subscription');
 const portal = require('../api/portal');
+const { isPremiumPrice, isPremiumSubscription } = require('../api/_premium');
 
 function response() {
   return {
@@ -58,4 +59,26 @@ test('subscription verification and billing portal reject missing managed identi
     await portal({ method: 'POST', body: { sessionId: 'cs_test_dummy' } }, management);
     assert.equal(management.code, 503);
   });
+});
+
+test('Premium entitlement requires the configured active 49 EUR monthly price', () => {
+  const validPrice = {
+    id: 'price_premium', active: true, currency: 'eur', unit_amount: 4900,
+    recurring: { interval: 'month', interval_count: 1 }
+  };
+  assert.equal(isPremiumPrice(validPrice, 'price_premium'), true);
+  assert.equal(isPremiumPrice({ ...validPrice, id: 'price_other' }, 'price_premium'), false);
+  assert.equal(isPremiumPrice({ ...validPrice, unit_amount: 5900 }, 'price_premium'), false);
+  assert.equal(isPremiumPrice({ ...validPrice, active: false }, 'price_premium'), false);
+});
+
+test('Premium entitlement rejects a subscription for another product or an unpaid status', () => {
+  const price = {
+    id: 'price_premium', active: true, currency: 'eur', unit_amount: 4900,
+    recurring: { interval: 'month', interval_count: 1 }
+  };
+  const subscription = { status: 'active', items: { data: [{ price }] } };
+  assert.equal(isPremiumSubscription(subscription, 'price_premium'), true);
+  assert.equal(isPremiumSubscription(subscription, 'price_other'), false);
+  assert.equal(isPremiumSubscription({ ...subscription, status: 'unpaid' }, 'price_premium'), false);
 });

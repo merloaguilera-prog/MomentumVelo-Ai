@@ -1,5 +1,6 @@
 const Stripe = require("stripe");
 const { getAuthenticatedUser } = require("./_clerk");
+const { isPremiumSubscription } = require("./_premium");
 module.exports = async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
   if (req.method !== "GET") { res.setHeader("Allow", "GET"); return res.status(405).json({ error: "Método no permitido." }); }
@@ -13,9 +14,9 @@ module.exports = async function handler(req, res) {
     if (!authenticatedUser || session.client_reference_id !== authenticatedUser.userId) {
       return res.status(403).json({ active: false, error: "Inicia sesión con la cuenta que realizó el pago." });
     }
-    const subscriptionStatus = typeof session.subscription === "object" ? session.subscription.status : null;
-    const premiumLine = session.line_items?.data?.some((item) => item.price?.currency === "eur" && item.price?.unit_amount === 4900 && item.price?.recurring?.interval === "month");
-    const active = session.status === "complete" && premiumLine && ["active", "trialing"].includes(subscriptionStatus);
+    const subscription = typeof session.subscription === "object" ? session.subscription : null;
+    const active = session.status === "complete"
+      && isPremiumSubscription(subscription, process.env.STRIPE_PREMIUM_PRICE_ID);
     if (!active) return res.status(402).json({ active: false, error: "La suscripción todavía no figura como activa." });
     return res.status(200).json({ active: true, email: session.customer_details?.email || null, telegramUrl: process.env.TELEGRAM_PREMIUM_INVITE_URL || null });
   } catch (error) { console.error("subscription_verification_error", { message: error instanceof Error ? error.message : String(error) }); return res.status(500).json({ error: "No se ha podido verificar la suscripción." }); }
