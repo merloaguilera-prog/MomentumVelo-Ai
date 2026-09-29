@@ -81,4 +81,6 @@ test('Premium entitlement rejects a subscription for another product or an unpai
   assert.equal(isPremiumSubscription(subscription, 'price_premium'), true);
   assert.equal(isPremiumSubscription(subscription, 'price_other'), false);
   assert.equal(isPremiumSubscription({ ...subscription, status: 'unpaid' }, 'price_premium'), false);
+  assert.equal(isPremiumSubscription({ ...subscription, items: { data: [{ price: { ...price, active: false } }] } }, 'price_premium'), true);
+  assert.equal(isPremiumPrice({ ...price, active: false }, 'price_premium'), false);
 });

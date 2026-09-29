@@ -17,15 +17,21 @@ module.exports = async function handler(req, res) {
   try {
     if (event.type === "checkout.session.completed") {
       const session = event.data.object;
-      const userId = session.metadata?.clerkUserId || session.client_reference_id;
+      const userId = session.client_reference_id;
       const subscriptionId = typeof session.subscription === "string" ? session.subscription : session.subscription?.id;
       const subscription = subscriptionId
         ? await stripe.subscriptions.retrieve(subscriptionId, { expand: ["items.data.price"] })
         : null;
-      if (userId && isPremiumSubscription(subscription, process.env.STRIPE_PREMIUM_PRICE_ID)) {
+      const customerId = typeof session.customer === "string" ? session.customer : session.customer?.id;
+      const subscriptionCustomerId = typeof subscription?.customer === "string" ? subscription.customer : subscription?.customer?.id;
+      if (session.mode === "subscription" && session.status === "complete"
+        && userId && session.metadata?.clerkUserId === userId
+        && subscription?.metadata?.clerkUserId === userId
+        && customerId && customerId === subscriptionCustomerId
+        && isPremiumSubscription(subscription, process.env.STRIPE_PREMIUM_PRICE_ID)) {
         await updateUserPlan(userId, "premium", {
-          status: "active",
-          customerId: typeof session.customer === "string" ? session.customer : session.customer?.id,
+          status: subscription.status,
+          customerId,
           subscriptionId
         });
       }

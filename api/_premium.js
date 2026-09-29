@@ -1,8 +1,8 @@
-function isPremiumPrice(price, configuredPriceId) {
+function isPremiumPrice(price, configuredPriceId, requireActive = true) {
   return Boolean(
     price
     && price.id === configuredPriceId
-    && price.active === true
+    && (!requireActive || price.active === true)
     && price.currency === "eur"
     && price.unit_amount === 4900
     && price.recurring?.interval === "month"
@@ -14,7 +14,7 @@ function isPremiumSubscription(subscription, configuredPriceId, allowedStatuses 
   return Boolean(
     subscription
     && allowedStatuses.includes(subscription.status)
-    && subscription.items?.data?.some((item) => isPremiumPrice(item.price, configuredPriceId))
+    && subscription.items?.data?.some((item) => isPremiumPrice(item.price, configuredPriceId, false))
   );
 }
 
