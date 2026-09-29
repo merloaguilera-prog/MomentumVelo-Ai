@@ -1,5 +1,6 @@
 const Stripe = require("stripe");
 const { getAuthenticatedUser } = require("./_clerk");
+const { isPremiumPrice } = require("./_premium");
 
 
 function getSiteUrl() {
@@ -50,7 +51,7 @@ module.exports = async function handler(req, res) {
   try {
     const stripe = new Stripe(secretKey, { apiVersion: "2026-07-29.dahlia" });
     const price = await stripe.prices.retrieve(priceId);
-    if (price.active !== true || price.currency !== "eur" || price.unit_amount !== 4900 || price.recurring?.interval !== "month" || price.recurring?.interval_count !== 1) {
+    if (!isPremiumPrice(price, priceId)) {
       return res.status(503).json({
         error: "El precio Premium configurado no corresponde a 49 € al mes. La contratación sigue cerrada.",
         helpUrl: "/ayuda?tema=premium#contacto"
