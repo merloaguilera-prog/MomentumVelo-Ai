@@ -1,6 +1,6 @@
 const Stripe = require("stripe");
-const { getAuthenticatedUser } = require("./_clerk");
-
+const { getAuthenticatedUser, getUserStripeCustomerId } = require("./_clerk");
+const { isPremiumPrice, isPremiumSubscription } = require("./_billing");
 
 function getSiteUrl() {
   if (process.env.PUBLIC_SITE_URL) return process.env.PUBLIC_SITE_URL.replace(/\/$/, "");
@@ -8,11 +8,6 @@ function getSiteUrl() {
     return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL.replace(/\/$/, "")}`;
   }
   return "https://momentum-velo.vercel.app";
-}
-
-function validEmail(value) {
-  const email = String(value || "").trim().toLowerCase();
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? email : null;
 }
 
 module.exports = async function handler(req, res) {
@@ -31,39 +26,37 @@ module.exports = async function handler(req, res) {
   }
   const secretKey = process.env.STRIPE_SECRET_KEY;
   const priceId = process.env.STRIPE_PREMIUM_PRICE_ID;
-  const managedAuthRequired = Boolean(process.env.CLERK_SECRET_KEY);
-  const authenticatedUser = managedAuthRequired ? await getAuthenticatedUser(req) : null;
-
-  if (managedAuthRequired && !authenticatedUser) {
+  if (!process.env.CLERK_SECRET_KEY || !secretKey || !priceId || !process.env.STRIPE_WEBHOOK_SECRET) {
+    return res.status(503).json({ error: "La contratación Premium todavía no está configurada." });
+  }
+  const authenticatedUser = await getAuthenticatedUser(req);
+  if (!authenticatedUser) {
     return res.status(401).json({
       error: "Inicia sesión en tu cuenta antes de activar Premium."
     });
   }
 
-  if (!managedAuthRequired || !authenticatedUser || !secretKey || !priceId || !process.env.STRIPE_WEBHOOK_SECRET) {
-    return res.status(503).json({
-      error: "La contratación Premium aún no está configurada para vincular el pago a una cuenta.",
-      helpUrl: "/ayuda?tema=premium#contacto"
-    });
-  }
-
   try {
-    const stripe = new Stripe(secretKey, { apiVersion: "2026-07-29.dahlia" });
+    const stripe = new Stripe(secretKey, { apiVersion: "2026-08-26.dahlia" });
     const price = await stripe.prices.retrieve(priceId);
-    if (price.active !== true || price.currency !== "eur" || price.unit_amount !== 4900 || price.recurring?.interval !== "month" || price.recurring?.interval_count !== 1) {
-      return res.status(503).json({
-        error: "El precio Premium configurado no corresponde a 49 € al mes. La contratación sigue cerrada.",
-        helpUrl: "/ayuda?tema=premium#contacto"
-      });
+    if (!isPremiumPrice(price, priceId)) {
+      return res.status(503).json({ error: "El precio Premium de 49 €/mes no está configurado correctamente." });
+    }
+    const customerId = await getUserStripeCustomerId(authenticatedUser.userId);
+    if (customerId) {
+      const subscriptions = await stripe.subscriptions.list({ customer: customerId, status: "all", limit: 100 });
+      if (subscriptions.data.some((subscription) => isPremiumSubscription(subscription, priceId)
+        && ["active", "trialing", "past_due", "incomplete"].includes(subscription.status))) {
+        return res.status(409).json({ error: "Ya tienes una suscripción Premium. Puedes gestionarla desde tu cuenta." });
+      }
     }
     const siteUrl = getSiteUrl();
-    const email = validEmail(req.body?.email);
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       line_items: [{ price: priceId, quantity: 1 }],
       success_url: `${siteUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${siteUrl}/cancel`,
-      customer_email: email || undefined,
+      customer: customerId || undefined,
       client_reference_id: authenticatedUser?.userId || undefined,
       metadata: {
         plan: "premium-monthly",
@@ -74,8 +67,7 @@ module.exports = async function handler(req, res) {
           plan: "premium-monthly",
           clerkUserId: authenticatedUser?.userId || ""
         }
-      },
-      integration_identifier: "momentumvelo_web_qmztrkpa"
+      }
     });
     return res.status(200).json({
       url: session.url,
