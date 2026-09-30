@@ -25,6 +25,13 @@ Stripe debe enviar `checkout.session.completed`, `checkout.session.async_payment
 
 Checkout deja que Stripe muestre los métodos compatibles habilitados en la cuenta. PayPal recurrente y SEPA siguen sin verificar en la cuenta real; no anunciarlos como disponibles. También quedan por verificar los registros fiscales y los impuestos antes de cobrar.
 
+## Comprobación de despliegue antes de abrir Premium
+
+1. En Vercel, confirmar que `momentum-velo.vercel.app` apunta al despliegue de producción de la revisión aprobada en `main`. Comparar el SHA del despliegue con el SHA de `main`; una vista previa `READY` no actualiza por sí sola ese dominio.
+2. Abrir `https://momentum-velo.vercel.app/api/auth-config` y comprobar `enabled: true` y `premiumSalesEnabled: false` antes de las pruebas. Si falta `premiumSalesEnabled`, el dominio sigue sirviendo una versión anterior a esta protección. Comprobar en ese mismo dominio el registro y el inicio de sesión con Clerk; verificar allí las variables de producción sin publicar sus valores secretos.
+3. En un entorno de prueba de Stripe y Clerk, verificar con una cuenta real del entorno: alta, pago confirmado, pago asíncrono pendiente y confirmado, renovación, impago, cancelación y apertura del portal. Revisar el webhook firmado y el plan en la cuenta Clerk después de cada evento. Confirmar que el precio es 49 EUR al mes y que Checkout vuelve al dominio correcto.
+4. Comprobar en producción el titular legal, la fiscalidad, el precio y las condiciones que ve la persona antes del cobro. Mantener `PREMIUM_SALES_ENABLED=false` hasta completar estas comprobaciones y verificar las funciones Premium prometidas; PayPal no debe anunciarse como método disponible.
+
 El formulario de `/ayuda` usa Resend. Si el envío todavía no está configurado, ofrece de forma explícita abrir un correo dirigido a `hola@momentumvelo.ai`, sin perder el texto de la consulta.
 
 Antes de abrir la contratación comercial, completar en `legal.html` la razón social o nombre del titular, NIF/CIF, domicilio y datos registrales, y revisar los textos con asesoría jurídica aplicable al país de operación.
