@@ -139,7 +139,7 @@
         `https://${domain}/npm/@clerk/clerk-js@6/dist/clerk.browser.js`,
         { "data-clerk-publishable-key": config.publishableKey }
       );
-      await window.Clerk.load({ ui: { ClerkUI: window.__internal_ClerkUICtor } });
+      await window.Clerk.load({ proxyUrl: "/__clerk", ui: { ClerkUI: window.__internal_ClerkUICtor } });
 
       updatePublicHeader();
       const managedView = document.querySelector("[data-managed-auth]");
