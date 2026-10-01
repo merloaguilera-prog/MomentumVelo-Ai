@@ -1,0 +1,17 @@
+{
+  "name": "MomentumVelo",
+  "short_name": "MomentumVelo",
+  "description": "Trading inteligente y análisis de momentum asistido por IA.",
+  "lang": "es",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#050b11",
+  "theme_color": "#07111f",
+  "orientation": "portrait-primary",
+  "categories": ["finance", "business", "productivity"],
+  "icons": [
+    {"src": "/icons/momentumvelo-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+    {"src": "/icons/momentumvelo-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ]
+}
