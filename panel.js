@@ -22,7 +22,8 @@
     const points=Array.from({length:44},(_,index)=>{
       const t=index/43;
       const level=.49+.18*Math.sin((t*2.8+seed*.13)*Math.PI)+.09*Math.sin((t*10+seed*.31)*Math.PI)+.13*(t-.5)*((seed%5)-2);
-      return [+(t*600).toFixed(1),+(120-level*155).toFixed(1)];
+      const y=Math.max(4,Math.min(216,120-level*155));
+      return [+(t*600).toFixed(1),+y.toFixed(1)];
     });
     const line=points.map(([x,y],index)=>`${index?"L":"M"}${x} ${y}`).join(" ");
     chartLine.setAttribute("d",line);
@@ -47,7 +48,7 @@
   document.querySelectorAll("[data-chart-period]").forEach(button=>button.addEventListener("click",()=>{chartPeriod=button.dataset.chartPeriod;document.querySelectorAll("[data-chart-period]").forEach(item=>item.setAttribute("aria-pressed",String(item===button)));renderChart();}));
   clearList.addEventListener("click",()=>{saved=[];try{localStorage.setItem(key,"[]");}catch(_error){}draw();if(selected){const a=assets.find(item=>item.symbol===selected);if(a)selectAsset(a);}});
   signalOpen.addEventListener("click",()=>{const a=assets.find(item=>item.symbol==="NVDA");if(a)selectAsset(a);});
-  analysisBack.addEventListener("click",()=>{document.getElementById("mercados").scrollIntoView({behavior:"smooth",block:"start"});if(selected){window.setTimeout(()=>{const row=Array.from(document.querySelectorAll(".asset-row")).find(item=>item.textContent.includes(selected));if(row)row.focus();},450);}});
+  analysisBack.addEventListener("click",()=>{document.getElementById("mercados").scrollIntoView({behavior:"smooth",block:"start"});if(selected){window.setTimeout(()=>{const row=Array.from(document.querySelectorAll(".asset-row")).find(item=>item.textContent.includes(selected));if(row)row.focus();else query.focus();},450);}});
   analysisSave.addEventListener("click",()=>{const a=assets.find(item=>item.symbol===selected);if(!a)return;saved=saved.includes(a.symbol)?saved.filter(x=>x!==a.symbol):[...saved,a.symbol];try{localStorage.setItem(key,JSON.stringify(saved));}catch(_error){}draw();selectAsset(a);});
   draw();
 })();
