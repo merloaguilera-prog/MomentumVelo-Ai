@@ -41,7 +41,6 @@ module.exports = async function handler(req, res) {
 
   const host = String(req.headers["x-forwarded-host"] || req.headers.host || "momentum-velo.vercel.app");
   const proto = String(req.headers["x-forwarded-proto"] || "https");
-  headers["Host"] = instanceFrontendApiDomain;
   headers["Clerk-Proxy-Url"] = `${proto}://${host}/__clerk`;
   headers["Clerk-Secret-Key"] = secretKey;
   headers["X-Forwarded-For"] = originalClientIp(req);
