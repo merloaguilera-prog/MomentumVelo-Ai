@@ -36,6 +36,10 @@
   ],
   "rewrites": [
     {
+      "source": "/__clerk",
+      "destination": "/api/clerk-proxy"
+    },
+    {
       "source": "/__clerk/:path*",
       "destination": "/api/clerk-proxy?path=:path*"
     }
