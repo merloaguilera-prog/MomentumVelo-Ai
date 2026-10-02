@@ -16,9 +16,9 @@ function originalClientIp(req) {
 module.exports = async function handler(req, res) {
   const secretKey = process.env.CLERK_SECRET_KEY || "";
   const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || "";
-  const frontendApiDomain = decodeFrontendApiDomain(publishableKey);
+  // Clerk's proxy guide requires forwarding to the canonical Frontend API host.\n  // Do not derive the upstream from the publishable key: once proxying is enabled,\n  // that domain can point back at the application/proxy and create a loop.\n  const frontendApiDomain = "frontend-api.clerk.dev";
 
-  if (!secretKey || !frontendApiDomain) {
+  if (!secretKey || !publishableKey) {
     return res.status(503).json({ error: "Clerk proxy is not configured." });
   }
 
