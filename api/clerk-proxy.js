@@ -20,8 +20,9 @@ module.exports = async function handler(req, res) {
   // Do not derive the upstream from the publishable key: once proxying is enabled,
   // that domain can point back at the application/proxy and create a loop.
   const frontendApiDomain = "frontend-api.clerk.dev";
+  const instanceFrontendApiDomain = decodeFrontendApiDomain(publishableKey);
 
-  if (!secretKey || !publishableKey) {
+  if (!secretKey || !publishableKey || !instanceFrontendApiDomain) {
     return res.status(503).json({ error: "Clerk proxy is not configured." });
   }
 
@@ -40,6 +41,7 @@ module.exports = async function handler(req, res) {
 
   const host = String(req.headers["x-forwarded-host"] || req.headers.host || "momentum-velo.vercel.app");
   const proto = String(req.headers["x-forwarded-proto"] || "https");
+  headers["Host"] = instanceFrontendApiDomain;
   headers["Clerk-Proxy-Url"] = `${proto}://${host}/__clerk`;
   headers["Clerk-Secret-Key"] = secretKey;
   headers["X-Forwarded-For"] = originalClientIp(req);
