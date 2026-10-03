@@ -134,9 +134,9 @@
         : "";
       if (!domain) return false;
 
-      await loadScript(`https://${domain}/npm/@clerk/ui@1/dist/ui.browser.js`);
+      await loadScript("/__clerk/npm/@clerk/ui@1/dist/ui.browser.js");
       await loadScript(
-        `https://${domain}/npm/@clerk/clerk-js@6/dist/clerk.browser.js`,
+        "/__clerk/npm/@clerk/clerk-js@6/dist/clerk.browser.js",
         { "data-clerk-publishable-key": config.publishableKey }
       );
       await window.Clerk.load({ proxyUrl: "/__clerk", ui: { ClerkUI: window.__internal_ClerkUICtor } });
