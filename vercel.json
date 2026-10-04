@@ -43,5 +43,6 @@
       "source": "/__clerk/:path*",
       "destination": "/api/clerk-proxy?path=:path*"
     }
-  ]
+  ],
+  "buildCommand": "node -e '(async()=>{try{const key=process.env.CLERK_SECRET_KEY;if(!key){console.log(\"CLERK_DOMAIN_AUDIT \"+JSON.stringify({error:\"missing_key\"}));return;}const r=await fetch(\"https://api.clerk.com/v1/domains\",{headers:{Authorization:\"Bearer \"+key},signal:AbortSignal.timeout(15000)});const p=await r.json();console.log(\"CLERK_DOMAIN_AUDIT \"+JSON.stringify({status:r.status,domains:(p.data||[]).map(d=>({id:d.id,name:d.name,is_satellite:d.is_satellite,proxy_url:d.proxy_url,frontend_api_url:d.frontend_api_url})),errors:(p.errors||[]).map(e=>({code:e.code,message:e.message}))}));}catch(e){console.log(\"CLERK_DOMAIN_AUDIT \"+JSON.stringify({error:e.name}));}})();'"
 }
