@@ -19,6 +19,16 @@ La portada separa el registro gratuito, el inicio de sesión y Premium. La API r
 
 Cuando Clerk está configurado, el registro, el inicio de sesión, las sesiones y la recuperación por correo son gestionados y multidispositivo. Sin esas variables, el acceso local es solo una demostración: la cuenta queda en el navegador donde fue creada y no tiene recuperación automática. No debe anunciarse como cuenta segura multidispositivo.
 
+El acceso local solo se habilita cuando `/api/auth-config` confirma que no están configuradas **ninguna** de las dos claves de Clerk. Una configuración parcial, un error de red o un fallo del SDK bloquea el registro local y muestra opciones de reintento y ayuda. Las cuentas locales antiguas tampoco cambian el encabezado de una instalación con Clerk.
+
+## Conexión de Clerk a momentumvelo.app
+
+Los bundles de Clerk y sus llamadas de sesión pasan por `/__clerk`. El script del SDK recibe `data-clerk-proxy-url="https://momentumvelo.app/__clerk"` **antes** de crear su instancia; `Clerk.load()` recibe las opciones de interfaz.
+
+En una instancia de producción, el proxy también debe estar habilitado en el dominio de esa misma instancia en Clerk, con `proxy_url` igual a `https://momentumvelo.app/__clerk`. Configurar solo `NEXT_PUBLIC_CLERK_PROXY_URL` en Vercel no habilita ese ajuste en Clerk. Verificar que las claves pública y secreta pertenecen a la misma instancia. Ver la [guía oficial del proxy](https://clerk.com/docs/guides/dashboard/dns-domains/proxy-fapi) y la [inicialización JavaScript](https://clerk.com/docs/js-frontend/getting-started/quickstart).
+
+Los bundles con HTTP 200 no prueban que las sesiones estén conectadas. Antes de aprobar el acceso, comprobar las llamadas `/__clerk/v1/environment` y `/__clerk/v1/client` del navegador, registro con verificación, inicio y cierre de sesión y recuperación por correo. `400 host_invalid` sigue siendo un bloqueo de la conexión; no debe marcarse como resuelto ni sustituirse por una cuenta local.
+
 Pulse (`/premium`) es una simulación con activos y puntuaciones codificados en `premium.js`; no hay feed ni alertas de mercado en vivo. PayPal no está integrado y los métodos de pago futuros dependerán de la configuración efectiva de Stripe.
 
 Stripe debe enviar los eventos `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.payment_succeeded` e `invoice.payment_failed` a `/api/webhook`. El webhook vincula el estado Premium con los metadatos de la cuenta Clerk y conserva un margen de acceso cuando el pago figura temporalmente como `past_due`. El portal de cliente permite cancelar renovaciones y está protegido por la identidad de la cuenta cuando Clerk está activo.
