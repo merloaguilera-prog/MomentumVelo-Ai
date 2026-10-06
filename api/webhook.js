@@ -13,7 +13,7 @@ module.exports = async function handler(req, res) {
   } catch (error) { console.error("stripe_webhook_error", { message: error instanceof Error ? error.message : String(error) }); return res.status(400).json({ error: "Firma de webhook no válida." }); }
 
   try {
-    if (event.type === "checkout.session.completed") {
+    if (["checkout.session.completed", "checkout.session.async_payment_succeeded"].includes(event.type)) {
       const session = event.data.object;
       const userId = session.metadata?.clerkUserId || session.client_reference_id;
       if (userId) {
@@ -39,7 +39,7 @@ module.exports = async function handler(req, res) {
       }
     }
 
-    if (["checkout.session.completed", "invoice.payment_succeeded", "invoice.payment_failed", "customer.subscription.updated", "customer.subscription.deleted"].includes(event.type)) {
+    if (["checkout.session.completed", "checkout.session.async_payment_succeeded", "invoice.payment_succeeded", "invoice.payment_failed", "customer.subscription.updated", "customer.subscription.deleted"].includes(event.type)) {
       console.info("stripe_subscription_event", { id: event.id, type: event.type, objectId: event.data.object.id });
     }
     return res.status(200).json({ received: true });
