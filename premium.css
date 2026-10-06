@@ -6,3 +6,14 @@
 .pulse-nav{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.pulse-nav a{padding:8px 11px;border:1px solid #28505a;border-radius:8px;color:#c5e0e3;text-decoration:none;font-size:13px;font-weight:700}.pulse-nav a:hover,.pulse-nav a:focus-visible{border-color:var(--green);color:#fff;box-shadow:0 0 15px #35ff9a36}.pulse-nav a:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}.topbar .ghost{border-color:#35ff9a99;color:#b8ffdb;box-shadow:0 0 14px #35ff9a33}.panel{border-color:#275c64;box-shadow:0 22px 70px #0008,0 0 34px #35e7ff11}.world{border-color:#31c7b35e}.map{box-shadow:inset 0 0 55px #16cfb319}.controls label{font-size:14px;color:#c5d7dc}.panelHead small{font-size:12px}.status{font-size:12px}
 @media(max-width:1050px){.topbar{flex-wrap:wrap}.pulse-nav{order:3;width:100%;justify-content:center}.status{margin-left:auto}}
 @media(max-width:560px){.pulse-nav{justify-content:flex-start;overflow-x:auto;flex-wrap:nowrap}.pulse-nav a{white-space:nowrap}.topbar .ghost{font-size:11px}}
+
+/* Electric neon refresh. Green is reserved for positive market values. */
+:root{--cyan:#22e7ff;--blue:#3974ff;--violet:#8b5cff;--magenta:#ff3fd2;--gold:#f5c75b;--green:#35ff9a;--line:#263d78}
+body{background:radial-gradient(circle at 75% 0,#183f8a55 0,transparent 30%),radial-gradient(circle at 10% 25%,#641f8a55 0,transparent 27%),#050711}
+.brand b{color:var(--cyan)}.brandmark{background:linear-gradient(135deg,var(--cyan),var(--violet));color:#fff;box-shadow:0 0 30px #22e7ff77}
+.hero h1 span{color:var(--cyan);text-shadow:0 0 34px #22e7ff66}
+.pulseOrb{border-color:#8b5cffaa;background:radial-gradient(circle,#233bff20,transparent 64%);box-shadow:0 0 70px #22e7ff2c,0 0 95px #ff3fd21c,inset 0 0 60px #8b5cff18}.pulseOrb strong{color:var(--cyan);text-shadow:0 0 26px #22e7ffaa}
+.panel{border-color:#31519a;box-shadow:0 22px 70px #0008,0 0 36px #22e7ff20,0 0 55px #8b5cff12}
+.world{border-color:#764fff77}.map{background:radial-gradient(circle at center,#173a8455,#040611 65%);box-shadow:inset 0 0 60px #4a42ff25}.map svg{fill:#111d48;stroke:#3265b9}.map button{color:var(--cyan);filter:drop-shadow(0 0 9px var(--cyan))}
+.controls button{border-color:var(--violet);background:#130c2a;color:#d7c8ff;box-shadow:0 0 17px #8b5cff35}.wide{border-color:#31519a;color:#c8d8ff}.markets button:hover,.ask button:hover,.markets button.active{border-color:var(--cyan);box-shadow:0 0 20px #22e7ff44}.aiBadge{border-color:var(--magenta);color:#ffb9f1;box-shadow:0 0 22px #ff3fd255}.ai h3{color:var(--cyan)}.strength i{background:linear-gradient(90deg,var(--violet),var(--cyan));box-shadow:0 0 14px var(--cyan)}
+.pulse-nav a{border-color:#31519a;color:#d5e5ff}.pulse-nav a:hover,.pulse-nav a:focus-visible{border-color:var(--cyan);box-shadow:0 0 18px #22e7ff55}.topbar .ghost{border-color:#f5c75baa;color:#ffe29a;box-shadow:0 0 17px #f5c75b44}
