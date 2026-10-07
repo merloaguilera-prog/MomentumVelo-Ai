@@ -1,6 +1,6 @@
 (async function () {
   "use strict";
-  const managedAuthEnabled = await (window.MomentumVeloAuthReady || Promise.resolve(false));
+  const authMode = await (window.MomentumVeloAuthReady || Promise.resolve("unavailable"));
   const sessionId = new URLSearchParams(window.location.search).get("session_id");
   const message = document.getElementById("verification-message");
   const status = document.getElementById("result-status");
@@ -8,7 +8,7 @@
   const retryButton = document.getElementById("retry-button");
 
   async function authHeaders() {
-    const token = managedAuthEnabled && window.Clerk?.session
+    const token = authMode === "managed" && window.Clerk?.session
       ? await window.Clerk.session.getToken()
       : null;
     return token ? { Authorization: `Bearer ${token}` } : {};
