@@ -7,23 +7,29 @@
   const authLink = document.querySelector("[data-auth-link]");
   const signupLink = document.querySelector("[data-signup-link]");
 
-  try {
-    const session = JSON.parse(window.localStorage.getItem(SESSION_KEY) || "null");
-    const accounts = JSON.parse(window.localStorage.getItem(ACCOUNTS_KEY) || "{}");
-    const account = session && session.email ? accounts[String(session.email).toLowerCase()] : null;
-    if (authLink && account) {
-      const firstName = String(account.name || "").trim().split(/\s+/)[0];
-      authLink.textContent = firstName ? `Hola, ${firstName}` : "Mi cuenta";
-      authLink.href = "/login?mode=account";
-      authLink.setAttribute("aria-label", `Abrir mi cuenta${account.name ? ` de ${account.name}` : ""}`);
+  function updateLocalHeader() {
+    try {
+      const session = JSON.parse(window.localStorage.getItem(SESSION_KEY) || "null");
+      const accounts = JSON.parse(window.localStorage.getItem(ACCOUNTS_KEY) || "{}");
+      const account = session && session.email ? accounts[String(session.email).toLowerCase()] : null;
+      if (authLink && account) {
+        const firstName = String(account.name || "").trim().split(/\s+/)[0];
+        authLink.textContent = firstName ? `Hola, ${firstName}` : "Mi cuenta";
+        authLink.href = "/login?mode=account";
+        authLink.setAttribute("aria-label", `Abrir mi cuenta${account.name ? ` de ${account.name}` : ""}`);
+      }
+      if (signupLink && account) {
+        signupLink.textContent = "Entrar en mi cuenta";
+        signupLink.href = "/login?mode=account";
+      }
+    } catch (_error) {
+      // Si el navegador bloquea el almacenamiento, los enlaces conservan su estado público.
     }
-    if (signupLink && account) {
-      signupLink.textContent = "Entrar en mi cuenta";
-      signupLink.href = "/login?mode=account";
-    }
-  } catch (_error) {
-    // Si el navegador bloquea el almacenamiento, los enlaces conservan su estado público.
   }
+
+  (window.MomentumVeloAuthReady || Promise.resolve("unavailable")).then((mode) => {
+    if (mode === "demo") updateLocalHeader();
+  });
 
   function highlightPremium() {
     if (!premiumCard) return;

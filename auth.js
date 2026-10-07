@@ -1,8 +1,8 @@
 (async function () {
   "use strict";
 
-  const managedAuthEnabled = await (window.MomentumVeloAuthReady || Promise.resolve(false));
-  if (managedAuthEnabled) return;
+  const authMode = await (window.MomentumVeloAuthReady || Promise.resolve("unavailable"));
+  if (authMode !== "demo") return;
 
   const ACCOUNTS_KEY = "momentumvelo.accounts.v1";
   const SESSION_KEY = "momentumvelo.session.v1";
