@@ -3,9 +3,14 @@ const assert = require("node:assert/strict");
 const Module = require("node:module");
 const { billingMode, getBillingSiteUrl } = require("../api/_billing");
 const { preflight } = require("../scripts/stripe-sandbox-preflight");
+const { STRIPE_API_VERSION, PREMIUM_WEBHOOK_EVENTS } = require("../api/_stripe-config");
 const testEnv = { STRIPE_SECRET_KEY: "sk_test_fixture", CLERK_SECRET_KEY: "sk_test_fixture",
   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_fixture", STRIPE_PREMIUM_PRICE_ID: "price_fixture",
-  STRIPE_WEBHOOK_SECRET: "whsec_fixture", VERCEL_ENV: "preview", VERCEL_URL: "momentum-test.vercel.app" };
+  STRIPE_WEBHOOK_SECRET: "whsec_fixture", STRIPE_WEBHOOK_ENDPOINT_ID: "we_fixture",
+  VERCEL_ENV: "preview", VERCEL_URL: "momentum-test.vercel.app" };
+const testEndpoint = () => ({ id: "we_fixture", livemode: false, status: "enabled",
+  url: "https://momentum-test.vercel.app/api/webhook", api_version: STRIPE_API_VERSION,
+  enabled_events: [...PREMIUM_WEBHOOK_EVENTS] });
 
 test("Preview refuses live keys and mixed Stripe/Clerk identities before any SDK call", async () => {
   const handlers = [require("../api/checkout"), require("../api/portal"), require("../api/subscription"), require("../api/webhook")];
@@ -51,18 +56,48 @@ test("preflight rejects live mode before making network calls", async () => {
   assert.equal(calls, 0);
 });
 
-test("preflight only reports readiness after Stripe confirms test balance and exact test price", async () => {
+test("preflight verifies registration without claiming signed delivery or entitlement writes", async () => {
   let livePrice = false;
   const sdk = () => ({ balance: { retrieve: async () => ({ livemode: false }) },
     prices: { retrieve: async () => ({ id: "price_fixture", livemode: livePrice, active: true, currency: "eur", unit_amount: 4900,
-      recurring: { interval: "month", interval_count: 1 }, tax_behavior: "inclusive" }) } });
+      recurring: { interval: "month", interval_count: 1 }, tax_behavior: "inclusive" }) },
+    webhookEndpoints: { retrieve: async id => { assert.equal(id, "we_fixture"); return testEndpoint(); } } });
   const report = await preflight(testEnv, sdk);
   assert.equal(report.stripeMode, "test");
   assert.equal(report.signedDeliveryVerified, false);
   assert.equal(report.entitlementWriteVerified, false);
+  assert.equal(report.webhookRegistrationVerified, true);
   assert.equal(JSON.stringify(report).includes("sk_test"), false);
   livePrice = true;
   await assert.rejects(() => preflight(testEnv, sdk));
+});
+
+test("preflight refuses an absent endpoint ID before contacting Stripe", async () => {
+  let calls = 0;
+  await assert.rejects(() => preflight({ ...testEnv, STRIPE_WEBHOOK_ENDPOINT_ID: "" }, () => { calls++; }));
+  assert.equal(calls, 0);
+});
+
+test("preflight rejects disabled, live, wrong-target or incomplete webhook registrations", async () => {
+  let endpoint = testEndpoint();
+  const sdk = () => ({ balance: { retrieve: async () => ({ livemode: false }) },
+    prices: { retrieve: async () => ({ id: "price_fixture", livemode: false, active: true, currency: "eur",
+      unit_amount: 4900, recurring: { interval: "month", interval_count: 1 } }) },
+    webhookEndpoints: { retrieve: async () => endpoint } });
+  for (const changes of [
+    { id: "we_other" }, { livemode: true }, { status: "disabled" },
+    { url: "https://momentumvelo.app/api/webhook" }, { url: "https://momentum-test.vercel.app/wrong" },
+    { api_version: "2020-08-27" }, { api_version: null },
+    { enabled_events: PREMIUM_WEBHOOK_EVENTS.filter(type => type !== "invoice.paid") },
+    { enabled_events: PREMIUM_WEBHOOK_EVENTS.filter(type => type !== "checkout.session.async_payment_failed") }
+  ]) {
+    endpoint = { ...testEndpoint(), ...changes };
+    await assert.rejects(() => preflight(testEnv, sdk));
+  }
+  endpoint = { ...testEndpoint(), url: "https://momentum-test.vercel.app/api/webhook?x-vercel-protection-bypass=fixture-private" };
+  const report = await preflight(testEnv, sdk);
+  assert.equal(report.webhookRegistrationVerified, true);
+  assert.equal(JSON.stringify(report).includes("fixture-private"), false);
 });
 
 test("test Checkout and portal send Preview return URLs to Stripe and reject a live price", async () => {
