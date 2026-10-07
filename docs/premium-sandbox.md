@@ -13,8 +13,8 @@ Producción mantiene `PREMIUM_SALES_ENABLED=false`. Las pruebas locales y un des
 
 1. Autorizar el sandbox de MomentumVelo en la conexión de Stripe. Confirmar `livemode=false` y su identificador antes de cualquier creación. Usar el sandbox que corresponde a las claves de Preview; si se crea uno nuevo, utilizar sus propias claves de pruebas.
 2. Usar una rama de pruebas y fijar las variables solamente para esa rama Preview: claves test de Stripe y Clerk development, precio activo de 4900 EUR cada mes y secreto del endpoint de pruebas. Preferir una clave Stripe restringida con los permisos necesarios. Los secretos se guardan en Vercel, sin incluirlos en Git, logs ni documentos.
-3. Registrar el webhook de pruebas en la URL de Preview de esa rama para los ocho eventos que maneja `api/webhook.js`. Mantener la protección del despliegue y usar el mecanismo de acceso admitido por Vercel para la entrega de Stripe; no desactivar la protección para hacer pasar una prueba.
-4. Ejecutar `npm run billing:preflight` en un entorno autorizado con sus variables de pruebas. También se puede ejecutar `node --env-file=.env.test.local scripts/stripe-sandbox-preflight.js` con un archivo local ignorado por Git. Solo hace lecturas. Confirma que Stripe devuelve `livemode=false`, valida el precio y la URL de retorno; no prueba la firma ni escribe en Clerk.
+3. Registrar el webhook de pruebas en la URL de Preview de esa rama para los ocho eventos de `api/_stripe-config.js`, con la versión `2026-07-29.dahlia`. Guardar su ID no secreto en `STRIPE_WEBHOOK_ENDPOINT_ID` solamente para esa rama Preview. Mantener la protección del despliegue y usar el mecanismo de acceso admitido por Vercel para la entrega de Stripe; no desactivar la protección para hacer pasar una prueba.
+4. Ejecutar `npm run billing:preflight` en un entorno autorizado con sus variables de pruebas. También se puede ejecutar `node --env-file=.env.test.local scripts/stripe-sandbox-preflight.js` con un archivo local ignorado por Git. La clave restringida necesita permisos de lectura para balance, precios y endpoints de webhook. Solo hace lecturas: confirma `livemode=false`, valida el precio, la URL de retorno y el registro del endpoint (modo test, habilitado, URL, versión y ocho eventos). No comprueba que el secreto corresponda al endpoint, no prueba la firma ni escribe en Clerk. La URL completa del webhook puede contener el acceso de Vercel; esa consulta no se incluye en el informe.
 5. Verificar que el usuario de prueba pertenece a Clerk development. Habilitar `PREMIUM_SALES_ENABLED=true` únicamente en esa rama Preview una vez validado el entorno; Production y las demás previews conservan `false`.
 
 ## Evidencia requerida
@@ -40,3 +40,7 @@ Los test clocks permiten avanzar renovaciones sin esperar meses. No introducir e
 - Checkout comprueba que el precio pertenece al modo correcto antes de crear una sesión.
 
 Antes de abrir ventas reales, validar por separado el precio final y el IVA aplicable. No habilitar Stripe Tax sin una inscripción fiscal válida; los resultados del sandbox no acreditan la configuración fiscal live.
+
+## Configuración live contrastada el 8 de octubre de 2026
+
+El endpoint `we_1UNdJGCclSZlOL5qrSi8gEcn` está habilitado en `https://momentumvelo.app/api/webhook`, versión `2026-07-29.dahlia`. Una lectura posterior al cambio confirma los ocho eventos del handler, incluidos `invoice.paid` y `checkout.session.async_payment_failed`. Esto acredita el registro, no una entrega firmada correcta ni el plan guardado en Clerk. Las ventas permanecen cerradas y no se creó ningún pago como parte del cambio.

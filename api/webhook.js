@@ -1,6 +1,7 @@
 const Stripe = require("stripe");
 const { updateUserPlan } = require("./_clerk");
 const { hasPremiumAccess, stripeId, billingMode } = require("./_billing");
+const { STRIPE_API_VERSION, PREMIUM_WEBHOOK_EVENTS } = require("./_stripe-config");
 
 async function readRawBody(req) {
   const chunks = [];
@@ -19,11 +20,7 @@ function subscriptionFromEvent(event) {
   return null;
 }
 
-const handledEvents = new Set([
-  "checkout.session.completed", "checkout.session.async_payment_succeeded",
-  "checkout.session.async_payment_failed", "customer.subscription.updated",
-  "customer.subscription.deleted", "invoice.paid", "invoice.payment_succeeded", "invoice.payment_failed"
-]);
+const handledEvents = new Set(PREMIUM_WEBHOOK_EVENTS);
 
 module.exports = async function handler(req, res) {
   if (req.method !== "POST") {
@@ -36,7 +33,7 @@ module.exports = async function handler(req, res) {
   }
   const mode = billingMode();
   if (mode === null) return res.status(503).json({ error: "La configuración de facturación no corresponde a este entorno." });
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2026-07-29.dahlia" });
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: STRIPE_API_VERSION });
   let event;
   try {
     event = stripe.webhooks.constructEvent(
