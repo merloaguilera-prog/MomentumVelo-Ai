@@ -37,6 +37,10 @@ El formulario de `/ayuda` usa Resend. Si el envío todavía no está configurado
 
 Antes de abrir la contratación comercial, completar en `legal.html` la razón social o nombre del titular, NIF/CIF, domicilio y datos registrales, y revisar los textos con asesoría jurídica aplicable al país de operación.
 
+## Validación en un entorno de pruebas
+
+La [guía de pruebas de Premium](docs/premium-sandbox.md) separa la preparación, las comprobaciones locales y la evidencia exigida a Stripe/Clerk reales. `npm run billing:preflight` solo hace lecturas con claves test: no crea pagos ni acredita el webhook o el plan de la cuenta. Preview y Development rechazan claves live y combinaciones Stripe/Clerk de distinto modo. Los retornos de Preview permanecen en esa Preview. La contratación live continúa cerrada.
+
 ## Referencia visual definitiva
 
 La referencia visual aprobada para MomentumVelo es el mockup neón generado el 19/09/2026 (gen_id: da53f8c5-29fa-4cd6-a361-eb90251f4e9c). Mantener esta dirección visual: fondo oscuro, cian/verde neón, CTA Premium destacado, panel Premium a 49 €/mes, portátil con gráficos y tarjetas limpias. No sustituir esta referencia por otro diseño sin aprobación explícita.

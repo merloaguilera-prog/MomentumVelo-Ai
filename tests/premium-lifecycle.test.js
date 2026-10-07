@@ -11,10 +11,10 @@ const env = { STRIPE_SECRET_KEY: "sk_test_fixture", STRIPE_WEBHOOK_SECRET: "whse
   STRIPE_PREMIUM_PRICE_ID: "price_fixture", CLERK_SECRET_KEY: "sk_test_clerk_fixture" };
 const price = { id: "price_fixture", currency: "eur", unit_amount: 4900, active: true,
   recurring: { interval: "month", interval_count: 1 } };
-const subscription = (status = "active") => ({ id: "sub_fixture", customer: "cus_fixture", status,
+const subscription = (status = "active") => ({ id: "sub_fixture", customer: "cus_fixture", status, livemode: false,
   metadata: { plan: "premium-monthly", clerkUserId: "user_fixture" },
   items: { data: [{ price }] }, latest_invoice: { id: "in_fixture", status: status === "active" ? "paid" : "open" } });
-const session = { id: "cs_test_fixture", mode: "subscription", status: "complete", payment_status: "paid",
+const session = { id: "cs_test_fixture", mode: "subscription", status: "complete", payment_status: "paid", livemode: false,
   customer: "cus_fixture", subscription: "sub_fixture", client_reference_id: "user_fixture",
   metadata: { plan: "premium-monthly", clerkUserId: "user_fixture" } };
 
@@ -52,8 +52,8 @@ function fixture() {
   };
   f.webhook = load("webhook", { stripe: FakeStripe, "./_clerk": clerk });
   f.verify = load("subscription", { stripe: FakeStripe, "./_clerk": clerk });
-  f.send = async (type, object, invalidSignature = false) => {
-    const payload = JSON.stringify({ id: "evt_fixture", type, data: { object } });
+  f.send = async (type, object, invalidSignature = false, livemode = false) => {
+    const payload = JSON.stringify({ id: "evt_fixture", type, data: { object }, livemode });
     const req = Readable.from([Buffer.from(payload)]);
     req.method = "POST";
     req.headers = { "stripe-signature": sdk.webhooks.generateTestHeaderString({ payload,
@@ -71,6 +71,24 @@ test("unpaid Checkout waits for asynchronous success without granting Premium", 
   assert.equal(f.writes.length, 0);
   assert.equal((await f.send("checkout.session.async_payment_succeeded", session)).code, 200);
   assert.equal(f.writes[0][1], "premium");
+}));
+
+test("a correctly signed live event cannot alter test entitlements", () => environment(async () => {
+  const f = fixture();
+  assert.equal((await f.send("checkout.session.completed", session, false, true)).code, 400);
+  assert.equal(f.reads, 0);
+  assert.equal(f.writes.length, 0);
+}));
+
+test("return rejects live references and cross-mode objects without granting Premium", () => environment(async () => {
+  const f = fixture();
+  const res = response();
+  await f.verify({ method: "GET", query: { session_id: "cs_live_fixture" } }, res);
+  assert.equal(res.code, 400); assert.equal(f.reads, 0);
+  f.checkout = { ...session, livemode: true };
+  assert.equal((await f.check()).code, 402);
+  f.checkout = { ...session }; f.current = { ...subscription(), livemode: true };
+  assert.equal((await f.check()).code, 402);
 }));
 
 test("invoice success, failure and recovery reconcile the current subscription", () => environment(async () => {

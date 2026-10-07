@@ -1,14 +1,6 @@
 const Stripe = require("stripe");
 const { getAuthenticatedUser } = require("./_clerk");
-
-
-function getSiteUrl() {
-  if (process.env.PUBLIC_SITE_URL) return process.env.PUBLIC_SITE_URL.replace(/\/$/, "");
-  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
-    return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL.replace(/\/$/, "")}`;
-  }
-  return "https://momentumvelo.app";
-}
+const { billingMode, getBillingSiteUrl } = require("./_billing");
 
 function validEmail(value) {
   const email = String(value || "").trim().toLowerCase();
@@ -31,6 +23,8 @@ module.exports = async function handler(req, res) {
   }
   const secretKey = process.env.STRIPE_SECRET_KEY;
   const priceId = process.env.STRIPE_PREMIUM_PRICE_ID;
+  const mode = billingMode();
+  if (mode === null) return res.status(503).json({ error: "La configuración de facturación no corresponde a este entorno." });
   const managedAuthRequired = Boolean(process.env.CLERK_SECRET_KEY);
   const authenticatedUser = managedAuthRequired ? await getAuthenticatedUser(req) : null;
 
@@ -48,15 +42,15 @@ module.exports = async function handler(req, res) {
   }
 
   try {
+    const siteUrl = getBillingSiteUrl();
     const stripe = new Stripe(secretKey, { apiVersion: "2026-07-29.dahlia" });
     const price = await stripe.prices.retrieve(priceId);
-    if (price.active !== true || price.currency !== "eur" || price.unit_amount !== 4900 || price.recurring?.interval !== "month" || price.recurring?.interval_count !== 1) {
+    if (price.livemode !== mode || price.active !== true || price.currency !== "eur" || price.unit_amount !== 4900 || price.recurring?.interval !== "month" || price.recurring?.interval_count !== 1) {
       return res.status(503).json({
         error: "El precio Premium configurado no corresponde a 49 € al mes. La contratación sigue cerrada.",
         helpUrl: "/ayuda?tema=premium#contacto"
       });
     }
-    const siteUrl = getSiteUrl();
     const email = validEmail(req.body?.email);
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
