@@ -1,6 +1,6 @@
 const Stripe = require("stripe");
 const { updateUserPlan } = require("./_clerk");
-const { hasPremiumAccess, stripeId } = require("./_billing");
+const { hasPremiumAccess, stripeId, billingMode } = require("./_billing");
 
 async function readRawBody(req) {
   const chunks = [];
@@ -34,6 +34,8 @@ module.exports = async function handler(req, res) {
       || !process.env.CLERK_SECRET_KEY || !process.env.STRIPE_PREMIUM_PRICE_ID) {
     return res.status(503).json({ error: "Webhook de suscripciones no configurado." });
   }
+  const mode = billingMode();
+  if (mode === null) return res.status(503).json({ error: "La configuración de facturación no corresponde a este entorno." });
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2026-07-29.dahlia" });
   let event;
   try {
@@ -44,6 +46,8 @@ module.exports = async function handler(req, res) {
     console.error("stripe_webhook_error", { message: error instanceof Error ? error.message : String(error) });
     return res.status(400).json({ error: "Firma de webhook no válida." });
   }
+
+  if (event.livemode !== mode) return res.status(400).json({ error: "El evento no corresponde a este entorno." });
 
   try {
     if (handledEvents.has(event.type)) {
@@ -64,7 +68,7 @@ module.exports = async function handler(req, res) {
             && session.client_reference_id === userId && session.metadata?.clerkUserId === userId
             && Boolean(sessionCustomerId && sessionCustomerId === subscriptionCustomerId)
           );
-          if (userId && sessionMatches && subscription.metadata?.plan === "premium-monthly"
+          if (subscription.livemode === mode && userId && sessionMatches && subscription.metadata?.plan === "premium-monthly"
               && subscriptionCustomerId) {
             const active = hasPremiumAccess(subscription, process.env.STRIPE_PREMIUM_PRICE_ID);
             const updated = await updateUserPlan(userId, active ? "premium" : "free", {
