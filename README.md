@@ -19,6 +19,14 @@ La portada separa el registro gratuito, el inicio de sesión y Premium. La API r
 
 Cuando Clerk está configurado, el registro, el inicio de sesión, las sesiones y la recuperación por correo son gestionados y multidispositivo. Sin esas variables, el acceso local es solo una demostración: la cuenta queda en el navegador donde fue creada y no tiene recuperación automática. No debe anunciarse como cuenta segura multidispositivo.
 
+## Acceso seguro y dominio
+
+El proxy se configura en el script de Clerk antes de crear su instancia, usando el origen actual y `/__clerk`. El registro local solo se permite si `/api/auth-config` confirma explícitamente que ambas claves están ausentes. Una configuración parcial, un fallo de red o un error del SDK muestran reintento y ayuda, sin leer ni crear identidades locales. Las dos páginas de acceso (`login.html` y `login/index.html`) mantienen los formularios ocultos hasta conocer la configuración.
+
+La asociación de dominio y proxy de la instancia de producción está gestionada por Vercel Marketplace. El 7 de octubre de 2026, la integración rechazó cambiar a `momentumvelo.app` por una discrepancia entre `name` y `proxy_url`. Clerk confirmó la recepción de una incidencia para corregir ambos valores conservando la instancia. Cambiar una variable de entorno por sí sola no resuelve esa asociación.
+
+Antes de considerar resuelto el acceso, verificar environment/client en el navegador, las claves de la misma instancia, el registro con verificación de correo, inicio, persistencia, cierre y recuperación. Un despliegue READY o pruebas locales correctas no acreditan estos pasos reales.
+
 Pulse (`/premium`) es una simulación con activos y puntuaciones codificados en `premium.js`; no hay feed ni alertas de mercado en vivo. PayPal no está integrado y los métodos de pago futuros dependerán de la configuración efectiva de Stripe.
 
 Stripe debe enviar los eventos `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.payment_succeeded` e `invoice.payment_failed` a `/api/webhook`. También se admiten `invoice.paid` y `checkout.session.async_payment_failed` si se habilitan en el endpoint. El webhook vuelve a consultar la suscripción actual y solo concede Premium con el precio configurado de 49 EUR/mes, estado `active` y última factura `paid`. Una sesión `unpaid` no activa Premium; `past_due` y la cancelación retiran el acceso. Los fallos de escritura en Clerk producen HTTP 500 para permitir reintentos. El retorno exige la misma cuenta, cliente y suscripción, y muestra los pagos pendientes con un botón para volver a comprobar. El portal de cliente permite cancelar renovaciones y está protegido por la identidad de la cuenta.

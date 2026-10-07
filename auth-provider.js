@@ -1,8 +1,16 @@
 (function () {
   "use strict";
 
+  function withTimeout(operation) {
+    let timeout;
+    const expired = new Promise((_, reject) => {
+      timeout = window.setTimeout(() => reject(new Error("La conexión de acceso seguro ha tardado demasiado.")), 15000);
+    });
+    return Promise.race([operation, expired]).finally(() => window.clearTimeout(timeout));
+  }
+
   function loadScript(src, attributes = {}) {
-    return new Promise((resolve, reject) => {
+    return withTimeout(new Promise((resolve, reject) => {
       const script = document.createElement("script");
       script.src = src;
       script.defer = true;
@@ -11,7 +19,32 @@
       script.addEventListener("load", resolve, { once: true });
       script.addEventListener("error", () => reject(new Error("No se pudo cargar el acceso seguro.")), { once: true });
       document.head.appendChild(script);
+    }));
+  }
+
+  function showConnectionError() {
+    const connection = document.querySelector("[data-auth-connection]");
+    const message = document.querySelector("[data-auth-connection-message]");
+    const retry = document.querySelector("[data-auth-retry]");
+    if (connection) {
+      connection.hidden = false;
+      connection.setAttribute("aria-busy", "false");
+    }
+    if (message) message.textContent = "No hemos podido conectar con el acceso seguro. Reintenta la conexión o consulta la ayuda. No se ha creado ninguna cuenta local de prueba.";
+    if (retry) retry.hidden = false;
+    document.querySelectorAll("[data-auth-view], [data-managed-auth], [data-account-view]").forEach((view) => {
+      view.hidden = true;
     });
+    document.querySelectorAll("[data-auth-mode]").forEach((tab) => { tab.disabled = true; });
+  }
+
+  function finishConnection() {
+    const connection = document.querySelector("[data-auth-connection]");
+    if (connection) {
+      connection.hidden = true;
+      connection.setAttribute("aria-busy", "false");
+    }
+    document.querySelectorAll("[data-auth-mode]").forEach((tab) => { tab.disabled = false; });
   }
 
   function clerkDomain(publishableKey) {
@@ -125,30 +158,43 @@
   }
 
   async function initializeManagedAuth() {
+    const retry = document.querySelector("[data-auth-retry]");
+    if (retry) retry.addEventListener("click", () => window.location.reload());
     try {
-      const response = await fetch("/api/auth-config", { cache: "no-store" });
-      if (!response.ok) return false;
-      const config = await response.json();
+      const response = await withTimeout(fetch("/api/auth-config", { cache: "no-store" }));
+      if (!response.ok) throw new Error("No se pudo consultar la configuración de acceso seguro.");
+      const config = await withTimeout(response.json());
+      // Only an explicitly unconfigured instance may use the local demo.
+      // An outage or a partial Clerk configuration must never create local accounts.
+      if (config.enabled === false && !config.publishableKey) {
+        finishConnection();
+        const localView = document.querySelector("[data-auth-view]");
+        if (localView) localView.hidden = false;
+        return "demo";
+      }
       const domain = config.enabled && config.publishableKey
         ? clerkDomain(config.publishableKey)
         : "";
-      if (!domain) return false;
+      if (!domain) throw new Error("La configuración de acceso seguro está incompleta.");
 
-      await loadScript("/__clerk/npm/@clerk/ui@1/dist/ui.browser.js");
+      const proxyUrl = new URL("/__clerk", window.location.origin).href;
+      await loadScript(`${proxyUrl}/npm/@clerk/ui@1/dist/ui.browser.js`);
       await loadScript(
-        "/__clerk/npm/@clerk/clerk-js@6/dist/clerk.browser.js",
-        { "data-clerk-publishable-key": config.publishableKey }
+        `${proxyUrl}/npm/@clerk/clerk-js@6/dist/clerk.browser.js`,
+        { "data-clerk-publishable-key": config.publishableKey, "data-clerk-proxy-url": proxyUrl }
       );
-      await window.Clerk.load({ proxyUrl: "/__clerk", ui: { ClerkUI: window.__internal_ClerkUICtor } });
+      // ClerkJS reads proxyUrl when its script creates the Clerk instance, before load().
+      await withTimeout(window.Clerk.load({ ui: { ClerkUI: window.__internal_ClerkUICtor } }));
 
       updatePublicHeader();
       const managedView = document.querySelector("[data-managed-auth]");
       const localView = document.querySelector("[data-auth-view]");
-      if (!managedView) return true;
+      if (!managedView) return "managed";
 
       if (window.Clerk.isSignedIn) {
         showManagedAccount();
-        return true;
+        finishConnection();
+        return "managed";
       }
 
       if (localView) localView.hidden = true;
@@ -188,10 +234,12 @@
       } else {
         window.Clerk.mountSignIn(mount, { appearance, signUpUrl: "/login?mode=signup" });
       }
-      return true;
+      finishConnection();
+      return "managed";
     } catch (error) {
       console.warn("managed_auth_unavailable", error instanceof Error ? error.message : String(error));
-      return false;
+      showConnectionError();
+      return "unavailable";
     }
   }
 
