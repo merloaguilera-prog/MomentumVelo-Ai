@@ -12,6 +12,7 @@ function authorizedParties() {
       ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
       : null,
     process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null,
+    "https://momentumvelo.app",
     "https://momentum-velo.vercel.app"
   ];
   return [...new Set(values.filter(Boolean).map((value) => value.replace(/\/$/, "")))];
@@ -33,8 +34,15 @@ async function getAuthenticatedUser(req) {
 }
 
 async function updateUserPlan(userId, plan, details = {}) {
-  if (!process.env.CLERK_SECRET_KEY || !userId) return false;
+  if (!process.env.CLERK_SECRET_KEY || !userId) {
+    throw new Error("La actualización de Premium requiere una cuenta Clerk configurada.");
+  }
   const clerk = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
+  const user = await clerk.users.getUser(userId);
+  const currentSubscriptionId = user.privateMetadata?.stripeSubscriptionId;
+  // A late event from an old subscription must not replace the current paid plan.
+  if (user.publicMetadata?.plan === "premium" && currentSubscriptionId
+      && details.subscriptionId && currentSubscriptionId !== details.subscriptionId) return true;
   await clerk.users.updateUserMetadata(userId, {
     publicMetadata: {
       plan,

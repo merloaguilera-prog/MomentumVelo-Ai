@@ -7,7 +7,7 @@ function getSiteUrl() {
   if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
     return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL.replace(/\/$/, "")}`;
   }
-  return "https://momentum-velo.vercel.app";
+  return "https://momentumvelo.app";
 }
 
 function validEmail(value) {
