@@ -44,3 +44,7 @@ La [guía de pruebas de Premium](docs/premium-sandbox.md) separa la preparación
 ## Referencia visual definitiva
 
 La referencia visual aprobada para MomentumVelo es el mockup neón generado el 19/09/2026 (gen_id: da53f8c5-29fa-4cd6-a361-eb90251f4e9c). Mantener esta dirección visual: fondo oscuro, cian/verde neón, CTA Premium destacado, panel Premium a 49 €/mes, portátil con gráficos y tarjetas limpias. No sustituir esta referencia por otro diseño sin aprobación explícita.
+
+### Gestión de facturación tras un impago
+
+La cuenta conserva el portal cuando el estado guardado de la suscripción indica facturación previa, aunque el plan sea `free`. Para `past_due`, `unpaid` o `incomplete` muestra el pago pendiente y permite revisarlo sin ofrecer una nueva contratación ni afirmar acceso Premium. El botón puede reintentarse después de un error de sesión o de Stripe. `/api/portal` sigue exigiendo la identidad autenticada y el cliente Stripe en metadatos privados. Estas pantallas se han probado localmente; el circuito con usuarios y servicios reales continúa pendiente de Clerk y del sandbox.

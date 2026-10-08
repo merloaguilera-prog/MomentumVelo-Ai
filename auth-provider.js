@@ -112,25 +112,34 @@
 
     const name = user.firstName || user.fullName || "de nuevo";
     const plan = user.publicMetadata?.plan === "premium" ? "premium" : "free";
+    const billingStatus = user.publicMetadata?.premiumStatus;
+    const paymentPending = plan !== "premium" && ["past_due", "unpaid", "incomplete"].includes(billingStatus);
+    // Billing management remains available after access is suspended or canceled.
+    // The API verifies the user and their private Stripe customer ID before opening it.
+    const hasBillingHistory = ["active", "trialing", "past_due", "unpaid", "incomplete",
+      "incomplete_expired", "canceled", "paused"].includes(billingStatus);
     document.querySelector("[data-account-title]").textContent = `Hola, ${name}`;
     document.querySelector("[data-account-message]").textContent = plan === "premium"
       ? "Tu suscripción Premium está activa y vinculada a esta cuenta."
-      : "Has iniciado sesión correctamente en tu cuenta gratuita.";
+      : paymentPending
+        ? "Tu pago de Premium está pendiente. Puedes revisarlo o actualizar el método de pago desde la gestión de tu suscripción."
+        : "Has iniciado sesión correctamente en tu cuenta gratuita.";
     document.querySelector("[data-account-email]").textContent = primaryEmail(user);
     document.querySelector("[data-account-plan]").textContent = plan === "premium"
       ? "Premium · 49 €/mes"
-      : "Trader · 0 €/mes";
+      : paymentPending ? "Trader · Premium pendiente de pago" : "Trader · 0 €/mes";
 
     const premiumButton = accountView.querySelector("[data-premium-next]");
     if (premiumButton) {
-      premiumButton.hidden = plan === "premium";
+      premiumButton.hidden = plan === "premium" || paymentPending;
       premiumButton.addEventListener("click", () => showPremiumPreparation(premiumButton), { once: true });
     }
 
     const portalButton = accountView.querySelector("[data-manage-subscription]");
     if (portalButton) {
-      portalButton.hidden = plan !== "premium";
-      portalButton.addEventListener("click", () => openPortal(portalButton), { once: true });
+      portalButton.hidden = plan !== "premium" && !hasBillingHistory;
+      if (paymentPending) portalButton.textContent = "Revisar pago de Premium";
+      portalButton.addEventListener("click", () => openPortal(portalButton));
     }
 
     const signoutButton = accountView.querySelector("[data-signout]");
