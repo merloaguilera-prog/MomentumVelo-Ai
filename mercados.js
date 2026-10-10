@@ -45,7 +45,7 @@
     script.textContent = JSON.stringify({
       symbols: [[name, `${option.value}|12M`]],
       chartOnly: false, width: "100%", height: "100%", autosize: true,
-      locale: "es", colorTheme: "dark", isTransparent: true,
+      locale: "es", colorTheme: "dark", isTransparent: false,
       showVolume: true, hideDateRanges: false, hideMarketStatus: false,
       hideSymbolLogo: false, scalePosition: "right", scaleMode: "Normal",
       fontFamily: "Arial, sans-serif", fontSize: "12", noTimeScale: false,
