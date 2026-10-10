@@ -56,6 +56,17 @@
   const requestedTopic = normalize(params.get("tema"));
   const categoryChip = chips.find((chip) => chip.dataset.helpCategory === requestedTopic);
   if (categoryChip) categoryChip.click();
+  const contactTopics = new Map([
+    ["cuenta", "Cuenta y acceso"],
+    ["premium", "Premium y pagos"],
+    ["empresas", "Plan Fondo / empresas"],
+    ["seguridad", "Privacidad y seguridad"],
+    ["cancelacion", "Cancelación de Premium"]
+  ]);
+  const contactTopic = document.querySelector("[data-contact-topic]");
+  if (contactTopic && contactTopics.has(requestedTopic)) {
+    contactTopic.value = contactTopics.get(requestedTopic);
+  }
 
   const suppliedEmail = params.get("correo");
   if (suppliedEmail && form?.elements.email) form.elements.email.value = suppliedEmail;
