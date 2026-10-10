@@ -1,3 +1,4 @@
+const { createHash } = require("node:crypto");
 const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL_TO || "hola@momentumvelo.ai";
 
 function text(value, limit) {
@@ -57,21 +58,24 @@ module.exports = async function handler(req, res) {
     <p>${escapeHtml(message).replace(/\n/g, "<br>")}</p>
   `;
 
+  const emailBody = JSON.stringify({
+    from: process.env.SUPPORT_EMAIL_FROM || "MomentumVelo <onboarding@resend.dev>",
+    to: [process.env.SUPPORT_EMAIL_TO],
+    reply_to: email,
+    subject,
+    html
+  });
+  const idempotencyKey = `support-${createHash("sha256").update(emailBody).digest("hex")}`;
+
   try {
     const response = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
         "Content-Type": "application/json",
-        "Idempotency-Key": `support-${Buffer.from(`${email}:${topic}:${message}`).toString("base64url").slice(0, 80)}`
+        "Idempotency-Key": idempotencyKey
       },
-      body: JSON.stringify({
-        from: process.env.SUPPORT_EMAIL_FROM || "MomentumVelo <onboarding@resend.dev>",
-        to: [process.env.SUPPORT_EMAIL_TO],
-        reply_to: email,
-        subject,
-        html
-      })
+      body: emailBody
     });
     const data = await response.json();
     if (!response.ok) throw new Error(data.message || "No se pudo enviar la consulta.");
