@@ -48,3 +48,11 @@ La referencia visual aprobada para MomentumVelo es el mockup neón generado el 1
 ### Gestión de facturación tras un impago
 
 La cuenta conserva el portal cuando el estado guardado de la suscripción indica facturación previa, aunque el plan sea `free`. Para `past_due`, `unpaid` o `incomplete` muestra el pago pendiente y permite revisarlo sin ofrecer una nueva contratación ni afirmar acceso Premium. El botón puede reintentarse después de un error de sesión o de Stripe. `/api/portal` sigue exigiendo la identidad autenticada y el cliente Stripe en metadatos privados. Estas pantallas se han probado localmente; el circuito con usuarios y servicios reales continúa pendiente de Clerk y del sandbox.
+
+## Cotizaciones de mercado disponibles
+
+`/mercados` integra el widget oficial Symbol Overview de TradingView, gratuito y con datos incluidos. Permite elegir acciones estadounidenses, Santander e Iberdrola en BME, EUR/USD y BTC/USD o ETH/USD de Coinbase, y cambiar el periodo del gráfico. Acciones con retraso: NASDAQ/NYSE se suministran mediante Cboe One; BME también se lista como delayed. El precio, moneda y estado del mercado se consultan en el widget. No se fabrican precios de respaldo ni se marca una descarga del script como prueba de cotización. Ante un error hay reintento y enlace al proveedor.
+
+La CSP permite exclusivamente el directorio de scripts de embedding de `s3.tradingview.com` y los frames de `www.tradingview-widget.com`. No se usan claves nuevas ni se modifica Stripe/Clerk. El panel y Pulse conservan sus demos claramente identificadas. Los widgets no permiten extraer cotizaciones para un motor propio; señales, IA, historial y backtesting propios requieren una API y permisos independientes y continúan pendientes.
+
+Documentación primaria: [inicio](https://www.tradingview.com/widget-docs/getting-started/), [mercados](https://www.tradingview.com/widget-docs/markets/), [datos y límites](https://www.tradingview.com/widget-docs/faq/data/), [NASDAQ](https://www.tradingview.com/widget-docs/markets/north-america/), [BME](https://www.tradingview.com/widget-docs/markets/europe/) y [privacidad de los widgets](https://www.tradingview.com/widget-docs/faq/general/).

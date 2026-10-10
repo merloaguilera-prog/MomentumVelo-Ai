@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#050b11">
+  <meta name="description" content="Consulta cotizaciones y gráficos de mercado suministrados por TradingView. Acciones con retraso, divisas y criptomonedas según el proveedor.">
+  <title>Mercados reales — MomentumVelo-AI</title>
+  <link rel="stylesheet" href="/panel.css"><link rel="stylesheet" href="/mercados.css">
+  <script src="/mercados.js" defer></script>
+</head>
+<body>
+  <header class="topbar"><a class="brand" href="/"><span class="brand-mark">↗</span><span>Momentum<span>Velo</span><small>AI</small></span></a><span class="top-note">COTIZACIONES · FUENTE TRADINGVIEW</span><a class="account-link" href="/ayuda">Ayuda →</a></header>
+  <div class="app-shell">
+    <nav class="sidebar" aria-label="Secciones del panel"><a class="current" href="/mercados" aria-current="page">▥ <span>Mercados reales</span></a><a href="/panel">⌂ <span>Panel demo</span></a><a href="/premium">⌁ <span>Radar Pulse · demo</span></a><a href="/#premium">♛ <span>Premium</span></a><a href="/ayuda">? <span>Ayuda</span></a><div class="sidebar-bottom"><strong>Precios con su fuente</strong><p>Consulta el estado del mercado, la moneda y el periodo del dato en el gráfico.</p><a href="/legal#datos-mercado">Origen y alcance →</a></div></nav>
+    <main>
+      <div class="intro-row"><div><p class="eyebrow">DATOS DE MERCADO · CONSULTA GRATUITA</p><h1>El mercado, con <em>datos reales.</em></h1><p>Consulta precios, variaciones y gráficos suministrados por TradingView.</p></div><a class="pulse-link" href="/panel">Panel demo <span>↗</span></a></div>
+      <div class="disclosure" role="note"><strong>Datos reales no siempre significa tiempo real.</strong> Las acciones se muestran con retraso. Divisas y criptomonedas usan la fuente indicada en el gráfico. Cuando un mercado está cerrado se muestra el último dato disponible.</div>
+      <section class="surface quote-panel" aria-labelledby="quote-title">
+        <div class="surface-heading"><div><p class="eyebrow">COTIZACIÓN E HISTÓRICO</p><h2 id="quote-title">Nvidia · NASDAQ</h2></div><span class="source-pill">TradingView</span></div>
+        <div class="market-controls">
+          <label for="market-symbol">Elige un activo
+            <select id="market-symbol">
+              <optgroup label="Acciones · datos con retraso">
+                <option value="NASDAQ:NVDA" data-timing="delayed">Nvidia · NASDAQ · USD</option>
+                <option value="NASDAQ:AAPL" data-timing="delayed">Apple · NASDAQ · USD</option>
+                <option value="NASDAQ:MSFT" data-timing="delayed">Microsoft · NASDAQ · USD</option>
+                <option value="NASDAQ:TSLA" data-timing="delayed">Tesla · NASDAQ · USD</option>
+                <option value="NASDAQ:ASML" data-timing="delayed">ASML · NASDAQ · USD</option>
+                <option value="NASDAQ:MELI" data-timing="delayed">MercadoLibre · NASDAQ · USD</option>
+                <option value="BME:SAN" data-timing="delayed">Santander · Bolsa de Madrid · EUR</option>
+                <option value="BME:IBE" data-timing="delayed">Iberdrola · Bolsa de Madrid · EUR</option>
+              </optgroup>
+              <optgroup label="Divisas">
+                <option value="FX_IDC:EURUSD" data-timing="realtime">Euro / dólar · FX_IDC</option>
+              </optgroup>
+              <optgroup label="Criptomonedas">
+                <option value="COINBASE:BTCUSD" data-timing="realtime">Bitcoin / dólar · Coinbase</option>
+                <option value="COINBASE:ETHUSD" data-timing="realtime">Ethereum / dólar · Coinbase</option>
+              </optgroup>
+            </select>
+          </label>
+          <button type="button" id="market-retry">Reintentar gráfico</button>
+        </div>
+        <p class="quote-timing" id="market-timing">Acción · cotización con retraso. El estado del mercado y la moneda aparecen en el gráfico.</p>
+        <p class="market-status" id="market-status" role="status" aria-live="polite">Cargando el gráfico del proveedor…</p>
+        <div id="market-chart" class="market-chart" aria-label="Cotización y gráfico de TradingView"></div>
+        <p class="provider-fallback">Si el proveedor no muestra datos, <a id="market-source" href="https://www.tradingview.com/symbols/NASDAQ-NVDA/" target="_blank" rel="noopener noreferrer">consulta Nvidia en TradingView ↗</a>. No sustituimos una cotización ausente por un precio de ejemplo.</p>
+        <noscript><p>Activa JavaScript para cargar el gráfico o consulta la fuente mediante el enlace anterior.</p></noscript>
+      </section>
+      <div class="market-notes">
+        <section class="surface"><p class="eyebrow">LEE EL DATO</p><h2>Precio, moneda y periodo</h2><p>El gráfico permite cambiar el periodo y consultar valores históricos. La moneda depende del activo y de la bolsa; no convertimos automáticamente USD a EUR.</p><p>El precio de una criptomoneda o divisa corresponde a la fuente seleccionada y puede diferir entre proveedores.</p></section>
+        <section class="surface"><p class="eyebrow">ALCANCE ACTUAL</p><h2>Consulta de mercado disponible</h2><p>Estos gráficos muestran datos del proveedor. El detector de momentum, las alertas y las explicaciones del radar Pulse siguen siendo una demostración; aún no analizan estas cotizaciones.</p><p>Premium continúa en preparación. Consultar esta página no crea una cuenta ni activa cobros.</p></section>
+      </div>
+    </main>
+  </div>
+  <footer>Datos y gráficos por TradingView · <a href="/legal#datos-mercado">Fuente y privacidad</a> · <a href="/legal#riesgos">Riesgos</a></footer>
+</body>
+</html>
