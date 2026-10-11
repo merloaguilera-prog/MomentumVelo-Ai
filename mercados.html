@@ -8,6 +8,8 @@
   <link rel="stylesheet" href="/panel.css"><link rel="stylesheet" href="/mercados.css">
   <script src="/mercados.js" defer></script>
   <script src="/detector-core.js" defer></script>
+  <script src="/detector-chart-core.js" defer></script>
+  <script src="/detector-chart.js" defer></script>
   <script src="/mercados-detector.js" defer></script>
 <link rel="stylesheet" href="/neon.css?v=20261011">
 </head>
@@ -78,7 +80,7 @@
       </section>
       <section id="mi-detector" class="surface market-tool" aria-labelledby="detector-title">
         <div class="surface-heading"><div><p class="eyebrow">TUS REGLAS · HISTÓRICO IMPORTADO</p><h2 id="detector-title">Mi detector de subidas y caídas</h2></div><span class="source-pill">Análisis al cargar datos</span></div>
-        <p class="workspace-hint">Elige los cambios que quieres detectar y carga cierres diarios de un único activo. El análisis se hace aquí, sobre tu archivo; no lee los gráficos de TradingView ni se actualiza automáticamente.</p>
+        <p class="workspace-hint">Elige los cambios que quieres detectar y carga cierres diarios de un único activo. Verás tus reglas, un gráfico con máximos y mínimos y los datos de cada fecha. El análisis se hace aquí, sobre tu archivo; no lee los gráficos de TradingView ni se actualiza automáticamente.</p>
         <form id="detector-form">
           <div class="detector-fields">
             <label for="detector-asset">Nombre o símbolo del activo<input id="detector-asset" required maxlength="60" placeholder="Ej.: NVDA"></label>
@@ -102,7 +104,7 @@
         </form>
         <p id="detector-status" class="market-status" role="status" aria-live="polite">Sin histórico cargado. No hay una señal calculada todavía.</p>
         <div id="detector-result" hidden></div>
-        <p class="workspace-hint">Las reglas del último análisis se conservan en este navegador; el archivo y los resultados solo duran esta visita. No se envían a ningún servidor. No hay avisos con la app cerrada. Una condición cumplida describe los datos cargados, no una recomendación de compra o venta.</p>
+        <p class="workspace-hint">Las reglas del último análisis se conservan en este navegador; el archivo y los resultados solo duran esta visita. Puedes descargar el histórico validado para guardarlo y volver a cargarlo. No se envía a ningún servidor. No hay avisos con la app cerrada. Una condición cumplida describe los datos cargados, no una recomendación de compra o venta.</p>
       </section>
       <div class="market-notes">
         <section class="surface"><p class="eyebrow">LEE EL DATO</p><h2>Precio, moneda y periodo</h2><p>El gráfico permite cambiar el periodo y consultar valores históricos. La moneda depende del activo y de la bolsa; no convertimos automáticamente USD a EUR.</p><p>El precio de una criptomoneda o divisa corresponde a la fuente seleccionada y puede diferir entre proveedores.</p></section>

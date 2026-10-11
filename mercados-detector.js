@@ -53,7 +53,8 @@
       analysis.history.slice().reverse().forEach(row => list.append(element("li", `${row.date} · ${percent(row.percent)}`)));
       if (!analysis.history.length) list.append(element("li", "Ningún cambio individual alcanza el umbral en este tramo."));
       history.append(list);
-      result.append(title, origin, dateNote, cards, signals, history); result.hidden = false;
+      const chart = window.MomentumHistoryChart(loaded);
+      result.append(title, origin, dateNote, cards, signals, chart, history); result.hidden = false;
       let saved = true;
       try { localStorage.setItem(settingsKey, JSON.stringify(settings)); } catch (_) { saved = false; }
       message(saved ? "Análisis calculado. Reglas guardadas en este navegador; histórico solo durante esta visita." : "Análisis calculado. El navegador no permite guardar las reglas: se perderán al salir.");
