@@ -40,12 +40,22 @@
             </select>
           </label>
           <button type="button" id="market-retry">Reintentar gráfico</button>
+          <button type="button" id="market-favorite" aria-pressed="false">☆ Guardar favorito</button>
         </div>
         <p class="quote-timing" id="market-timing">Acción · cotización con retraso. El estado del mercado y la moneda aparecen en el gráfico.</p>
         <p class="market-status" id="market-status" role="status" aria-live="polite">Cargando el gráfico del proveedor…</p>
         <div id="market-chart" class="market-chart" aria-label="Cotización y gráfico de TradingView"></div>
         <p class="provider-fallback">Si el proveedor no muestra datos, <a id="market-source" href="https://www.tradingview.com/symbols/NASDAQ-NVDA/" target="_blank" rel="noopener noreferrer">consulta Nvidia en TradingView ↗</a>. No sustituimos una cotización ausente por un precio de ejemplo.</p>
         <noscript><p>Activa JavaScript para cargar el gráfico o consulta la fuente mediante el enlace anterior.</p></noscript>
+      </section>
+      <section class="surface market-workspace" aria-labelledby="workspace-title">
+        <div class="surface-heading"><div><p class="eyebrow">TU SEGUIMIENTO</p><h2 id="workspace-title">Mis favoritos y notas</h2></div><span id="market-favorite-count">0 favoritos</span></div>
+        <p class="workspace-hint">Se guardan en este navegador. No se sincronizan con otros dispositivos ni crean alertas automáticas. Si borras los datos del navegador, se perderán.</p>
+        <div class="workspace-grid">
+          <div><h3>Activos que sigo</h3><ul id="market-favorites" class="market-favorites" aria-label="Mis activos favoritos"></ul><p id="market-favorites-empty">Pulsa «Guardar favorito» junto al selector para añadir tu primer activo.</p></div>
+          <div><label class="market-note-label" for="market-note">Mi nota sobre <span id="market-note-name">Nvidia</span></label><textarea id="market-note" rows="5" maxlength="2000" placeholder="Qué quiero seguir, qué dudas tengo y qué revisar…" aria-describedby="market-note-help workspace-status"></textarea><p id="market-note-help" class="workspace-hint">Hasta 2.000 caracteres. Se guarda al escribir. Es una nota tuya, sin análisis de IA.</p></div>
+        </div>
+        <p id="workspace-status" class="market-status" role="status" aria-live="polite">Tus favoritos y notas se guardan solo en este navegador.</p>
       </section>
       <div class="market-notes">
         <section class="surface"><p class="eyebrow">LEE EL DATO</p><h2>Precio, moneda y periodo</h2><p>El gráfico permite cambiar el periodo y consultar valores históricos. La moneda depende del activo y de la bolsa; no convertimos automáticamente USD a EUR.</p><p>El precio de una criptomoneda o divisa corresponde a la fuente seleccionada y puede diferir entre proveedores.</p></section>
