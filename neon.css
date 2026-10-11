@@ -1,0 +1,136 @@
+/* Shared neon finish. Layout and market direction colours remain page-owned. */
+:root {
+  --neon-purple: #bd88ff;
+  --neon-pink: #ff8ddd;
+  --neon-blue: #78b7ff;
+  --neon-cyan: #56eaff;
+  --primary: #52ffbc;
+  --green: #52ffbc;
+  --cyan: #56eaff;
+  --muted: #bbc8dc;
+  --text: #f7f8ff;
+  --line: #695397;
+  --border: #695397;
+}
+body {
+  background: radial-gradient(ellipse at 8% 0%, #7736d13b, transparent 42%),
+    radial-gradient(ellipse at 95% 18%, #176ce537, transparent 42%),
+    radial-gradient(ellipse at 65% 70%, #cc28871b, transparent 42%), #090b19;
+  color: var(--text);
+}
+.site-header, .topbar {
+  border-bottom: 1px solid #ad73ff;
+  background: #0c1024f5;
+  box-shadow: 0 3px 24px #ae65ff30, 0 1px 0 #59e9ff45;
+}
+.brand-mark, .brandmark {
+  background: linear-gradient(135deg, #64ffcf, #58d9ff);
+  color: #081c30;
+  box-shadow: 0 0 12px #55eaff80, 0 0 30px #a66cff60;
+}
+.brand .accent, .brand small, .brand b { color: var(--neon-cyan); }
+.eyebrow, .kicker, .panelHead small, .top-note { color: var(--neon-cyan); }
+.visual-hero h1 span, .intro-row h1 em, .hero h1 span, .final-cta h2 span {
+  color: #c6a0ff;
+  text-shadow: 0 0 24px #ae68ff58;
+}
+.hero-screen, .surface, .panel, .destination-grid a, .feature-grid article,
+.price-card, .help-item, .auth-page .auth-card, .result-card, .contact-section {
+  --edge: #bd88ff;
+  border: 1px solid var(--edge);
+  background: radial-gradient(ellipse at top right, #9861ff20, transparent 65%),
+    linear-gradient(135deg, #1a1734, #0c172c);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--edge) 20%, transparent),
+    inset 0 1px 0 #ffffff0d, 0 18px 38px #0005;
+}
+.destination-grid a:nth-child(4n+2), .feature-grid article:nth-child(4n+2),
+.help-item:nth-child(4n+2), .market-workspace, .world { --edge: #56eaff; }
+.destination-grid a:nth-child(4n+3), .feature-grid article:nth-child(4n+3),
+.help-item:nth-child(4n+3), .premium-panel, .premium-card, .watch { --edge: #ff8ddd; }
+.destination-grid a:nth-child(4n+4), .feature-grid article:nth-child(4n+4),
+.help-item:nth-child(4n+4), .quote-panel, .ai, .analysis-panel { --edge: #78b7ff; }
+.hero-screen { border-width: 2px; box-shadow: 0 0 35px #a369ff45, 0 0 70px #37bbff20; }
+.screen-top { border-bottom-color: #9a68d9; background: #21143b; }
+.screen-chart, .chart-frame, .asset-chart, .map {
+  border-color: #696ac9;
+  box-shadow: inset 0 0 35px #7258ff18, 0 0 18px #39cdff15;
+}
+.screen-chart .line, .chart-line { stroke: #56eaff; filter: drop-shadow(0 0 6px #56eaff99); }
+.chart-area { fill: #7885ff29; }
+.overview article {
+  border-color: #8a77df;
+  background: linear-gradient(135deg, #242049, #101d36);
+  box-shadow: 0 0 15px #a478ff25;
+}
+.overview article:nth-child(2n) { border-color: #56d6ff; background: linear-gradient(135deg, #12354a, #171b39); }
+.overview svg { filter: drop-shadow(0 0 6px #52ffbc80); }
+.sidebar { border-color: #7257a2; background: #100f24a6; }
+.sidebar > a:hover, .sidebar > a.current {
+  border-color: #bc88ff;
+  background: linear-gradient(110deg, #562b794a, #284b704a);
+  color: #f7eaff;
+  box-shadow: 0 0 15px #b879ff35;
+}
+.market-jumps a, .quick-grid a, .detector-presets button {
+  border-color: #bd88ff;
+  background: linear-gradient(135deg, #3a215d, #1b2143);
+  color: #f1e5ff;
+  box-shadow: 0 0 14px #af65ff35;
+}
+.market-jumps a:nth-child(4n+2), .quick-grid a:nth-child(4n+2), .detector-presets button:nth-child(3n+2) {
+  border-color: #56eaff; background: linear-gradient(135deg, #124457, #1c2346);
+}
+.market-jumps a:nth-child(4n+3), .quick-grid a:nth-child(4n+3), .detector-presets button:nth-child(3n+3) {
+  border-color: #ff8ddd; background: linear-gradient(135deg, #4c2246, #252044);
+}
+.market-jumps a:nth-child(4n+4), .quick-grid a:nth-child(4n+4) {
+  border-color: #78b7ff; background: linear-gradient(135deg, #203e6a, #222449);
+}
+.button, .visual-hero .hero-actions .button:first-child, .neon-button {
+  border: 1px solid #86ffe4;
+  background: linear-gradient(115deg, #5affc5, #59dcff);
+  color: #081c30;
+  box-shadow: 0 0 20px #55eaff50;
+}
+.button.button-secondary, .visual-hero .hero-actions .button-secondary,
+.account-link, .pulse-link, .ghost, .market-controls button, .wide {
+  border: 1px solid #56eaff;
+  background: linear-gradient(135deg, #173b55, #251b47);
+  color: #e7fbff;
+  box-shadow: 0 0 16px #56eaff30;
+}
+.site-header .header-premium {
+  border-color: #ff8ddd !important; background: #41203c !important;
+  color: #ffe2f8 !important; box-shadow: 0 0 18px #ff8ddd45 !important;
+}
+.source-pill, .help-topic, .aiBadge { border-color: #9e8aff; color: #dbceff; }
+.help-chip.is-active, .filters button[aria-pressed=true], .chart-periods button[aria-pressed=true] {
+  border-color: #bd88ff; background: #392454; color: #f6eaff;
+  box-shadow: 0 0 12px #b47aff30;
+}
+.pulseOrb { border-color: #c49aff; background: radial-gradient(circle, #61338e55, #15354933 60%, transparent 70%); box-shadow: 0 0 55px #bc75ff45, inset 0 0 45px #56eaff25; }
+.pulseOrb strong { color: #d1b2ff; text-shadow: 0 0 20px #b879ff70; }
+.detector-metric, .analysis-metrics > div, .screen-markets > div {
+  border-color: #9c7dda; background: linear-gradient(135deg, #24203f, #102d3d);
+  box-shadow: 0 0 12px #9566ff20;
+}
+.detector-signal.up { border-color: #52ffbc; box-shadow: 0 0 18px #52ffbc20; }
+.detector-signal.down, .detector-signal.drawdown { border-color: #ff86a6; box-shadow: 0 0 18px #ff6b9220; }
+.market-widget, .market-chart { border: 1px solid #818bef; box-shadow: 0 0 22px #648bff25; }
+.market-tool > summary { color: #dfc6ff; }
+.detector-fields input, .detector-fields select, #detector-file, #detector-csv, #market-note {
+  border-color: #7f69ae; background: #10182e;
+}
+.auth-page .auth-field:focus-within, .help-search:focus-within {
+  border-color: #56eaff; box-shadow: 0 0 18px #56eaff30;
+}
+:is(a, button, input, select, textarea, summary):focus-visible {
+  outline: 3px solid #a7f5ff; outline-offset: 4px;
+}
+@media (hover: hover) {
+  .market-jumps a:hover, .quick-grid a:hover, .detector-presets button:hover,
+  .destination-grid a:hover { border-color: #fff0ff; box-shadow: 0 0 24px #bb80ff66; }
+  .button:hover, .account-link:hover, .pulse-link:hover, .market-controls button:hover {
+    box-shadow: 0 0 27px #56eaff65;
+  }
+}
