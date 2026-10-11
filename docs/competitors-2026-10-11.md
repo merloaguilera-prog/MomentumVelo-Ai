@@ -24,6 +24,31 @@ La implementación adapta un patrón funcional habitual con código y estilo pro
 
 No se modifica el bloqueo de ventas Premium. La validación del acceso en Clerk y del ciclo real de Stripe sigue siendo una dependencia separada.
 
+## Segunda mejora: subidas, caídas y reglas explicadas
+
+Comparación ampliada el 11 de octubre con documentación oficial de TradingView, Finviz y TrendSpider. No se han probado sus planes de pago ni se reutiliza código privado, señales o datos extraídos.
+
+| Patrón observado | Aplicación propia | Alcance |
+| --- | --- | --- |
+| TradingView y Finviz: mayores ganadores, perdedores y actividad | Hotlists oficiales incrustadas con atribución y enlace a la fuente | Consulta real del proveedor, bolsa estadounidense, con retraso; no alimenta el motor propio |
+| TradingView: mapa por sector y cambio porcentual | Mapa oficial S&P 500, cargado al abrir el apartado | Vista de mercado, sin procesamiento de los datos del panel |
+| TradingView: umbrales de movimiento y TrendSpider: confirmación y condiciones combinadas | Reglas configurables de variación, ventana de máximos, 1–3 cambios consecutivos y filtro opcional de volumen | Análisis de cierres diarios importados por el usuario; no seguimiento automático |
+| Finviz: porcentaje entre cierres, medias simples y distancia desde máximos | Variación entre cierres, SMA20/cruce y pérdida desde el mayor cierre de una ventana completa | Fórmulas documentadas en código, con fecha, moneda y fuente declarada |
+
+La media de volumen propia usa **20 cierres anteriores**, excluye el actual y **no** replica la media trimestral ni el ajuste intradía de Finviz. Las reglas de precio y volumen se calculan sobre el archivo seleccionado, nunca sobre cifras de demostración. La historia muestra los últimos 30 cambios individuales que superan el umbral, no alertas entregadas ni operaciones realizadas.
+
+Sigue faltando una API con acceso y derechos adecuados para analizar acciones automáticamente, almacenamiento de reglas por cuenta, ejecución periódica y notificaciones verificadas. Las APIs gratuitas personales no se consideran autorización para redistribuir datos en una app comercial. No se contratan servicios ni se cambia el bloqueo de Premium.
+
+Fuentes adicionales:
+- TradingView, hotlists: https://www.tradingview.com/widget-docs/widgets/watchlists/stock-market/demos/no-chart/
+- TradingView, mapa: https://www.tradingview.com/widget-docs/widgets/heatmaps/stock-heatmap/
+- TradingView, operadores: https://www.tradingview.com/support/solutions/43000763312-learn-how-to-configure-alerts/
+- Finviz, definiciones de filtros: https://finviz.com/help/screener
+- TrendSpider, confirmación: https://trendspider.reamaze.com/kb/alerts/create-new-dynamic-price-alert
+- TrendSpider, varias condiciones: https://help.trendspider.com/kb/alerts/multi-factor-alerts-overview
+- Finnhub, licencia comercial: https://api.finnhub.io/pricing-startups-and-enterprise
+- Twelve Data, acceso empresarial: https://twelvedata.com/pricing-business
+
 ## Fuentes
 
 - TradingView, screener: https://www.tradingview.com/support/solutions/43000718866-tradingview-stock-screener-trade-smarter-not-harder/
