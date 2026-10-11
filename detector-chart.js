@@ -42,7 +42,7 @@
     controls.append(label, download);
     const summary = element("div", "", "detector-metrics");
     const rangeNote = element("p", "", "workspace-hint");
-    const graph = svgElement("svg", { viewBox: "0 0 1000 300", role: "img", "aria-labelledby": "history-svg-title history-svg-desc", preserveAspectRatio: "xMidYMid meet" });
+    const graph = svgElement("svg", { viewBox: "0 0 1000 300", role: "img", "aria-labelledby": "history-svg-title history-svg-desc", preserveAspectRatio: "none" });
     graph.classList.add("history-svg");
     const graphTitle = svgElement("title", { id: "history-svg-title" }, "Histórico de cierres importados");
     const graphDescription = svgElement("desc", { id: "history-svg-desc" });
