@@ -91,7 +91,7 @@
       $("detector-csv").value = text; message(`Archivo «${file.name}» cargado. Indica el activo y la fuente y pulsa «Analizar mis datos».`);
     } catch (_) { if (current === fileGeneration) message("No se pudo leer el archivo. Reintenta o pega el CSV.", true); }
   });
-  $("detector-clear").addEventListener("click", () => { fileGeneration++; $("detector-csv").value = ""; $("detector-file").value = ""; invalidate("Datos y resultado borrados. Las reglas se conservan."); });
+  $("detector-clear").addEventListener("click", () => { fileGeneration++; $("detector-csv").value = ""; $("detector-file").value = ""; $("detector-asset").value = ""; $("detector-source").value = ""; invalidate("Datos y resultado borrados. Las reglas se conservan."); });
   try {
     const saved = JSON.parse(localStorage.getItem(settingsKey) || "null");
     if (saved) {
@@ -116,7 +116,7 @@
     script.async = true; script.textContent = JSON.stringify(config);
     script.addEventListener("load", () => {
       if (host.dataset.generation !== generation) return;
-      state.textContent = "Consulta los datos y su fecha en el panel del proveedor. Si no aparecen, reintenta o abre la fuente.";
+      state.textContent = "Consulta los datos y las indicaciones de retraso del proveedor. Si no aparecen, reintenta o abre la fuente.";
     });
     script.addEventListener("error", () => {
       if (host.dataset.generation !== generation) return;

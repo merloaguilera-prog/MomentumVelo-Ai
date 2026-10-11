@@ -67,4 +67,5 @@ test('bad rule settings and unordered data do not produce signals', () => {
   for (const invalid of [{ move: 0 }, { drawdown: NaN }, { lookback: 1.5 }, { confirmation: 4 }])
     assert.throws(() => analyze(series([100, 110]), { ...rules, ...invalid }));
   assert.throws(() => analyze(series([100, 110]).reverse(), rules));
+  assert.throws(() => analyze(series([Number.MIN_VALUE, 100]), rules), /escala/);
 });

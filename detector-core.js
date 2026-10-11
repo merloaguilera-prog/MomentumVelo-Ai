@@ -82,7 +82,7 @@
     const peakDrop = (last.close / peak - 1) * 100;
     const previousVolumes = rows.slice(-21, -1).map(row => row.volume);
     const volumeReady = previousVolumes.length === 20 && previousVolumes.every(v => v !== null) && last.volume !== null;
-    const averageVolume = volumeReady ? previousVolumes.reduce((a, b) => a + b, 0) / 20 : null;
+    const averageVolume = volumeReady ? previousVolumes.reduce((a, b) => a + b / 20, 0) : null;
     const volumeRatio = averageVolume > 0 ? last.volume / averageVolume : null;
     const volumePass = !requireVolume || (volumeRatio !== null && volumeRatio >= 1.5);
     const changes = rows.slice(-confirmation).map((row, j) => {
@@ -91,17 +91,19 @@
     });
     const sustained = sign => changes.length === confirmation && changes.every(value => value !== null && sign * value >= move - 1e-9);
     const signals = [];
-    if (volumePass && sustained(1)) signals.push({ kind: "up", title: "Subida detectada", detail: `Cada uno de los últimos ${confirmation} cambios entre cierres alcanza +${move} %.` });
-    if (volumePass && sustained(-1)) signals.push({ kind: "down", title: "Caída detectada", detail: `Cada uno de los últimos ${confirmation} cambios entre cierres alcanza −${move} %.` });
+    if (volumePass && sustained(1)) signals.push({ kind: "up", title: "Subida detectada", detail: confirmation === 1 ? `El último cambio entre cierres alcanza al menos +${move} %.` : `Cada uno de los últimos ${confirmation} cambios entre cierres alcanza al menos +${move} %.` });
+    if (volumePass && sustained(-1)) signals.push({ kind: "down", title: "Caída detectada", detail: confirmation === 1 ? `El último cambio entre cierres alcanza una caída de al menos ${move} %.` : `Cada uno de los últimos ${confirmation} cambios entre cierres alcanza una caída de al menos ${move} %.` });
     if (volumePass && peakRows.length === lookback && peakDrop <= -drawdown + 1e-9) signals.push({ kind: "drawdown", title: "Pérdida desde máximos", detail: `El último cierre cae al menos ${drawdown} % desde el mayor cierre de los últimos ${lookback}. Esta regla usa el último cierre, sin confirmación adicional.` });
-    const sma20 = rows.length >= 20 ? rows.slice(-20).reduce((sum, row) => sum + row.close, 0) / 20 : null;
-    const previousSma20 = rows.length >= 21 ? rows.slice(-21, -1).reduce((sum, row) => sum + row.close, 0) / 20 : null;
+    const sma20 = rows.length >= 20 ? rows.slice(-20).reduce((sum, row) => sum + row.close / 20, 0) : null;
+    const previousSma20 = rows.length >= 21 ? rows.slice(-21, -1).reduce((sum, row) => sum + row.close / 20, 0) : null;
+    if ([change, peakDrop, volumeRatio, sma20, previousSma20, ...changes].some(value => value !== null && !Number.isFinite(value))) throw new Error("La escala de los números no permite calcular porcentajes válidos. Revisa precios y volúmenes.");
     const crossing = sma20 !== null && previousSma20 !== null
       ? previous.close <= previousSma20 && last.close > sma20 ? "up" : previous.close >= previousSma20 && last.close < sma20 ? "down" : null
       : null;
     const history = [];
     for (let i = Math.max(1, rows.length - 30); i < rows.length; i++) {
       const percent = (rows[i].close / rows[i - 1].close - 1) * 100;
+      if (!Number.isFinite(percent)) throw new Error("La escala de los números no permite calcular porcentajes válidos. Revisa los precios.");
       if (Math.abs(percent) >= move - 1e-9) history.push({ date: rows[i].date, percent });
     }
     return { date: last.date, close: last.close, previousClose: previous.close, change, peakDrop, peak, peakCount: peakRows.length, sma20, crossing, volumeRatio, volumePass, signals, history, count: rows.length };
