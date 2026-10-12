@@ -28,6 +28,9 @@ Producción mantiene `PREMIUM_SALES_ENABLED=false`. Las pruebas locales y un des
 | Recuperación | Nueva factura pagada y suscripción activa; Premium restaurado | Eventos y lectura de Clerk |
 | Cancelación | Retirar Premium cuando finalice la suscripción; cancelación al fin de periodo conserva acceso hasta ese fin si la factura sigue pagada | Portal de prueba, estado actual de Stripe y lectura de Clerk |
 | Duplicado o evento retrasado | No sustituir el estado actual por una instantánea antigua | Reenvío del evento y lectura posterior del plan |
+| Dos pestañas o reintento de Checkout | Un cliente y una sesión abierta de la misma cuenta; misma URL de pago | Dos solicitudes autenticadas, listado de sesiones y cliente en Clerk development |
+| Cuenta con suscripción activa o pendiente | Rechazo de otra contratación y acceso a gestión; sin segunda suscripción | Respuesta 409 y listado de suscripciones del sandbox |
+| Checkout expirado | Nuevo intento sobre el mismo cliente, sin reutilizar una URL expirada | ID del intento anterior expirado y de la sesión nueva |
 | Error de escritura en Clerk | Respuesta 500 y reintento posterior que termina en 200 | Historial de entrega de Stripe y metadatos finales |
 
 Los test clocks permiten avanzar renovaciones sin esperar meses. No introducir excepciones de identidad o firma para simular estos resultados. Una prueba de Billing creada directamente por API no acredita por sí sola el formulario de Checkout o el retorno en el navegador.

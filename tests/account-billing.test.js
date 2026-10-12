@@ -24,8 +24,8 @@ function element(hidden = false) {
   };
 }
 
-async function account(metadata) {
-  const f = { portalAttempts: 0, tokenFailure: false, portalFailure: false, navigation: [] };
+async function account(metadata, premiumSalesEnabled = false) {
+  const f = { portalAttempts: 0, checkoutAttempts: 0, tokenReads: 0, tokenFailure: false, portalFailure: false, navigation: [] };
   const selectors = ["auth-view", "managed-auth", "account-view", "auth-connection", "auth-retry",
     "account-title", "account-message", "account-email", "account-plan", "premium-next",
     "premium-status", "manage-subscription", "signout"];
@@ -39,7 +39,9 @@ async function account(metadata) {
     Clerk: { isSignedIn: true, user: { firstName: "Prueba", publicMetadata: metadata,
       primaryEmailAddress: { emailAddress: "test@example.com" } },
       load: async () => {}, session: { getToken: async () => {
+        f.tokenReads++;
         if (f.tokenFailure) throw new Error("Sesión temporalmente no disponible.");
+        if (f.missingToken) return null;
         return "fixture-token";
       } } }
   };
@@ -54,7 +56,16 @@ async function account(metadata) {
   } });
   vm.runInNewContext(source, { window, document, URL, URLSearchParams, console,
     fetch: async (url, options) => {
-      if (url === "/api/auth-config") return { ok: true, json: async () => ({ enabled: true, publishableKey: key }) };
+      if (url === "/api/auth-config") return { ok: true, json: async () => ({ enabled: true, publishableKey: key, premiumSalesEnabled }) };
+      if (url === "/api/checkout") {
+        assert.equal(options.headers.Authorization, "Bearer fixture-token");
+        assert.equal(options.body, "{}");
+        f.checkoutAttempts++;
+        if (f.waitCheckout) await f.waitCheckout;
+        return { ok: !f.checkoutFailure, json: async () => f.checkoutFailure
+          ? { error: "Hay una suscripción pendiente.", manageSubscription: true }
+          : { url: f.checkoutUrl || "https://checkout.stripe.com/c/pay/cs_test_fixture" } };
+      }
       assert.equal(url, "/api/portal");
       assert.equal(options.headers.Authorization, "Bearer fixture-token");
       f.portalAttempts++;
@@ -115,4 +126,61 @@ test("portal opening can be retried after a session-token failure", async () => 
   await page.portal.click();
   assert.equal(page.portalAttempts, 1);
   assert.deepEqual(page.navigation, ["https://billing.stripe.com/test-fixture"]);
+});
+
+test("Premium opens authenticated Checkout only when the configuration enables sales", async () => {
+  const page = await account({ plan: "free" }, true);
+  assert.match(page.upgrade.textContent, /49/);
+  await page.upgrade.click();
+  assert.equal(page.checkoutAttempts, 1);
+  assert.deepEqual(page.navigation, ["https://checkout.stripe.com/c/pay/cs_test_fixture"]);
+});
+
+test("simultaneous clicks send one request and a failed Checkout can be retried with a fresh token", async () => {
+  const page = await account({ plan: "free" }, true);
+  let release;
+  page.waitCheckout = new Promise(resolve => { release = resolve; });
+  const first = page.upgrade.click();
+  await page.upgrade.click();
+  release(); await first;
+  assert.equal(page.checkoutAttempts, 1);
+
+  const retry = await account({ plan: "free" }, true);
+  retry.checkoutFailure = true;
+  await retry.upgrade.click();
+  assert.equal(retry.upgrade.disabled, false);
+  assert.equal(retry.portal.hidden, false);
+  assert.equal(retry.navigation.length, 0);
+  retry.checkoutFailure = false;
+  await retry.upgrade.click();
+  assert.equal(retry.tokenReads, 2);
+  assert.equal(retry.checkoutAttempts, 2);
+  assert.equal(retry.navigation.length, 1);
+});
+
+test("a missing session token sends no Checkout request and exposes a retryable error", async () => {
+  const page = await account({ plan: "free" }, true);
+  page.missingToken = true;
+  await page.upgrade.click();
+  assert.equal(page.checkoutAttempts, 0);
+  assert.equal(page.upgrade.disabled, false);
+  assert.match(page.nodes["[data-premium-status]"].textContent, /sesión/);
+});
+
+test("closed sales never request Checkout even with an active managed account", async () => {
+  const page = await account({ plan: "free" });
+  // Avoid a navigation timer in this unit test: the public state itself stays in preparation.
+  assert.match(page.upgrade.textContent, /preparación/);
+  assert.equal(page.checkoutAttempts, 0);
+});
+
+test("Checkout cannot navigate to a URL outside the Stripe HTTPS hosted page", async () => {
+  for (const url of ["https://attacker.invalid/pay", "javascript:alert(1)", "https://user:password@checkout.stripe.com/pay"]) {
+    const page = await account({ plan: "free" }, true);
+    page.checkoutUrl = url;
+    await page.upgrade.click();
+    assert.equal(page.navigation.length, 0);
+    assert.equal(page.upgrade.disabled, false);
+    assert.match(page.nodes["[data-premium-status]"].textContent, /segura/);
+  }
 });

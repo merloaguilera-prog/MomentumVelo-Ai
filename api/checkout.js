@@ -1,11 +1,9 @@
 const Stripe = require("stripe");
-const { getAuthenticatedUser } = require("./_clerk");
+const clerk = require("./_clerk");
+const { getAuthenticatedUser } = clerk;
 const { billingMode, getBillingSiteUrl } = require("./_billing");
-
-function validEmail(value) {
-  const email = String(value || "").trim().toLowerCase();
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? email : null;
-}
+const { prepareCheckout } = require("./_checkout");
+const { STRIPE_API_VERSION } = require("./_stripe-config");
 
 module.exports = async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
@@ -43,41 +41,33 @@ module.exports = async function handler(req, res) {
 
   try {
     const siteUrl = getBillingSiteUrl();
-    const stripe = new Stripe(secretKey, { apiVersion: "2026-07-29.dahlia" });
+    const stripe = new Stripe(secretKey, { apiVersion: STRIPE_API_VERSION });
     const price = await stripe.prices.retrieve(priceId);
-    if (price.livemode !== mode || price.active !== true || price.currency !== "eur" || price.unit_amount !== 4900 || price.recurring?.interval !== "month" || price.recurring?.interval_count !== 1) {
+    if (price.id !== priceId || price.livemode !== mode || price.active !== true || price.currency !== "eur" || price.unit_amount !== 4900 || price.recurring?.interval !== "month" || price.recurring?.interval_count !== 1) {
       return res.status(503).json({
         error: "El precio Premium configurado no corresponde a 49 € al mes. La contratación sigue cerrada.",
         helpUrl: "/ayuda?tema=premium#contacto"
       });
     }
-    const email = validEmail(req.body?.email);
-    const session = await stripe.checkout.sessions.create({
-      mode: "subscription",
-      line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${siteUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${siteUrl}/cancel`,
-      customer_email: email || undefined,
-      client_reference_id: authenticatedUser?.userId || undefined,
-      metadata: {
-        plan: "premium-monthly",
-        clerkUserId: authenticatedUser?.userId || ""
-      },
-      subscription_data: {
-        metadata: {
-          plan: "premium-monthly",
-          clerkUserId: authenticatedUser?.userId || ""
-        }
-      },
-      integration_identifier: "momentumvelo_web_qmztrkpa"
+    const prepared = await prepareCheckout(stripe, {
+      userId: authenticatedUser.userId, priceId, siteUrl, mode
+    }, clerk);
+    if (prepared.error) return res.status(prepared.status).json({
+      error: prepared.error, manageSubscription: prepared.manageSubscription
     });
+    const { session } = prepared;
     return res.status(200).json({
       url: session.url,
       mode: "subscription",
       plan: "premium-monthly",
-      source: "checkout-session"
+      source: "checkout-session",
+      reused: prepared.reused
     });
   } catch (error) {
+    if (error?.code === "idempotency_key_in_use" || error?.statusCode === 409) {
+      return res.status(409).json({ retryable: true,
+        error: "Tu contratación se está preparando. Vuelve a comprobarla en unos segundos." });
+    }
     console.error("checkout_session_error", {
       message: error instanceof Error ? error.message : String(error)
     });

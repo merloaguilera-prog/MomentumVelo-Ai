@@ -107,7 +107,10 @@ test("test Checkout and portal send Preview return URLs to Stripe and reject a l
     constructor() {
       this.prices = { retrieve: async () => ({ id: "price_fixture", livemode: livePrice, active: true, currency: "eur",
         unit_amount: 4900, recurring: { interval: "month", interval_count: 1 } }) };
-      this.checkout = { sessions: { create: async args => { calls.push(args); return { url: "https://checkout.stripe.com/test-fixture" }; } } };
+      this.customers = { retrieve: async () => ({ id: "cus_fixture", livemode: false }) };
+      this.subscriptions = { list: async () => ({ data: [], has_more: false }) };
+      this.checkout = { sessions: { list: async () => ({ data: [], has_more: false }),
+        create: async args => { calls.push(args); return { url: "https://checkout.stripe.com/test-fixture" }; } } };
       this.billingPortal = { sessions: { create: async args => { calls.push(args); return { url: "https://billing.stripe.com/test-fixture" }; } } };
     }
   }

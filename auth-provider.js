@@ -1,5 +1,6 @@
 (function () {
   "use strict";
+  let premiumSalesEnabled = false;
 
   function withTimeout(operation) {
     let timeout;
@@ -73,6 +74,44 @@
     }, 450);
   }
 
+  async function startPremium(button) {
+    if (button.disabled) return;
+    const status = document.querySelector("[data-premium-status]");
+    const originalText = button.textContent;
+    button.disabled = true;
+    button.textContent = "Preparando pago seguro…";
+    button.setAttribute("aria-busy", "true");
+    if (status) { status.textContent = ""; status.classList.remove("error"); }
+    try {
+      if (!premiumSalesEnabled || !window.Clerk?.isSignedIn || !window.Clerk.session) {
+        throw new Error("Inicia sesión para activar Premium.");
+      }
+      const token = await withTimeout(window.Clerk.session.getToken());
+      if (!token) throw new Error("Tu sesión ha caducado. Vuelve a iniciar sesión.");
+      const response = await withTimeout(fetch("/api/checkout", {
+        method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: "{}", cache: "no-store"
+      }));
+      const data = await withTimeout(response.json());
+      if (data.manageSubscription) {
+        const portal = document.querySelector("[data-manage-subscription]");
+        if (portal) portal.hidden = false;
+      }
+      if (!response.ok || !data.url) throw new Error(data.error || "No se pudo preparar la contratación de Premium.");
+      const url = new URL(data.url);
+      if (url.protocol !== "https:" || url.hostname !== "checkout.stripe.com" || url.username || url.password) {
+        throw new Error("No se recibió una página de pago segura.");
+      }
+      window.location.assign(url.href);
+    } catch (error) {
+      if (status) { status.textContent = error instanceof Error ? error.message : "No se pudo abrir el pago."; status.classList.add("error"); }
+      button.disabled = false;
+      button.textContent = originalText;
+    } finally {
+      button.setAttribute("aria-busy", "false");
+    }
+  }
+
   async function openPortal(button) {
     const originalText = button.textContent;
     const status = document.querySelector("[data-premium-status]");
@@ -132,7 +171,10 @@
     const premiumButton = accountView.querySelector("[data-premium-next]");
     if (premiumButton) {
       premiumButton.hidden = plan === "premium" || paymentPending;
-      premiumButton.addEventListener("click", () => showPremiumPreparation(premiumButton), { once: true });
+      premiumButton.textContent = premiumSalesEnabled ? "Activar Premium · 49 €/mes" : "Premium · en preparación";
+      premiumButton.setAttribute("aria-label", premiumSalesEnabled ? "Abrir el pago seguro de Premium, 49 euros al mes" : "Consultar el estado de Premium");
+      premiumButton.addEventListener("click", () => premiumSalesEnabled
+        ? startPremium(premiumButton) : showPremiumPreparation(premiumButton));
     }
 
     const portalButton = accountView.querySelector("[data-manage-subscription]");
@@ -173,6 +215,7 @@
       const response = await withTimeout(fetch("/api/auth-config", { cache: "no-store" }));
       if (!response.ok) throw new Error("No se pudo consultar la configuración de acceso seguro.");
       const config = await withTimeout(response.json());
+      premiumSalesEnabled = config.premiumSalesEnabled === true;
       // Only an explicitly unconfigured instance may use the local demo.
       // An outage or a partial Clerk configuration must never create local accounts.
       if (config.enabled === false && !config.publishableKey) {

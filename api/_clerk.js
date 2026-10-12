@@ -65,4 +65,16 @@ async function getUserStripeCustomerId(userId) {
   return typeof customerId === "string" && customerId.startsWith("cus_") ? customerId : null;
 }
 
-module.exports = { getAuthenticatedUser, getUserStripeCustomerId, updateUserPlan };
+async function setUserStripeCustomerId(userId, customerId) {
+  if (!process.env.CLERK_SECRET_KEY || !userId || !customerId?.startsWith("cus_")) {
+    throw new Error("La vinculación de facturación requiere una cuenta configurada.");
+  }
+  const clerk = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
+  const user = await clerk.users.getUser(userId);
+  const current = user.privateMetadata?.stripeCustomerId;
+  if (current && current !== customerId) throw new Error("La cuenta ya tiene otro cliente de facturación.");
+  if (!current) await clerk.users.updateUserMetadata(userId, { privateMetadata: { stripeCustomerId: customerId } });
+  return true;
+}
+
+module.exports = { getAuthenticatedUser, getUserStripeCustomerId, setUserStripeCustomerId, updateUserPlan };
