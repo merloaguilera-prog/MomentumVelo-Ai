@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b1025">
+  <meta name="description" content="Compara dos históricos importados en MomentumVelo: mismas fechas, variaciones porcentuales, caída desde máximos y exportación CSV.">
+  <title>Comparar históricos — MomentumVelo-AI</title>
+  <link rel="stylesheet" href="/panel.css"><link rel="stylesheet" href="/neon.css?v=20261011"><link rel="stylesheet" href="/practica.css"><link rel="stylesheet" href="/comparar.css">
+  <script src="/detector-core.js" defer></script><script src="/detector-chart-core.js" defer></script><script src="/comparador-core.js" defer></script><script src="/comparar.js" defer></script>
+</head>
+<body>
+  <header class="topbar"><a class="brand" href="/"><span class="brand-mark">↗</span><span>Momentum<span>Velo</span><small>AI</small></span></a><span class="top-note">DOS HISTÓRICOS · FECHAS COMUNES</span><a class="account-link" href="/mercados">Ver mercados →</a></header>
+  <div class="app-shell">
+    <nav class="sidebar" aria-label="Secciones del panel"><a class="current" href="/comparar" aria-current="page">⇄ <span>Comparar históricos</span></a><a href="/mercados">▥ <span>Mercados reales</span></a><a href="/mercados#mi-detector">◎ <span>Mi detector</span></a><a href="/practica">◉ <span>Cartera de práctica</span></a><a href="/practica#evolucion">↗ <span>Mi evolución</span></a><a href="/ayuda">? <span>Ayuda</span></a><div class="sidebar-bottom"><strong>La misma base</strong><p>Cada línea empieza en 0 %. Comparamos cambios de precio sobre las fechas que comparten tus archivos.</p></div></nav>
+    <main>
+      <section class="practice-hero comparison-hero" aria-labelledby="compare-title"><img src="/images/practica-neon.webp" width="1672" height="941" alt="" fetchpriority="high" decoding="async"><div><p class="eyebrow">COMPARA · ENTIENDE · DECIDE</p><h1 id="compare-title">Dos activos.<br><em>La misma mirada.</em></h1><p>Sus precios pueden ser distintos. Su recorrido se entiende mejor cuando parten de la misma fecha.</p><a class="comparison-start" href="#compare-form">Cargar mis históricos ↗</a></div></section>
+      <p class="practice-scope">Trabaja con tus CSV, sin leer los gráficos del proveedor ni traer cotizaciones en directo. Los archivos se procesan aquí y permanecen solo durante esta visita. Descarga el resultado antes de salir.</p>
+      <p id="compare-status" class="practice-status" role="status" aria-live="polite">Añade dos históricos con al menos dos fechas comunes.</p>
+      <form id="compare-form">
+        <div class="comparison-inputs">
+          <fieldset class="surface comparison-input"><legend>Histórico A · línea turquesa</legend><div class="practice-form">
+            <label>Activo A<input id="compare-asset-a" maxlength="80" required placeholder="Nombre o símbolo"></label>
+            <label>Fuente A<input id="compare-source-a" maxlength="160" required placeholder="Proveedor o archivo de origen"></label>
+            <label>Moneda A<select id="compare-currency-a"><option value="USD">USD · dólar</option><option value="EUR">EUR · euro</option></select></label>
+            <label>Tipo de cierre A<select id="compare-adjustment-a"><option value="unknown">No declarado</option><option value="raw">Sin ajustar</option><option value="adjusted">Ajustado</option></select></label>
+            <label class="practice-wide">Archivo CSV A<input id="compare-file-a" type="file" accept=".csv,text/csv"></label>
+            <label class="practice-wide">Pegar o revisar CSV A<textarea id="compare-csv-a" rows="5" maxlength="256000" required placeholder="fecha,cierre&#10;AAAA-MM-DD,precio"></textarea></label>
+          </div></fieldset>
+          <fieldset class="surface comparison-input"><legend>Histórico B · línea rosa</legend><div class="practice-form">
+            <label>Activo B<input id="compare-asset-b" maxlength="80" required placeholder="Nombre o símbolo"></label>
+            <label>Fuente B<input id="compare-source-b" maxlength="160" required placeholder="Proveedor o archivo de origen"></label>
+            <label>Moneda B<select id="compare-currency-b"><option value="USD">USD · dólar</option><option value="EUR">EUR · euro</option></select></label>
+            <label>Tipo de cierre B<select id="compare-adjustment-b"><option value="unknown">No declarado</option><option value="raw">Sin ajustar</option><option value="adjusted">Ajustado</option></select></label>
+            <label class="practice-wide">Archivo CSV B<input id="compare-file-b" type="file" accept=".csv,text/csv"></label>
+            <label class="practice-wide">Pegar o revisar CSV B<textarea id="compare-csv-b" rows="5" maxlength="256000" required placeholder="fecha,cierre&#10;AAAA-MM-DD,precio"></textarea></label>
+          </div></fieldset>
+        </div>
+        <p class="practice-hint">Cabecera «fecha,cierre» o «Date,Close» y fechas AAAA-MM-DD. Hasta 1.000 cierres y 256 KB por archivo. Puedes usar coma, punto y coma o tabulador como separador. Confirma que ambos archivos usan el mismo tipo de cierre.</p>
+        <div class="practice-actions"><button type="submit">Comparar mis históricos</button><button type="button" id="compare-clear">Vaciar comparador</button></div>
+      </form>
+      <section id="compare-result" class="surface comparison-result" hidden aria-label="Resultado de la comparación"></section>
+      <noscript><p>Activa JavaScript para comparar tus históricos.</p></noscript>
+    </main>
+  </div>
+  <footer>MomentumVelo-AI · Histórico importado · <a href="/legal#datos-mercado">Origen y alcance</a></footer>
+</body>
+</html>
