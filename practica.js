@@ -132,6 +132,7 @@
       name.append(dot, document.createTextNode(allocation.name)); row.append(name, element("span", `${share.toLocaleString("es-ES", { maximumFractionDigits: 1 })} % · ${money(allocation.value)}`)); allocationList.append(row);
     });
     $("allocation-ring").style.background = analysis.totalAtCostCents ? `conic-gradient(${segments.join(",")})` : "#253854";
+    window.renderPracticeReview($("practice-review"), current);
     renderJournal(analysis);
   }
   $("setup-form").addEventListener("submit", event => { event.preventDefault(); try { prepare(core.create($("setup-currency").value, Number($("setup-capital").value)), "Nueva cartera de práctica"); } catch (error) { message(error.message, true); } });
