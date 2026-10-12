@@ -28,3 +28,13 @@ Se recrean patrones funcionales con código propio. La identidad y las ilustraci
 - Yahoo Finance Estados Unidos: https://apps.apple.com/us/app/yahoo-finance-stocks-markets/id328412701?platform=watch
 - Delta España: https://apps.apple.com/es/app/delta-by-etoro/id1288676542
 - Delta Estados Unidos: https://apps.apple.com/us/app/delta-by-etoro/id1288676542?platform=iphone&see-all=reviews
+
+## Tercera entrega: comparación de históricos
+
+Investing.com publica en App Store España 4,7/5 y aproximadamente 22.000 valoraciones; su ficha enumera herramientas de comparación de pares. TradingView documenta superponer varios símbolos y usar variaciones porcentuales para comparar precios de distintas escalas. Son referencias funcionales, no un ranking de fiabilidad. Stock Events (400 valoraciones, 4,8/5 en España) se revisó como referencia de organización de eventos, pero no se adopta su calendario en esta entrega.
+
+Adaptación propia: comparador de dos históricos importados con líneas turquesa y rosa, misma fecha inicial, solo fechas comunes, tramos y tabla accesible. Se muestran variación de cierre, diferencia en puntos porcentuales y caída desde máximos de la serie de fechas compartidas; una fecha excluida podría contener otro máximo o caída. No se calculan correlación, rentabilidad total, conversión de monedas, comisiones ni impuestos. El CSV es un informe del tramo visible con columnas numéricas A/B; no contiene nombres o fuentes. No se replica código, gráficos de marca ni pronósticos de los competidores.
+
+- Investing.com España: https://apps.apple.com/es/app/investing-com-bolsa-acciones/id909998122?platform=watch
+- Comparación en TradingView: https://www.tradingview.com/support/solutions/43000543053-how-to-use-the-compare-tool/
+- Stock Events España: https://apps.apple.com/es/app/stock-events-bolsa-y-cartera/id1488720155?platform=ipad

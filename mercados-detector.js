@@ -54,7 +54,13 @@
       if (!analysis.history.length) list.append(element("li", "Ningún cambio individual alcanza el umbral en este tramo."));
       history.append(list);
       const chart = window.MomentumHistoryChart(loaded);
-      result.append(title, origin, dateNote, cards, signals, chart, history); result.hidden = false;
+      const compare = element("a", "Comparar este histórico con otro ↗"); compare.href = "/comparar?desde=detector";
+      compare.addEventListener("click", event => {
+        try { sessionStorage.setItem("momentumvelo.compare.transfer.v1", JSON.stringify(loaded)); }
+        catch (_) { event.preventDefault(); message("No se pudo preparar el histórico en esta pestaña. Abre Comparar históricos y carga allí tu CSV.", true); }
+      });
+      const comparisonActions = element("div", "", "market-controls"); comparisonActions.append(compare);
+      result.append(title, origin, dateNote, cards, signals, chart, history, comparisonActions); result.hidden = false;
       let saved = true;
       try { localStorage.setItem(settingsKey, JSON.stringify(settings)); } catch (_) { saved = false; }
       message(saved ? "Análisis calculado. Reglas guardadas en este navegador; histórico solo durante esta visita." : "Análisis calculado. El navegador no permite guardar las reglas: se perderán al salir.");
