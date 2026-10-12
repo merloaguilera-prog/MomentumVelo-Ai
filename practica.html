@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0b1025">
+  <meta name="description" content="Cartera de práctica y diario de MomentumVelo. Registra operaciones simuladas, comisiones y notas con capital virtual y precios que introduces tú.">
+  <title>Cartera de práctica — MomentumVelo-AI</title>
+  <link rel="stylesheet" href="/panel.css"><link rel="stylesheet" href="/neon.css?v=20261011"><link rel="stylesheet" href="/practica.css">
+  <script src="/practica-core.js" defer></script><script src="/practica.js" defer></script>
+</head>
+<body>
+  <header class="topbar"><a class="brand" href="/"><span class="brand-mark">↗</span><span>Momentum<span>Velo</span><small>AI</small></span></a><span class="top-note">TU LABORATORIO · CAPITAL VIRTUAL</span><a class="account-link" href="/mercados">Ver mercados →</a></header>
+  <div class="app-shell">
+    <nav class="sidebar" aria-label="Secciones del panel"><a class="current" href="/practica" aria-current="page">◉ <span>Cartera de práctica</span></a><a href="#diario">✎ <span>Mi diario</span></a><a href="/mercados">▥ <span>Mercados reales</span></a><a href="/mercados#mi-detector">◎ <span>Mi detector</span></a><a href="/panel">⌂ <span>Panel demo</span></a><a href="/premium">⌁ <span>Pulse · demo</span></a><a href="/ayuda">? <span>Ayuda</span></a><div class="sidebar-bottom"><strong>Aprende a tu ritmo</strong><p>Tus operaciones son simuladas. El saldo es virtual y no se envían órdenes.</p><a href="#copias">Guardar una copia →</a></div></nav>
+    <main>
+      <section class="practice-hero" aria-labelledby="practice-title">
+        <img src="/images/practica-neon.webp" width="1672" height="941" alt="" fetchpriority="high" decoding="async">
+        <div><p class="eyebrow">EXPLORA · PRACTICA · APRENDE</p><h1 id="practice-title">Tu próxima idea.<br><em>Primero, practícala.</em></h1><p>Una cartera virtual y un diario para entender cada operación, sus costes y lo que te enseña.</p><div class="practice-hero-actions"><a href="#operacion">Registrar una simulación ↗</a><a href="#diario">Abrir mi diario</a></div><span class="practice-badge">Capital virtual · sin órdenes ni cobros</span></div>
+      </section>
+      <p class="practice-scope">Tú introduces los precios simulados. No se completan con cotizaciones en directo. El registro se conserva en este navegador, sin sincronización entre dispositivos.</p>
+      <p id="practice-status" class="practice-status" role="status" aria-live="polite">Prepara tu capital virtual para empezar.</p>
+      <details class="surface practice-setup" id="practice-setup" open>
+        <summary>Preparar mi cartera de práctica</summary>
+        <p>Elige una moneda y un capital virtual. EUR y USD se mantienen separados: no hacemos conversión de divisas.</p>
+        <form id="setup-form" class="practice-form">
+          <label>Moneda de la cartera<select id="setup-currency"><option value="EUR">EUR · euro</option><option value="USD">USD · dólar</option></select></label>
+          <label>Capital virtual inicial<input id="setup-capital" type="number" min="100" max="1000000" step="0.01" value="10000" required></label>
+          <button type="submit">Preparar cartera</button>
+        </form>
+        <p class="practice-hint">Cambiar de cartera propone sustituir el registro actual. Puedes recuperar el estado anterior desde «Copia y recuperación».</p>
+      </details>
+      <section class="surface practice-pending" id="practice-pending" hidden aria-labelledby="pending-title">
+        <h2 id="pending-title">Revisar la cartera antes de aplicarla</h2><p id="pending-summary"></p>
+        <p>Al aplicarla, esta será tu cartera actual. Conservaremos el estado anterior para que puedas recuperarlo.</p>
+        <div class="practice-actions"><button type="button" id="pending-apply">Usar esta cartera</button><button type="button" id="pending-cancel">Conservar mi cartera actual</button></div>
+      </section>
+      <div id="practice-workspace" hidden>
+        <section class="practice-metrics" aria-label="Resumen de mi cartera virtual" id="practice-metrics"></section>
+        <p class="practice-hint" id="practice-account-note"></p>
+        <div class="practice-columns">
+          <section class="surface practice-trade" id="operacion" aria-labelledby="trade-title">
+            <p class="eyebrow">UNA IDEA, CON SUS NÚMEROS</p><h2 id="trade-title">Registrar una operación simulada</h2>
+            <form id="trade-form" class="practice-form">
+              <label>Operación<select id="trade-side"><option value="buy">Compra simulada</option><option value="sell">Venta simulada</option></select></label>
+              <label>Activo<select id="trade-symbol"></select></label>
+              <label>Fecha<input id="trade-date" type="date" required></label>
+              <label>Unidades<input id="trade-quantity" type="number" min="0.000001" max="1000000" step="0.000001" required placeholder="Ej.: 5"></label>
+              <label><span id="trade-price-label">Precio unitario simulado</span><input id="trade-price" type="number" min="0.00000001" max="1000000" step="0.00000001" required placeholder="Introduce tú el precio"></label>
+              <label><span id="trade-fee-label">Comisión de la simulación</span><input id="trade-fee" type="number" min="0" max="1000000" step="0.01" value="0" required></label>
+              <label class="practice-wide">Mi motivo o aprendizaje<textarea id="trade-note" rows="3" maxlength="500" placeholder="Qué quiero comprobar y qué aprenderé del resultado…"></textarea></label>
+              <p id="trade-estimate" class="practice-wide practice-estimate" role="status">Añade unidades y precio para ver el importe con su comisión.</p>
+              <button class="practice-wide" type="submit" id="trade-submit">Registrar compra simulada</button>
+            </form>
+            <a id="trade-market-link" class="practice-source" href="/mercados">Consultar el activo en Mercados reales ↗</a>
+            <p class="practice-hint">Copiar un precio es una decisión tuya. La fecha de la operación no certifica la fecha de una cotización. Cada nueva operación debe tener una fecha igual o posterior a la última del diario.</p>
+          </section>
+          <section class="surface practice-holdings" aria-labelledby="holdings-title">
+            <p class="eyebrow">TU CARTERA, EN CONTEXTO</p><h2 id="holdings-title">Posiciones abiertas</h2><p class="practice-hint">Coste medio ponderado, con comisiones de compra incluidas. No es el valor actual de mercado.</p>
+            <div id="practice-holdings"></div>
+            <h3>Cómo se reparte el capital al coste</h3><p class="practice-hint">Saldo virtual y coste pendiente de las posiciones. Los porcentajes no representan una valoración actual.</p>
+            <div class="practice-allocation"><div id="allocation-ring" class="allocation-ring" aria-hidden="true"><span>Al coste</span></div><ul id="allocation-list"></ul></div>
+          </section>
+        </div>
+        <section class="surface practice-journal" id="diario" aria-labelledby="journal-title">
+          <div class="journal-cover"><img src="/images/diario-neon.webp" width="1672" height="940" alt="" loading="lazy" decoding="async"><div><p class="eyebrow">TUS DECISIONES TIENEN HISTORIA</p><h2 id="journal-title">Mi diario de práctica</h2><p>El precio, el coste y el motivo. Para revisar lo que pasó y lo que quieres aprender.</p></div></div>
+          <div class="practice-form journal-filters"><label>Buscar en mi diario<input id="journal-search" type="search" maxlength="100" placeholder="Activo o nota…"></label><label>Mostrar operaciones<select id="journal-filter"><option value="all">Todas</option><option value="buy">Compras simuladas</option><option value="sell">Ventas simuladas</option></select></label></div>
+          <p id="journal-count" class="practice-hint" role="status"></p><div id="practice-journal"></div>
+          <p class="practice-hint">El resultado de cada venta descuenta la parte proporcional del coste medio y su comisión. Incluye ventas parciales; no es rentabilidad futura ni una estimación fiscal. Puedes editar la nota de cada registro.</p>
+        </section>
+      </div>
+      <section class="surface practice-backups" id="copias" aria-labelledby="backup-title">
+        <p class="eyebrow">TU TRABAJO, A MANO</p><h2 id="backup-title">Copia y recuperación</h2><p>Descarga la cartera y el diario en un archivo. Puedes cargarlo en otro navegador; revisaremos que las operaciones y los saldos cuadren antes de aplicarlo.</p>
+        <div class="practice-actions"><button type="button" id="practice-export" disabled>Descargar mi copia JSON</button><button type="button" id="practice-recover" disabled>Recuperar estado anterior</button></div>
+        <label class="practice-import">Cargar una copia de MomentumVelo<input id="practice-import" type="file" accept=".json,application/json"></label>
+        <p class="practice-hint">Hasta 500 operaciones y 1 MB. Se guarda la cartera actual y un estado anterior; cada cambio sustituye ese estado anterior. Los archivos se leen aquí y no se envían a un servidor. Borrar los datos del navegador elimina estas copias locales.</p>
+      </section>
+      <noscript><p>Activa JavaScript para utilizar la cartera de práctica.</p></noscript>
+    </main>
+  </div>
+  <footer>MomentumVelo-AI · Operaciones simuladas · <a href="/legal#riesgos">Alcance y riesgos</a></footer>
+</body>
+</html>

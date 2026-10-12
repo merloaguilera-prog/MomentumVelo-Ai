@@ -60,3 +60,25 @@ Fuentes adicionales:
 - Trade Ideas, Holly y simulador: https://www.trade-ideas.com/ti-ai-virtual-trade-assistant/
 - Trade Ideas, histórico: https://www.trade-ideas.com/hollyguide/Holly_Performance_History.html
 - TradingView, límites del widget: https://www.tradingview.com/widget-docs/faq/data/
+
+## Tercera mejora: practicar y revisar decisiones
+
+Ampliación del 11 de octubre de 2026, 23:19 Europe/Madrid. TradingView declara más de 100 millones de traders/inversores en su página About; eToro comunica más de 40 millones de usuarios. Son cifras publicadas por los proveedores, no usuarios activos comparables ni una prueba de seguridad o rentabilidad. Koyfin se incluye por sus funciones de seguimiento documentadas, sin atribuirle un número de usuarios no verificado. No se establece un ranking de fiabilidad ni se compran planes.
+
+| Referencia | Idea funcional | Implementación propia y límite |
+| --- | --- | --- |
+| eToro Virtual Portfolio | Practicar con saldo virtual | Cartera de práctica manual EUR/USD; precios introducidos por el usuario, sin ejecución ni cotizaciones automáticas |
+| TradingView Portfolios | Diario, posiciones, saldo y resultados realizados | Coste medio ponderado, comisiones y ventas parciales; fecha, activo y notas. Sin rendimiento TWR ni valor actual |
+| Koyfin watchlists y dashboards | Seguimiento organizado, notas y resúmenes | Posiciones abiertas, reparto al coste, filtros de diario y notas editables; copia JSON validada y recuperación de estado |
+
+La ilustración neón de cartera y el cuaderno de cristal son originales. Se adaptan funciones habituales con código propio; no se reutilizan interfaces, activos gráficos, señales ni datos privados de terceros.
+
+Fuentes consultadas:
+- TradingView, comunidad: https://www.tradingview.com/about/
+- eToro, comunidad: https://corporate.etoro.com/
+- eToro, práctica: https://www.etoro.com/trading/demo-account/
+- TradingView, portfolios: https://www.tradingview.com/support/solutions/43000760937-tradingview-portfolios-track-your-assets-know-your-trades/
+- TradingView, FIFO y coste medio ponderado: https://es.tradingview.com/support/solutions/43000790167/
+- TradingView, saldo: https://www.tradingview.com/support/solutions/43000756016-portfolio-summary-portfolio-value-and-cash/
+- Koyfin, seguimiento: https://www.koyfin.com/features/watchlists/
+- Koyfin, paneles: https://www.koyfin.com/features/custom-dashboards/
