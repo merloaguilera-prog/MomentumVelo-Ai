@@ -19,7 +19,7 @@ function element(hidden = false) {
   };
 }
 
-function browser({ config = { enabled: true, publishableKey }, responseOk = true, fetchFailure = false, scriptFailure = false, loadFailure = false, pendingConfig = false, origin = 'https://momentumvelo.app', search = '?mode=login' } = {}) {
+function browser({ config = { enabled: true, publishableKey }, responseOk = true, fetchFailure = false, scriptFailure = false, loadFailure = false, pendingConfig = false, origin = 'https://momentumvelo.app', search = '?mode=login', tabMode = 'login' } = {}) {
   const nodes = {
     '[data-auth-view]': element(true), '[data-managed-auth]': element(true),
     '[data-account-view]': element(true), '[data-auth-connection]': element(),
@@ -30,12 +30,12 @@ function browser({ config = { enabled: true, publishableKey }, responseOk = true
   nodes['[data-managed-auth]'].querySelector = () => mount;
   const tab = element();
   tab.disabled = true;
-  tab.dataset = { authMode: 'login' };
+  tab.dataset = { authMode: tabMode };
   tab.classList = { toggle() {} };
-  const scripts = [], requests = [], timers = new Map();
+  const scripts = [], requests = [], redirects = [], timers = new Map();
   let timerId = 0, reloads = 0, storageReads = 0, storageWrites = 0, mounted = '';
   const window = {
-    location: { origin, href: `${origin}/login${search}`, search, reload() { reloads++; } },
+    location: { origin, href: `${origin}/login${search}`, search, reload() { reloads++; }, assign(url) { redirects.push(url); } },
     atob: (value) => Buffer.from(value, 'base64').toString('utf8'),
     setTimeout(callback) { timers.set(++timerId, callback); return timerId; },
     clearTimeout(id) { timers.delete(id); },
@@ -84,7 +84,7 @@ function browser({ config = { enabled: true, publishableKey }, responseOk = true
   });
   vm.runInContext(providerSource, context);
   return {
-    window, nodes, tab, scripts, requests, timers, context,
+    window, nodes, tab, scripts, requests, redirects, timers, context,
     get mounted() { return mounted; }, get reloads() { return reloads; },
     get storageReads() { return storageReads; }, get storageWrites() { return storageWrites; }
   };
@@ -128,7 +128,7 @@ for (const [name, options] of Object.entries({
     assert.equal(page.nodes['[data-auth-connection]'].hidden, false);
     assert.match(page.nodes['[data-auth-connection-message]'].textContent, /No hemos podido conectar/);
     assert.equal(page.nodes['[data-auth-retry]'].hidden, false);
-    assert.equal(page.tab.disabled, true);
+    assert.equal(page.tab.disabled, false);
     assert.equal(page.storageReads, 0);
     assert.equal(page.storageWrites, 0);
     page.nodes['[data-auth-retry]'].listeners.click();
@@ -162,6 +162,10 @@ test('a canonical-domain failure offers the same application signup without redi
   assert.match(page.nodes['[data-auth-temporary-link]'].textContent, /Crear cuenta/);
   assert.match(page.window.location.href, /^https:\/\/momentumvelo.app\//);
   assert.equal(page.storageWrites, 0);
+  assert.deepEqual(page.redirects, []);
+  page.tab.listeners.click();
+  assert.deepEqual(page.redirects, ['https://momentum-velo.vercel.app/login?mode=login']);
+  assert.equal(page.mounted, '');
 });
 
 test('account and unrecognized modes use only the fixed temporary sign-in URL', async () => {
@@ -169,6 +173,19 @@ test('account and unrecognized modes use only the fixed temporary sign-in URL', 
     const page = browser({ loadFailure: true, search });
     assert.equal(await page.window.MomentumVeloAuthReady, 'unavailable');
     assert.equal(page.nodes['[data-auth-temporary-link]'].href, 'https://momentum-velo.vercel.app/login?mode=login');
+  }
+});
+
+test('both error-page tabs open only the fixed corresponding temporary mode on explicit click', async () => {
+  for (const mode of ['login', 'signup']) {
+    const page = browser({ loadFailure: true, tabMode: mode, search: '?mode=signup&email=private&session_id=secret&redirect=https://other.example' });
+    assert.equal(await page.window.MomentumVeloAuthReady, 'unavailable');
+    assert.deepEqual(page.redirects, []);
+    assert.equal(page.tab.disabled, false);
+    page.tab.listeners.click();
+    assert.deepEqual(page.redirects, [`https://momentum-velo.vercel.app/login?mode=${mode}`]);
+    assert.equal(page.storageWrites, 0);
+    assert.equal(page.nodes['[data-auth-view]'].hidden, true);
   }
 });
 
@@ -184,6 +201,8 @@ test('the temporary origin and preview failures never offer a self-loop or produ
     assert.equal(await page.window.MomentumVeloAuthReady, 'unavailable');
     assert.equal(page.nodes['[data-auth-temporary]'].hidden, true);
     assert.equal(page.nodes['[data-auth-temporary-link]'].href, undefined);
+    assert.equal(page.tab.disabled, true);
+    assert.deepEqual(page.redirects, []);
   }
 });
 
