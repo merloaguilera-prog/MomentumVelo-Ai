@@ -136,7 +136,7 @@
     status.textContent = "Cargando el gráfico del proveedor…";
     document.querySelector("#quote-title").textContent = option.textContent;
     document.querySelector("#market-timing").textContent = option.dataset.timing === "delayed"
-      ? "Acción · cotización con retraso. El estado del mercado y la moneda aparecen en el gráfico."
+      ? "Cotización con retraso o de cierre, según la bolsa. El estado del mercado y la moneda aparecen en el gráfico."
       : "Datos de la fuente seleccionada · consulta el estado y el periodo del dato en el gráfico.";
     source.href = `https://www.tradingview.com/symbols/${option.value.replace(":", "-")}/`;
     source.textContent = `consulta ${name} en TradingView ↗`;
@@ -188,7 +188,7 @@
     container.appendChild(script);
   }
 
-  const requestedSymbol = new URLSearchParams(window.location.search).get("activo");
+  const requestedSymbol = new URLSearchParams(window.location.search).get("activo") || new URLSearchParams(window.location.search).get("tvwidgetsymbol");
   if (options.some(option => option.value === requestedSymbol)) selector.value = requestedSymbol;
   selector.addEventListener("change", render);
   document.querySelector("#market-retry").addEventListener("click", render);
