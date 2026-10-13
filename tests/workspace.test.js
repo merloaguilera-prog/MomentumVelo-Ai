@@ -16,13 +16,16 @@ test("backup round trip includes notes on non-favorites, Unicode and literal mar
   const state={favorites:[symbols[0]],notes:{[symbols[2]]:"✎ <script>alert(1)</script>",[symbols[1]]:"Á".repeat(2000)}};
   const text=core.serializeBackup(state,symbols,new Date("2026-10-13T00:00:00Z"));
   assert.deepEqual(core.parseBackup(text,symbols),{version:1,...state});
+  const all=Array.from({length:11},(_,i)=>`X:${i}`);
+  const worst={favorites:all,notes:Object.fromEntries(all.map(s=>[s,"\u0000".repeat(2000)]))};
+  assert.deepEqual(core.parseBackup(core.serializeBackup(worst,all),all),{version:1,...worst});
 });
 test("imports reject malformed, oversized, foreign-symbol and dangerous-key backups atomically", () => {
   const valid={favorites:[],notes:{}};
   for(const text of ["{",wrap({...valid,version:2}),wrap({...valid,favorites:["OTHER:X"]}),wrap({...valid,notes:{[symbols[0]]:9}}),wrap({...valid,notes:{[symbols[0]]:"a".repeat(2001)}}),'{"format":"momentumvelo-workspace","version":1,"favorites":[],"notes":{"__proto__":"bad"}}']) {
     assert.throws(()=>core.parseBackup(text,symbols));
   }
-  assert.throws(()=>core.parseBackup("á".repeat(64001),symbols),/128 KB/);
+  assert.throws(()=>core.parseBackup("á".repeat(128001),symbols),/256 KB/);
   assert.equal({}.bad,undefined);
 });
 test("merge is non-destructive, counts conflicts and is idempotent", () => {

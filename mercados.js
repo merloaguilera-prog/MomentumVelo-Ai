@@ -205,7 +205,7 @@
     const file = event.target.files[0];
     if (!file) return;
     try {
-      if (file.size > workspaceCore.MAX_BYTES) throw new Error("La copia supera el límite de 128 KB.");
+      if (file.size > workspaceCore.MAX_BYTES) throw new Error("La copia supera el límite de 256 KB.");
       const text = await file.text();
       if (token !== fileGeneration) return;
       backupText.value = text;

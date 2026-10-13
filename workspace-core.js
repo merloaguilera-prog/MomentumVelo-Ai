@@ -4,7 +4,7 @@
   else root.MomentumWorkspace = api;
 })(typeof globalThis !== "undefined" ? globalThis : this, function () {
   "use strict";
-  const MAX_BYTES = 128000;
+  const MAX_BYTES = 256000;
   function normalize(text) {
     return String(text).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   }
@@ -18,7 +18,7 @@
   }
   function parseBackup(text, knownSymbols) {
     if (typeof text !== "string" || new TextEncoder().encode(text).length > MAX_BYTES) {
-      throw new Error("La copia supera el límite de 128 KB.");
+      throw new Error("La copia supera el límite de 256 KB.");
     }
     let data;
     try { data = JSON.parse(text); } catch (_) { throw new Error("La copia no contiene JSON válido."); }
