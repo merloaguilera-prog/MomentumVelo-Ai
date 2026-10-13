@@ -24,8 +24,11 @@
       });
       const data = await response.json();
       if (response.status === 202 && data.pending) {
-        message.textContent = "Tu pago está pendiente de confirmación.";
+        message.textContent = data.paymentConfirmed
+          ? "Pago confirmado. Estamos esperando la activación de Premium en tu cuenta."
+          : "Tu pago está pendiente de confirmación.";
         status.textContent = data.message;
+        portalButton.hidden = data.paymentConfirmed !== true;
         retryButton.hidden = false;
         return;
       }

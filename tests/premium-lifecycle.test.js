@@ -37,7 +37,7 @@ function response() { return { headers: {}, code: 200,
   setHeader(key, value) { this.headers[key] = value; },
   status(code) { this.code = code; return this; }, json(body) { this.body = body; return this; } }; }
 function fixture() {
-  const f = { current: subscription(), checkout: { ...session }, writes: [], reads: 0, result: true, user: "user_fixture" };
+  const f = { current: subscription(), checkout: { ...session }, writes: [], reads: 0, result: true, user: "user_fixture", provisioned: true, entitlementReads: 0 };
   const sdk = new Stripe(env.STRIPE_SECRET_KEY);
   class FakeStripe {
     constructor() {
@@ -48,6 +48,12 @@ function fixture() {
   }
   const clerk = {
     getAuthenticatedUser: async () => f.user ? { userId: f.user } : null,
+    hasUserPremiumEntitlement: async (...args) => {
+      f.entitlementReads++;
+      f.entitlementArgs = args;
+      if (f.entitlementError) throw f.entitlementError;
+      return f.provisioned;
+    },
     updateUserPlan: async (...args) => { if (f.error) throw f.error; f.writes.push(args); return f.result; }
   };
   f.webhook = load("webhook", { stripe: FakeStripe, "./_clerk": clerk });
@@ -176,6 +182,39 @@ test("return distinguishes pending payment from paid Premium and past_due", () =
   assert.equal((await f.check()).body.active, false);
 }));
 
+test("paid return waits for webhook provisioning and rechecks without writing or exposing Premium links", () => environment(async () => {
+  const f = fixture(); f.provisioned = false;
+  const pending = await f.check();
+  assert.equal(pending.code,202);assert.equal(pending.body.active,false);
+  assert.equal(pending.body.paymentConfirmed,true);assert.equal(pending.body.pending,true);
+  assert.equal(pending.body.telegramUrl,undefined);assert.equal(f.writes.length,0);
+  assert.deepEqual(f.entitlementArgs,["user_fixture","cus_fixture","sub_fixture"]);
+  f.provisioned=true;assert.equal((await f.check()).body.active,true);
+  f.entitlementError=new Error("Clerk unavailable");
+  const error=await f.check();assert.equal(error.code,500);assert.equal(error.body.active,undefined);
+  assert.equal(f.writes.length,0);
+}));
+
+test("unpaid, unauthorized and mismatched Stripe returns never read account entitlements", () => environment(async () => {
+  const f=fixture();f.user=null;await f.check();assert.equal(f.entitlementReads,0);
+  f.user="user_fixture";f.checkout.payment_status="unpaid";f.current.latest_invoice.status="open";
+  await f.check();assert.equal(f.entitlementReads,0);
+  f.checkout={...session,customer:"cus_other"};f.current=subscription();
+  await f.check();assert.equal(f.entitlementReads,0);
+}));
+
+test("Clerk access must match the actual customer and subscription, not just the plan label", () => environment(async () => {
+  const current={publicMetadata:{plan:"premium",premiumStatus:"active"},privateMetadata:{stripeCustomerId:"cus_fixture",stripeSubscriptionId:"sub_fixture"}};
+  const clerk=load("_clerk",{"@clerk/backend":{createClerkClient:()=>({users:{getUser:async()=>current}})}});
+  assert.equal(await clerk.hasUserPremiumEntitlement("user_fixture","cus_fixture","sub_fixture"),true);
+  assert.equal(await clerk.hasUserPremiumEntitlement("user_fixture","cus_other","sub_fixture"),false);
+  assert.equal(await clerk.hasUserPremiumEntitlement("user_fixture","cus_fixture","sub_old"),false);
+  current.publicMetadata.premiumStatus="past_due";
+  assert.equal(await clerk.hasUserPremiumEntitlement("user_fixture","cus_fixture","sub_fixture"),false);
+  current.publicMetadata.premiumStatus="active";current.publicMetadata.plan="free";
+  assert.equal(await clerk.hasUserPremiumEntitlement("user_fixture","cus_fixture","sub_fixture"),false);
+}));
+
 test("Clerk metadata failures throw while late old-subscription events preserve the current plan", () => environment(async () => {
   const writes = []; const current = { publicMetadata: { plan: "premium" }, privateMetadata: { stripeSubscriptionId: "sub_current" } };
   const clerk = load("_clerk", { "@clerk/backend": { createClerkClient: () => ({ users: {
@@ -190,28 +229,34 @@ test("Clerk metadata failures throw while late old-subscription events preserve 
   assert.equal(writes.length, 1);
 }));
 
-test("pending payment screen offers retry and never claims payment confirmed", async () => {
+test("return screen distinguishes unpaid, paid-but-unprovisioned and activated accounts", async () => {
   const nodes = {};
   for (const id of ["verification-message", "result-status", "portal-button", "retry-button"]) {
     nodes[id] = { hidden: true, textContent: "", classList: { add() {}, remove() {} },
       addEventListener(name, fn) { this[name] = fn; } };
   }
-  let paid = false;
+  let stage = 0;
   const ready = vm.runInNewContext(fs.readFileSync(require.resolve("../success.js"), "utf8"), {
     document: { getElementById: id => nodes[id] }, URLSearchParams, encodeURIComponent, Error,
     window: { location: { search: "?session_id=cs_test_fixture" }, MomentumVeloAuthReady: Promise.resolve("managed"),
       Clerk: { session: { getToken: async () => "fixture-token" } } },
     fetch: async (_url, options) => {
       assert.equal(options.headers.Authorization, "Bearer fixture-token");
-      return { status: paid ? 200 : 202, ok: true,
-        json: async () => paid ? { active: true } : { active: false, pending: true, message: "Pago pendiente." } };
+      return { status: stage === 2 ? 200 : 202, ok: true,
+        json: async () => stage === 2 ? { active: true } : stage === 1
+          ? { active: false, pending: true, paymentConfirmed: true, message: "Pago confirmado; no vuelvas a pagar." }
+          : { active: false, pending: true, message: "Pago pendiente." } };
     }
   });
   await ready;
   assert.match(nodes["verification-message"].textContent, /pendiente/);
   assert.equal(nodes["portal-button"].hidden, true); assert.equal(nodes["retry-button"].hidden, false);
   assert.doesNotMatch(nodes["result-status"].textContent, /Pago confirmado/);
-  paid = true; await nodes["retry-button"].click();
+  stage = 1; await nodes["retry-button"].click();
+  assert.match(nodes["verification-message"].textContent,/esperando la activación/);
+  assert.equal(nodes["portal-button"].hidden,false);assert.equal(nodes["retry-button"].hidden,false);
+  assert.match(nodes["result-status"].textContent,/no vuelvas a pagar/);
+  stage = 2; await nodes["retry-button"].click();
   assert.match(nodes["result-status"].textContent, /Pago confirmado/);
   assert.equal(nodes["portal-button"].hidden, false); assert.equal(nodes["retry-button"].hidden, true);
 });
