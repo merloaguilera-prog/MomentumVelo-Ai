@@ -99,7 +99,7 @@
       }
       if (!response.ok || !data.url) throw new Error(data.error || "No se pudo preparar la contratación de Premium.");
       const url = new URL(data.url);
-      if (url.protocol !== "https:" || url.hostname !== "checkout.stripe.com" || url.username || url.password) {
+      if (url.protocol !== "https:" || url.hostname !== "checkout.stripe.com" || url.port || url.username || url.password) {
         throw new Error("No se recibió una página de pago segura.");
       }
       window.location.assign(url.href);
@@ -150,6 +150,28 @@
     }
   }
 
+  async function closeSession(button) {
+    if (button.disabled) return;
+    const originalText = button.textContent;
+    const status = document.querySelector("[data-premium-status]");
+    button.disabled = true;
+    button.textContent = "Cerrando sesión…";
+    button.setAttribute("aria-busy", "true");
+    if (status) { status.textContent = ""; status.classList.remove("error"); }
+    try {
+      await withTimeout(window.Clerk.signOut({ redirectUrl: "/" }));
+    } catch (error) {
+      if (status) {
+        status.textContent = error instanceof Error ? error.message : "No se ha podido cerrar la sesión. Vuelve a intentarlo.";
+        status.classList.add("error");
+      }
+      button.disabled = false;
+      button.textContent = originalText;
+    } finally {
+      button.setAttribute("aria-busy", "false");
+    }
+  }
+
   function showManagedAccount() {
     const user = window.Clerk.user;
     const accountView = document.querySelector("[data-account-view]");
@@ -166,24 +188,34 @@
     const plan = user.publicMetadata?.plan === "premium" ? "premium" : "free";
     const billingStatus = user.publicMetadata?.premiumStatus;
     const paymentPending = plan !== "premium" && ["past_due", "unpaid", "incomplete"].includes(billingStatus);
+    const hasOngoingSubscription = ["active", "trialing", "past_due", "unpaid", "incomplete", "paused"].includes(billingStatus);
+    const freeBillingMessages = {
+      active: "Tienes una suscripción vinculada. Revisa su estado desde la gestión de Premium antes de iniciar otra contratación.",
+      trialing: "Tu suscripción está en periodo de prueba. Puedes consultar su estado desde la gestión de Premium.",
+      paused: "Tu suscripción Premium está en pausa. Puedes revisar sus opciones desde la gestión de tu suscripción."
+    };
+    const freeBillingPlans = {
+      active: "Trader · Premium por confirmar",
+      trialing: "Trader · Premium en periodo de prueba",
+      paused: "Trader · Premium en pausa"
+    };
     // Billing management remains available after access is suspended or canceled.
     // The API verifies the user and their private Stripe customer ID before opening it.
-    const hasBillingHistory = ["active", "trialing", "past_due", "unpaid", "incomplete",
-      "incomplete_expired", "canceled", "paused"].includes(billingStatus);
+    const hasBillingHistory = hasOngoingSubscription || ["incomplete_expired", "canceled"].includes(billingStatus);
     document.querySelector("[data-account-title]").textContent = `Hola, ${name}`;
     document.querySelector("[data-account-message]").textContent = plan === "premium"
       ? "Tu suscripción Premium está activa y vinculada a esta cuenta."
       : paymentPending
         ? "Tu pago de Premium está pendiente. Puedes revisarlo o actualizar el método de pago desde la gestión de tu suscripción."
-        : "Has iniciado sesión correctamente en tu cuenta gratuita.";
+        : freeBillingMessages[billingStatus] || "Has iniciado sesión correctamente en tu cuenta gratuita.";
     document.querySelector("[data-account-email]").textContent = primaryEmail(user);
     document.querySelector("[data-account-plan]").textContent = plan === "premium"
       ? "Premium · 49 €/mes"
-      : paymentPending ? "Trader · Premium pendiente de pago" : "Trader · 0 €/mes";
+      : paymentPending ? "Trader · Premium pendiente de pago" : freeBillingPlans[billingStatus] || "Trader · 0 €/mes";
 
     const premiumButton = accountView.querySelector("[data-premium-next]");
     if (premiumButton) {
-      premiumButton.hidden = plan === "premium" || paymentPending;
+      premiumButton.hidden = plan === "premium" || hasOngoingSubscription;
       premiumButton.textContent = premiumSalesEnabled ? "Activar Premium · 49 €/mes" : "Premium · en preparación";
       premiumButton.setAttribute("aria-label", premiumSalesEnabled ? "Abrir el pago seguro de Premium, 49 euros al mes" : "Consultar el estado de Premium");
       premiumButton.addEventListener("click", () => premiumSalesEnabled
@@ -199,9 +231,7 @@
 
     const signoutButton = accountView.querySelector("[data-signout]");
     if (signoutButton) {
-      signoutButton.addEventListener("click", async () => {
-        await window.Clerk.signOut({ redirectUrl: "/" });
-      }, { once: true });
+      signoutButton.addEventListener("click", () => closeSession(signoutButton));
     }
   }
 

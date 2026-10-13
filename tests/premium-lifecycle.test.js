@@ -36,7 +36,7 @@ function load(name, dependencies) {
 function response() { return { headers: {}, code: 200,
   setHeader(key, value) { this.headers[key] = value; },
   status(code) { this.code = code; return this; }, json(body) { this.body = body; return this; } }; }
-function fixture() {
+function fixture(clerkOverrides = {}) {
   const f = { current: subscription(), checkout: { ...session }, writes: [], reads: 0, result: true, user: "user_fixture" };
   const sdk = new Stripe(env.STRIPE_SECRET_KEY);
   class FakeStripe {
@@ -48,7 +48,8 @@ function fixture() {
   }
   const clerk = {
     getAuthenticatedUser: async () => f.user ? { userId: f.user } : null,
-    updateUserPlan: async (...args) => { if (f.error) throw f.error; f.writes.push(args); return f.result; }
+    updateUserPlan: async (...args) => { if (f.error) throw f.error; f.writes.push(args); return f.result; },
+    ...clerkOverrides
   };
   f.webhook = load("webhook", { stripe: FakeStripe, "./_clerk": clerk });
   f.verify = load("subscription", { stripe: FakeStripe, "./_clerk": clerk });
@@ -188,6 +189,39 @@ test("Clerk metadata failures throw while late old-subscription events preserve 
   assert.equal(writes.length, 0);
   assert.equal(await clerk.updateUserPlan("user_fixture", "free", { subscriptionId: "sub_current" }), true);
   assert.equal(writes.length, 1);
+}));
+
+test("a newly paid subscription replaces an old saved ID regardless of cancellation delivery order", () => environment(async () => {
+  for (const order of ["new-first", "old-first"]) {
+    const current = { publicMetadata: { plan: "premium", premiumStatus: "active" },
+      privateMetadata: { stripeCustomerId: "cus_fixture", stripeSubscriptionId: "sub_old" } };
+    const clerk = load("_clerk", { "@clerk/backend": { createClerkClient: () => ({ users: {
+      getUser: async () => structuredClone(current),
+      updateUserMetadata: async (_user, update) => {
+        Object.assign(current.publicMetadata, update.publicMetadata);
+        Object.assign(current.privateMetadata, update.privateMetadata);
+      }
+    } }) } });
+    const f = fixture({ updateUserPlan: clerk.updateUserPlan });
+    const oldCanceled = { ...subscription("canceled"), id: "sub_old" };
+    const newPaid = { ...subscription(), id: "sub_new" };
+    const cancelOld = async () => {
+      f.current = oldCanceled;
+      assert.equal((await f.send("customer.subscription.deleted", oldCanceled)).code, 200);
+    };
+    if (order === "old-first") await cancelOld();
+    f.current = newPaid;
+    const newCheckout = { ...session, subscription: "sub_new" };
+    assert.equal((await f.send("checkout.session.completed", newCheckout)).code, 200);
+    assert.equal(current.publicMetadata.plan, "premium");
+    assert.equal(current.privateMetadata.stripeSubscriptionId, "sub_new", order);
+    // A delayed cancellation or paid snapshot from the canceled old subscription must not revoke the new one.
+    await cancelOld();
+    assert.equal((await f.send("checkout.session.async_payment_succeeded", { ...session, subscription: "sub_old" })).code, 200);
+    assert.equal(current.publicMetadata.plan, "premium");
+    assert.equal(current.privateMetadata.stripeSubscriptionId, "sub_new");
+    assert.equal(current.privateMetadata.stripeCustomerId, "cus_fixture");
+  }
 }));
 
 test("pending payment screen offers retry and never claims payment confirmed", async () => {

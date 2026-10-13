@@ -40,8 +40,9 @@ async function updateUserPlan(userId, plan, details = {}) {
   const clerk = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
   const user = await clerk.users.getUser(userId);
   const currentSubscriptionId = user.privateMetadata?.stripeSubscriptionId;
-  // A late event from an old subscription must not replace the current paid plan.
-  if (user.publicMetadata?.plan === "premium" && currentSubscriptionId
+  // Ignore revocation from another subscription, but allow a newly verified paid
+  // subscription to replace an old ID whose cancellation delivery is delayed.
+  if (plan !== "premium" && user.publicMetadata?.plan === "premium" && currentSubscriptionId
       && details.subscriptionId && currentSubscriptionId !== details.subscriptionId) return true;
   await clerk.users.updateUserMetadata(userId, {
     publicMetadata: {
