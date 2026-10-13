@@ -104,6 +104,25 @@
     });
     document.querySelector("#market-note-name").textContent = options.find(item => item.value === current).textContent.split(" · ")[0];
     if (loadNote) note.value = workspace.notes[current] || "";
+    const notesList = document.querySelector("#workspace-all-notes");
+    const savedNotes = workspaceCore.listNotes(workspace, assets);
+    notesList.replaceChildren();
+    document.querySelector("#workspace-notes-empty").hidden = savedNotes.length > 0;
+    savedNotes.forEach(item => {
+      const row = document.createElement("li");
+      const open = document.createElement("button");
+      open.type = "button";
+      open.className = "favorite-open saved-note-open";
+      open.setAttribute("aria-label", `Abrir nota de ${item.label}`);
+      const label = document.createElement("strong");
+      label.textContent = item.label;
+      const preview = document.createElement("span");
+      preview.textContent = item.text.slice(0, 120) + (item.text.length > 120 ? "…" : "");
+      open.append(label, preview);
+      open.addEventListener("click", () => { selector.value = item.symbol; render(); note.focus(); });
+      row.appendChild(open);
+      notesList.appendChild(row);
+    });
   }
 
   function render() {

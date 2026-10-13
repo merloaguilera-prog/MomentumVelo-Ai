@@ -36,6 +36,11 @@
     Object.keys(data.notes).forEach(s => { if (data.notes[s].trim()) notes[s] = data.notes[s]; });
     return { version: 1, favorites: [...new Set(data.favorites)], notes };
   }
+  function listNotes(state, assets) {
+    return assets.filter(a => typeof state.notes[a.symbol] === "string" && state.notes[a.symbol].trim())
+      .map(a => ({ ...a, text: state.notes[a.symbol] }))
+      .sort((a, b) => a.label.localeCompare(b.label, "es"));
+  }
   function mergeBackup(current, imported) {
     const favorites = [...new Set(current.favorites.concat(imported.favorites))];
     const notes = { ...current.notes };
@@ -55,5 +60,5 @@
     });
     return JSON.stringify({ format: "momentumvelo-workspace", version: 1, exportedAt: date.toISOString(), favorites, notes }, null, 2);
   }
-  return { MAX_BYTES, filterFavorites, parseBackup, mergeBackup, serializeBackup };
+  return { MAX_BYTES, filterFavorites, listNotes, parseBackup, mergeBackup, serializeBackup };
 });

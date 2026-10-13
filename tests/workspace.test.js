@@ -4,6 +4,12 @@ const core = require("../workspace-core");
 const symbols = ["NASDAQ:NVDA", "BME:IBE", "NASDAQ:AAPL"];
 const assets = [{symbol:symbols[0],label:"Nvidia"},{symbol:symbols[1],label:"Iberdróla"},{symbol:symbols[2],label:"Apple"}];
 const wrap = data => JSON.stringify({format:"momentumvelo-workspace",version:1,...data});
+test("all notes include non-favorite assets, ignore whitespace and retain literal text", () => {
+  const state={favorites:[],notes:{[symbols[0]]:" ",[symbols[1]]:"original",[symbols[2]]:"<b>sin HTML</b>","OTHER:X":"unknown"}};
+  const before=JSON.stringify(state);
+  assert.deepEqual(core.listNotes(state,assets).map(a=>[a.symbol,a.text]),[[symbols[2],"<b>sin HTML</b>"],[symbols[1],"original"]]);
+  assert.equal(JSON.stringify(state),before);
+});
 test("favorite filters preserve saved order, match accented names/tickers and identify actual notes", () => {
   const state={favorites:symbols,notes:{[symbols[0]]:"   ",[symbols[1]]:"revisar"}};
   assert.deepEqual(core.filterFavorites(state,assets,"",false,"added").map(a=>a.symbol),symbols);
