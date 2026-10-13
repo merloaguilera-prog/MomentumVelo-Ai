@@ -32,6 +32,16 @@
     }
     if (message) message.textContent = "No hemos podido conectar con el acceso seguro. Reintenta la conexión o consulta la ayuda. No se ha creado ninguna cuenta local de prueba.";
     if (retry) retry.hidden = false;
+    const temporary = document.querySelector("[data-auth-temporary]");
+    const temporaryLink = document.querySelector("[data-auth-temporary-link]");
+    // Offer an explicit route to the same Clerk application, never an automatic
+    // cross-origin redirect or a destination supplied by query parameters.
+    if (temporary && temporaryLink && window.location.origin === "https://momentumvelo.app") {
+      const mode = new URLSearchParams(window.location.search).get("mode") === "signup" ? "signup" : "login";
+      temporaryLink.href = `https://momentum-velo.vercel.app/login?mode=${mode}`;
+      temporaryLink.textContent = mode === "signup" ? "Crear cuenta en el acceso temporal" : "Entrar en el acceso temporal";
+      temporary.hidden = false;
+    }
     document.querySelectorAll("[data-auth-view], [data-managed-auth], [data-account-view]").forEach((view) => {
       view.hidden = true;
     });
@@ -39,6 +49,8 @@
   }
 
   function finishConnection() {
+    const temporary = document.querySelector("[data-auth-temporary]");
+    if (temporary) temporary.hidden = true;
     const connection = document.querySelector("[data-auth-connection]");
     if (connection) {
       connection.hidden = true;
