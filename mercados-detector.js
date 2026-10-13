@@ -60,6 +60,17 @@
         catch (_) { event.preventDefault(); message("No se pudo preparar el histórico en esta pestaña. Abre Comparar históricos y carga allí tu CSV.", true); }
       });
       const comparisonActions = element("div", "", "market-controls"); comparisonActions.append(compare);
+      const catalog = Array.from($("market-symbol").options);
+      const key = loaded.asset.trim().toUpperCase();
+      const matches = catalog.filter(option => option.value.toUpperCase() === key || option.value.split(":")[1].toUpperCase() === key || option.textContent.split(" · ")[0].toUpperCase() === key);
+      if (matches.length === 1) {
+        const openQuote = element("a", "Consultar cotización y gráfico actuales ↗");
+        openQuote.href = `/mercados?activo=${encodeURIComponent(matches[0].value)}#cotizacion`;
+        comparisonActions.append(openQuote);
+      }
+      const practice = element("a", "Probar mi decisión con capital virtual ↗"); practice.href = "/practica";
+      comparisonActions.append(practice);
+
       result.append(title, origin, dateNote, cards, signals, chart, history, comparisonActions); result.hidden = false;
       let saved = true;
       try { localStorage.setItem(settingsKey, JSON.stringify(settings)); } catch (_) { saved = false; }
