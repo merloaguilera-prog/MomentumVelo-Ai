@@ -19,11 +19,12 @@ function element(hidden = false) {
   };
 }
 
-function browser({ config = { enabled: true, publishableKey }, responseOk = true, fetchFailure = false, scriptFailure = false, loadFailure = false, pendingConfig = false } = {}) {
+function browser({ config = { enabled: true, publishableKey }, responseOk = true, fetchFailure = false, scriptFailure = false, loadFailure = false, pendingConfig = false, origin = 'https://momentumvelo.app', search = '?mode=login' } = {}) {
   const nodes = {
     '[data-auth-view]': element(true), '[data-managed-auth]': element(true),
     '[data-account-view]': element(true), '[data-auth-connection]': element(),
-    '[data-auth-connection-message]': element(), '[data-auth-retry]': element(true)
+    '[data-auth-connection-message]': element(), '[data-auth-retry]': element(true),
+    '[data-auth-temporary]': element(true), '[data-auth-temporary-link]': element()
   };
   const mount = element();
   nodes['[data-managed-auth]'].querySelector = () => mount;
@@ -34,7 +35,7 @@ function browser({ config = { enabled: true, publishableKey }, responseOk = true
   const scripts = [], requests = [], timers = new Map();
   let timerId = 0, reloads = 0, storageReads = 0, storageWrites = 0, mounted = '';
   const window = {
-    location: { origin: 'https://momentumvelo.app', href: 'https://momentumvelo.app/login?mode=login', search: '?mode=login', reload() { reloads++; } },
+    location: { origin, href: `${origin}/login${search}`, search, reload() { reloads++; } },
     atob: (value) => Buffer.from(value, 'base64').toString('utf8'),
     setTimeout(callback) { timers.set(++timerId, callback); return timerId; },
     clearTimeout(id) { timers.delete(id); },
@@ -151,6 +152,39 @@ test('only explicitly disabled Clerk allows the local demo', async () => {
   assert.equal(page.nodes['[data-auth-view]'].hidden, false);
   assert.equal(page.nodes['[data-auth-connection]'].hidden, true);
   assert.equal(page.scripts.length, 0);
+});
+
+test('a canonical-domain failure offers the same application signup without redirecting or forwarding URL data', async () => {
+  const page = browser({ loadFailure: true, search: '?mode=signup&redirect=https://other.example&token=private&plan=premium' });
+  assert.equal(await page.window.MomentumVeloAuthReady, 'unavailable');
+  assert.equal(page.nodes['[data-auth-temporary]'].hidden, false);
+  assert.equal(page.nodes['[data-auth-temporary-link]'].href, 'https://momentum-velo.vercel.app/login?mode=signup');
+  assert.match(page.nodes['[data-auth-temporary-link]'].textContent, /Crear cuenta/);
+  assert.match(page.window.location.href, /^https:\/\/momentumvelo.app\//);
+  assert.equal(page.storageWrites, 0);
+});
+
+test('account and unrecognized modes use only the fixed temporary sign-in URL', async () => {
+  for (const search of ['?mode=account', '?mode=https://other.example', '']) {
+    const page = browser({ loadFailure: true, search });
+    assert.equal(await page.window.MomentumVeloAuthReady, 'unavailable');
+    assert.equal(page.nodes['[data-auth-temporary-link]'].href, 'https://momentum-velo.vercel.app/login?mode=login');
+  }
+});
+
+test('a working canonical connection hides the temporary route', async () => {
+  const page = browser();
+  assert.equal(await page.window.MomentumVeloAuthReady, 'managed');
+  assert.equal(page.nodes['[data-auth-temporary]'].hidden, true);
+});
+
+test('the temporary origin and preview failures never offer a self-loop or production transfer', async () => {
+  for (const origin of ['https://momentum-velo.vercel.app', 'https://preview.vercel.app', 'https://momentumvelo.app.other.example']) {
+    const page = browser({ loadFailure: true, origin });
+    assert.equal(await page.window.MomentumVeloAuthReady, 'unavailable');
+    assert.equal(page.nodes['[data-auth-temporary]'].hidden, true);
+    assert.equal(page.nodes['[data-auth-temporary-link]'].href, undefined);
+  }
 });
 
 test('a missing auth provider cannot enable local signup', async () => {
