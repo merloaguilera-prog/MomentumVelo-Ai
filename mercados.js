@@ -10,6 +10,17 @@
   const favoriteButton = document.querySelector("#market-favorite");
   const note = document.querySelector("#market-note");
   const workspaceStatus = document.querySelector("#workspace-status");
+  const workspaceCore = window.MomentumWorkspace;
+  const assets = options.map(option => ({ symbol: option.value, label: option.textContent }));
+  const knownSymbols = assets.map(a => a.symbol);
+  const searchFavorites = document.querySelector("#favorites-search");
+  const orderFavorites = document.querySelector("#favorites-order");
+  const notesOnly = document.querySelector("#favorites-notes-only");
+  const transferStatus = document.querySelector("#workspace-transfer-status");
+  const backupText = document.querySelector("#workspace-json");
+  const importButton = document.querySelector("#workspace-import");
+  let pendingBackup = null;
+  let fileGeneration = 0;
   let workspace = { version: 1, favorites: [], notes: {} };
   let storageFailed = false;
   let generation = 0;
@@ -59,7 +70,11 @@
     document.querySelector("#market-favorite-count").textContent = `${workspace.favorites.length} favoritos`;
     document.querySelector("#market-favorites-empty").hidden = workspace.favorites.length > 0;
     favorites.replaceChildren();
-    workspace.favorites.forEach(symbol => {
+    const visible = workspaceCore.filterFavorites(workspace, assets, searchFavorites.value, notesOnly.checked, orderFavorites.value);
+    document.querySelector("#favorites-results").textContent = workspace.favorites.length
+      ? `${visible.length} de ${workspace.favorites.length} favoritos${visible.length ? "" : ": cambia la búsqueda o el filtro para verlos"}.`
+      : "";
+    visible.forEach(({ symbol }) => {
       const option = options.find(item => item.value === symbol);
       const row = document.createElement("li");
       const open = document.createElement("button");
@@ -79,6 +94,12 @@
         renderWorkspace(false);
       });
       row.append(open, remove);
+      if ((workspace.notes[symbol] || "").trim()) {
+        const badge = document.createElement("span");
+        badge.className = "favorite-note-badge";
+        badge.textContent = "✎ Nota";
+        row.insertBefore(badge, remove);
+      }
       favorites.appendChild(row);
     });
     document.querySelector("#market-note-name").textContent = options.find(item => item.value === current).textContent.split(" · ")[0];
@@ -165,6 +186,78 @@
       if (note.value) state.notes[selector.value] = note.value.slice(0, 2000);
       else delete state.notes[selector.value];
     });
+    renderWorkspace(false);
+  });
+  [searchFavorites, orderFavorites, notesOnly].forEach(control => {
+    control.addEventListener(control === searchFavorites ? "input" : "change", () => renderWorkspace(false));
+  });
+  function resetPreview() {
+    pendingBackup = null;
+    importButton.hidden = true;
+    transferStatus.classList.remove("error");
+    transferStatus.textContent = "Pulsa Revisar copia antes de importar. Tus datos actuales se conservan.";
+  }
+  backupText.addEventListener("input", () => { fileGeneration++; resetPreview(); });
+  document.querySelector("#workspace-file").addEventListener("change", async event => {
+    const token = ++fileGeneration;
+    resetPreview();
+    backupText.value = "";
+    const file = event.target.files[0];
+    if (!file) return;
+    try {
+      if (file.size > workspaceCore.MAX_BYTES) throw new Error("La copia supera el límite de 128 KB.");
+      const text = await file.text();
+      if (token !== fileGeneration) return;
+      backupText.value = text;
+      transferStatus.textContent = "Copia cargada. Pulsa Revisar copia; todavía no se ha importado nada.";
+    } catch (error) {
+      if (token !== fileGeneration) return;
+      transferStatus.classList.add("error");
+      transferStatus.textContent = error.message || "No se pudo leer la copia.";
+    }
+  });
+  document.querySelector("#workspace-preview").addEventListener("click", () => {
+    resetPreview();
+    try {
+      pendingBackup = workspaceCore.parseBackup(backupText.value, knownSymbols);
+      const preview = workspaceCore.mergeBackup(workspace, pendingBackup);
+      transferStatus.textContent = `Se añadirían ${preview.addedFavorites} favoritos y ${preview.addedNotes} notas. ${preview.conflicts} notas distintas conservarán la versión que ya tienes. No se borra ningún dato.`;
+      importButton.hidden = false;
+    } catch (error) {
+      transferStatus.classList.add("error");
+      transferStatus.textContent = error.message;
+    }
+  });
+  importButton.addEventListener("click", () => {
+    if (!pendingBackup) return;
+    let result;
+    saveWorkspace(state => {
+      result = workspaceCore.mergeBackup(state, pendingBackup);
+      state.favorites = result.state.favorites;
+      state.notes = result.state.notes;
+    });
+    renderWorkspace(true);
+    pendingBackup = null;
+    importButton.hidden = true;
+    transferStatus.textContent = `Añadidos ${result.addedFavorites} favoritos y ${result.addedNotes} notas. ${result.conflicts} notas distintas se han conservado sin sobrescribir.${storageFailed ? " El navegador no ha podido guardarlos; descarga una copia antes de salir." : ""}`;
+  });
+  document.querySelector("#workspace-export").addEventListener("click", () => {
+    try {
+      const body = workspaceCore.serializeBackup(workspace, knownSymbols);
+      const url = URL.createObjectURL(new Blob([body], { type: "application/json" }));
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `momentumvelo-favoritos-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+      transferStatus.classList.remove("error");
+      transferStatus.textContent = "Copia preparada para descargar. Comprueba que el archivo se ha guardado en tu dispositivo.";
+    } catch (_) {
+      transferStatus.classList.add("error");
+      transferStatus.textContent = "No se pudo preparar la descarga. Tus favoritos y notas siguen en esta página.";
+    }
   });
   window.addEventListener("storage", event => {
     if (event.key !== workspaceKey && event.key !== null) return;

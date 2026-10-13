@@ -6,6 +6,7 @@
   <meta name="description" content="Consulta cotizaciones y gráficos de mercado suministrados por TradingView. Acciones con retraso, divisas y criptomonedas según el proveedor.">
   <title>Mercados reales — MomentumVelo-AI</title>
   <link rel="stylesheet" href="/panel.css"><link rel="stylesheet" href="/practica-promos.css"><link rel="stylesheet" href="/mercados.css">
+  <script src="/workspace-core.js" defer></script>
   <script src="/mercados.js" defer></script>
   <script src="/detector-core.js" defer></script>
   <script src="/detector-chart-core.js" defer></script>
@@ -74,10 +75,19 @@
         <div class="surface-heading"><div><p class="eyebrow">TU SEGUIMIENTO</p><h2 id="workspace-title">Mis favoritos y notas</h2></div><span id="market-favorite-count">0 favoritos</span></div>
         <p class="workspace-hint">Se guardan en este navegador. No se sincronizan con otros dispositivos ni crean alertas automáticas. Si borras los datos del navegador, se perderán.</p>
         <div class="workspace-grid">
-          <div><h3>Activos que sigo</h3><ul id="market-favorites" class="market-favorites" aria-label="Mis activos favoritos"></ul><p id="market-favorites-empty">Pulsa «Guardar favorito» junto al selector para añadir tu primer activo.</p></div>
+          <div><h3>Activos que sigo</h3><div class="workspace-filters"><label for="favorites-search">Buscar favorito<input id="favorites-search" type="search" placeholder="Empresa o símbolo…"></label><label for="favorites-order">Ordenar<select id="favorites-order"><option value="added">Orden de guardado</option><option value="name">Nombre A–Z</option></select></label><label class="workspace-notes-filter"><input id="favorites-notes-only" type="checkbox"> Solo favoritos con nota</label></div><p id="favorites-results" class="workspace-hint" role="status" aria-live="polite"></p><ul id="market-favorites" class="market-favorites" aria-label="Mis activos favoritos"></ul><p id="market-favorites-empty">Pulsa «Guardar favorito» junto al selector para añadir tu primer activo.</p></div>
           <div><label class="market-note-label" for="market-note">Mi nota sobre <span id="market-note-name">Nvidia</span></label><textarea id="market-note" rows="5" maxlength="2000" placeholder="Qué quiero seguir, qué dudas tengo y qué revisar…" aria-describedby="market-note-help workspace-status"></textarea><p id="market-note-help" class="workspace-hint">Hasta 2.000 caracteres. Se guarda al escribir. Es una nota tuya, sin análisis de IA.</p></div>
         </div>
         <p id="workspace-status" class="market-status" role="status" aria-live="polite">Tus favoritos y notas se guardan solo en este navegador.</p>
+        <details class="workspace-backup"><summary>⇄ Copia de seguridad de mis favoritos y notas</summary>
+          <p class="workspace-hint">Descarga una copia para guardarla o llevarla a otro navegador. Incluye todas tus notas, también las de activos que no son favoritos. El archivo puede contener información personal: guárdalo donde tú decidas.</p>
+          <div class="market-controls"><button type="button" id="workspace-export">↓ Descargar mi copia</button></div>
+          <label class="detector-file-label" for="workspace-file">Abrir una copia de MomentumVelo<input id="workspace-file" type="file" accept=".json,application/json"></label>
+          <label class="market-note-label" for="workspace-json">O pega el contenido de la copia</label>
+          <textarea id="workspace-json" rows="4" maxlength="128000" placeholder="Pega aquí tu copia JSON…"></textarea>
+          <div class="market-controls"><button type="button" id="workspace-preview">Revisar copia</button><button type="button" id="workspace-import" hidden>Añadir favoritos y notas</button></div>
+          <p id="workspace-transfer-status" class="market-status" role="status" aria-live="polite">La revisión no modifica tus datos. Al importar, se conservan las notas que ya existen. El archivo se procesa en tu navegador y no se envía a ningún servidor.</p>
+        </details>
       </section>
       <section id="mi-detector" class="surface market-tool" aria-labelledby="detector-title">
         <div class="surface-heading"><div><p class="eyebrow">TUS REGLAS · HISTÓRICO IMPORTADO</p><h2 id="detector-title">Mi detector de subidas y caídas</h2></div><span class="source-pill">Análisis al cargar datos</span></div>
