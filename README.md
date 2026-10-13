@@ -25,6 +25,8 @@ El proxy se configura en el script de Clerk antes de crear su instancia, usando 
 
 La asociación de dominio y proxy de la instancia de producción está gestionada por Vercel Marketplace. El 7 de octubre de 2026, la integración rechazó cambiar a `momentumvelo.app` por una discrepancia entre `name` y `proxy_url`. Clerk confirmó la recepción de una incidencia para corregir ambos valores conservando la instancia. Cambiar una variable de entorno por sí sola no resuelve esa asociación.
 
+El 13 de octubre de 2026 se confirmó la recepción de una actualización de la incidencia desde el formulario oficial de soporte de Clerk. La comprobación pública posterior seguía dando HTTP 400 `host_invalid` en `momentumvelo.app/__clerk/v1/environment`. La recepción del mensaje no acredita la corrección del dominio o del proxy.
+
 Antes de considerar resuelto el acceso, verificar environment/client en el navegador, las claves de la misma instancia, el registro con verificación de correo, inicio, persistencia, cierre y recuperación. Un despliegue READY o pruebas locales correctas no acreditan estos pasos reales.
 
 Pulse (`/premium`) es una simulación con activos y puntuaciones codificados en `premium.js`; no hay feed ni alertas de mercado en vivo. PayPal no está integrado y los métodos de pago futuros dependerán de la configuración efectiva de Stripe.
@@ -48,6 +50,8 @@ La referencia visual aprobada para MomentumVelo es el mockup neón generado el 1
 ### Gestión de facturación tras un impago
 
 La cuenta conserva el portal cuando el estado guardado de la suscripción indica facturación previa, aunque el plan sea `free`. Para `past_due`, `unpaid` o `incomplete` muestra el pago pendiente y permite revisarlo sin ofrecer una nueva contratación ni afirmar acceso Premium. El botón puede reintentarse después de un error de sesión o de Stripe. `/api/portal` sigue exigiendo la identidad autenticada y el cliente Stripe en metadatos privados. Estas pantallas se han probado localmente; el circuito con usuarios y servicios reales continúa pendiente de Clerk y del sandbox.
+
+La cuenta y el retorno del pago requieren un token vigente antes de consultar la verificación o solicitar el portal. La espera de autenticación, token, petición y respuesta JSON tiene un límite de 15 segundos por fase; al agotarse se muestra un aviso y se restablece el botón para reintentar. Una respuesta tardía no produce navegación tras el error. La navegación del portal se limita al host por defecto `billing.stripe.com` mediante HTTPS, sin credenciales ni puertos alternativos. Los tests locales reproducen peticiones sin respuesta, sesiones caducadas y enlaces inesperados. No sustituyen una prueba real del portal en sandbox.
 
 ## Contratación desde la cuenta y prevención de duplicados
 

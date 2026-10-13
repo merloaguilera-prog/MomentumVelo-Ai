@@ -40,6 +40,7 @@ async function account(metadata, premiumSalesEnabled = false) {
       primaryEmailAddress: { emailAddress: "test@example.com" } },
       load: async () => {}, session: { getToken: async () => {
         f.tokenReads++;
+        if (f.waitToken) await f.waitToken;
         if (f.tokenFailure) throw new Error("Sesión temporalmente no disponible.");
         if (f.missingToken) return null;
         return "fixture-token";
@@ -67,15 +68,18 @@ async function account(metadata, premiumSalesEnabled = false) {
           : { url: f.checkoutUrl || "https://checkout.stripe.com/c/pay/cs_test_fixture" } };
       }
       assert.equal(url, "/api/portal");
-      assert.equal(options.headers.Authorization, "Bearer fixture-token");
       f.portalAttempts++;
-      return { ok: !f.portalFailure, json: async () => f.portalFailure
-        ? { error: "El portal no está disponible temporalmente." }
-        : { url: "https://billing.stripe.com/test-fixture" } };
+      assert.equal(options.headers.Authorization, "Bearer fixture-token");
+      if (f.waitPortal) await f.waitPortal;
+      return { ok: !f.portalFailure, json: async () => {
+        if (f.waitPortalBody) await f.waitPortalBody;
+        return f.portalFailure ? { error: "El portal no está disponible temporalmente." }
+          : { url: f.portalUrl || "https://billing.stripe.com/test-fixture" };
+      } };
     }
   });
   assert.equal(await window.MomentumVeloAuthReady, "managed");
-  return Object.assign(f, { nodes, portal: nodes["[data-manage-subscription]"],
+  return Object.assign(f, { window, nodes, portal: nodes["[data-manage-subscription]"],
     upgrade: nodes["[data-premium-next]"], message: nodes["[data-account-message]"] });
 }
 
@@ -183,4 +187,53 @@ test("Checkout cannot navigate to a URL outside the Stripe HTTPS hosted page", a
     assert.equal(page.upgrade.disabled, false);
     assert.match(page.nodes["[data-premium-status]"].textContent, /segura/);
   }
+});
+
+test("an expired session never sends a portal request and permits a signed-in retry", async () => {
+  const page = await account({ plan: "premium", premiumStatus: "active" });
+  page.missingToken = true;
+  await page.portal.click();
+  assert.equal(page.portalAttempts, 0);
+  assert.equal(page.portal.disabled, false);
+  assert.match(page.nodes["[data-premium-status]"].textContent, /sesión/i);
+  page.missingToken = false;
+  await page.portal.click();
+  assert.equal(page.portalAttempts, 1);
+  assert.equal(page.navigation.length, 1);
+});
+
+test("an unavailable portal token, request or response body times out and can be retried", async () => {
+  for (const stage of ["waitToken", "waitPortal", "waitPortalBody"]) {
+    const page = await account({ plan: "premium", premiumStatus: "active" });
+    let release;
+    page[stage] = new Promise(resolve => { release = resolve; });
+    page.window.setTimeout = fn => setTimeout(fn, 10);
+    const attempt = page.portal.click();
+    let guard;
+    try {
+      await Promise.race([attempt, new Promise((_, reject) => {
+        guard = setTimeout(() => reject(new Error(`Portal remained blocked at ${stage}`)), 150);
+      })]);
+      assert.equal(page.portal.disabled, false);
+      assert.equal(page.navigation.length, 0);
+      assert.match(page.nodes["[data-premium-status]"].textContent, /tardado demasiado/);
+    } finally { clearTimeout(guard); release(); await attempt; }
+    page[stage] = null;
+    await page.portal.click();
+    assert.deepEqual(page.navigation, ["https://billing.stripe.com/test-fixture"]);
+  }
+});
+
+test("the portal rejects non-Stripe destinations and allows a subsequent correct response", async () => {
+  const page = await account({ plan: "premium", premiumStatus: "active" });
+  for (const url of ["javascript:alert(1)", "http://billing.stripe.com/pay", "https://attacker.invalid/pay",
+    "https://billing.stripe.com.attacker.invalid/pay", "https://user:password@billing.stripe.com/pay"]) {
+    page.portalUrl = url;
+    await page.portal.click();
+    assert.equal(page.portal.disabled, false);
+    assert.equal(page.navigation.length, 0);
+  }
+  page.portalUrl = null;
+  await page.portal.click();
+  assert.deepEqual(page.navigation, ["https://billing.stripe.com/test-fixture"]);
 });
