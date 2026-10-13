@@ -1,5 +1,6 @@
 (function () {
   "use strict";
+  let managedTabsReady = false;
 
   function withTimeout(operation) {
     let timeout;
@@ -23,6 +24,7 @@
   }
 
   function showConnectionError() {
+    managedTabsReady = false;
     const connection = document.querySelector("[data-auth-connection]");
     const message = document.querySelector("[data-auth-connection-message]");
     const retry = document.querySelector("[data-auth-retry]");
@@ -45,10 +47,25 @@
     document.querySelectorAll("[data-auth-view], [data-managed-auth], [data-account-view]").forEach((view) => {
       view.hidden = true;
     });
-    document.querySelectorAll("[data-auth-mode]").forEach((tab) => { tab.disabled = true; });
+    const canUseTemporary = temporary && temporaryLink && window.location.origin === "https://momentumvelo.app";
+    if (canUseTemporary && message) {
+      message.textContent += " Los botones Crear cuenta gratis e Iniciar sesión abren el acceso temporal de MomentumVelo.";
+    }
+    document.querySelectorAll("[data-auth-mode]").forEach((tab) => {
+      tab.disabled = !canUseTemporary;
+      if (!canUseTemporary) return;
+      const mode = tab.dataset.authMode === "signup" ? "signup" : "login";
+      tab.setAttribute("title", "Abrir el acceso temporal de MomentumVelo");
+      tab.addEventListener("click", () => {
+        // Navigation is explicit and carries only a fixed mode. Never forward
+        // emails, tokens, payment references or arbitrary redirect parameters.
+        window.location.assign(`https://momentum-velo.vercel.app/login?mode=${mode}`);
+      });
+    });
   }
 
   function finishConnection() {
+    managedTabsReady = true;
     const temporary = document.querySelector("[data-auth-temporary]");
     if (temporary) temporary.hidden = true;
     const connection = document.querySelector("[data-auth-connection]");
@@ -233,6 +250,7 @@
         tab.setAttribute("aria-controls", mount.id);
         tab.tabIndex = 0;
         tab.addEventListener("click", () => {
+          if (!managedTabsReady) return;
           if (tab.dataset.authMode === activeMode) return;
           const url = new URL(window.location.href);
           url.searchParams.set("mode", tab.dataset.authMode);
