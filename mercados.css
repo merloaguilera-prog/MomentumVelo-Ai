@@ -18,3 +18,7 @@
 a.detector-primary { display: inline-flex; align-items: center; justify-content: center; border: 2px solid #ed8cff; border-radius: 12px; padding: 1rem; background: linear-gradient(110deg, #722fc2, #a52a85); color: #fff; font-weight: 800; text-decoration: none; box-shadow: 0 0 18px #d14cff60; }
 a.detector-primary:hover, a.detector-primary:focus-visible { border-color: #58f4ff; box-shadow: 0 0 24px #58f4ff70; outline: 2px solid #58f4ff; outline-offset: 3px; }
 @media (max-width: 760px) { .detector-launch { grid-template-columns: 1fr; } }
+.radar-main { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+.radar-main .surface { margin-bottom: 1.25rem; }
+#radar-threshold { padding: .8rem; width: 100%; color: #fff; background: #171326; border: 1px solid #c860ff; border-radius: 10px; }
+#radar-start { padding: 1rem; border: 2px solid #ed8cff; color: #fff; background: linear-gradient(110deg, #722fc2, #a52a85); box-shadow: 0 0 18px #d14cff60; border-radius: 12px; font-weight: 800; }
