@@ -1,0 +1,21 @@
+{
+  "id": "/mercados",
+  "name": "MomentumVelo",
+  "short_name": "MomentumVelo",
+  "description": "Mercados, radar de criptomonedas y herramientas de práctica financiera.",
+  "lang": "es",
+  "start_url": "/mercados?source=android",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#050b11",
+  "theme_color": "#050b11",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Radar de criptomonedas", "short_name": "Radar", "url": "/radar" },
+    { "name": "Cartera de práctica", "short_name": "Práctica", "url": "/practica" },
+    { "name": "Mis favoritos y notas", "short_name": "Favoritos", "url": "/mercados#seguimiento" }
+  ]
+}

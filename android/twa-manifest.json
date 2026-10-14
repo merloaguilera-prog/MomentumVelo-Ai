@@ -1,0 +1,34 @@
+{
+  "packageId": "app.momentumvelo",
+  "host": "momentumvelo.app",
+  "name": "MomentumVelo",
+  "launcherName": "MomentumVelo",
+  "display": "standalone",
+  "themeColor": "#050b11",
+  "navigationColor": "#050b11",
+  "backgroundColor": "#050b11",
+  "enableNotifications": false,
+  "enableSiteSettingsShortcut": true,
+  "startUrl": "/mercados?source=android",
+  "iconUrl": "https://momentumvelo.app/icons/icon-512.png",
+  "maskableIconUrl": "https://momentumvelo.app/icons/icon-512.png",
+  "splashScreenFadeOutDuration": 200,
+  "signingKey": {
+    "path": "./private/upload-key.jks",
+    "alias": "momentumvelo-upload"
+  },
+  "appVersionCode": 1,
+  "appVersion": "1.0.0",
+  "minSdkVersion": 24,
+  "orientation": "default",
+  "shortcuts": [],
+  "generatorApp": "bubblewrap-cli",
+  "fallbackType": "customtabs",
+  "features": {},
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "fingerprints": [],
+  "additionalTrustedOrigins": [],
+  "retainedBundles": []
+}
