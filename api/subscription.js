@@ -1,5 +1,5 @@
 const Stripe = require("stripe");
-const { getAuthenticatedUser } = require("./_clerk");
+const { getAuthenticatedUser, hasUserPremiumEntitlement } = require("./_clerk");
 const { isPremiumSubscription, hasPremiumAccess, billingMode } = require("./_billing");
 module.exports = async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
@@ -41,6 +41,11 @@ module.exports = async function handler(req, res) {
     const active = matches && session.payment_status === "paid"
       && hasPremiumAccess(subscription, process.env.STRIPE_PREMIUM_PRICE_ID);
     if (!active) return res.status(402).json({ active: false, error: "La suscripción todavía no figura como activa." });
+    // Stripe payment and application access are separate states. The signed
+    // webhook owns activation; this read-only return must not bypass it.
+    const provisioned = await hasUserPremiumEntitlement(authenticatedUser.userId, subscriptionCustomerId, subscriptionId);
+    if (!provisioned) return res.status(202).json({ active: false, pending: true, paymentConfirmed: true,
+      message: "El pago está confirmado. La activación de Premium en tu cuenta sigue pendiente; vuelve a comprobarla sin realizar otro pago." });
     return res.status(200).json({ active: true, email: session.customer_details?.email || null, telegramUrl: process.env.TELEGRAM_PREMIUM_INVITE_URL || null });
   } catch (error) { console.error("subscription_verification_error", { message: error instanceof Error ? error.message : String(error) }); return res.status(500).json({ error: "No se ha podido verificar la suscripción." }); }
 };

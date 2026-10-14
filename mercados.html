@@ -6,6 +6,8 @@
   <meta name="description" content="Consulta cotizaciones y gráficos de mercado suministrados por TradingView. Acciones con retraso, divisas y criptomonedas según el proveedor.">
   <title>Mercados reales — MomentumVelo-AI</title>
   <link rel="stylesheet" href="/panel.css"><link rel="stylesheet" href="/practica-promos.css"><link rel="stylesheet" href="/mercados.css">
+  <script src="/workspace-core.js" defer></script>
+  <script src="/mercados-global.js" defer></script>
   <script src="/mercados.js" defer></script>
   <script src="/detector-core.js" defer></script>
   <script src="/detector-chart-core.js" defer></script>
@@ -19,9 +21,19 @@
     <nav class="sidebar" aria-label="Secciones del panel"><a href="/comparar">⇄ <span>Comparar históricos</span></a><a href="/practica">◉ <span>Cartera de práctica</span></a><a class="current" href="/mercados" aria-current="page">▥ <span>Mercados reales</span></a><a href="/panel">⌂ <span>Panel demo</span></a><a href="/premium">⌁ <span>Radar Pulse · demo</span></a><a href="/#premium">♛ <span>Premium</span></a><a href="/ayuda">? <span>Ayuda</span></a><div class="sidebar-bottom"><strong>Precios con su fuente</strong><p>Consulta el estado del mercado, la moneda y el periodo del dato en el gráfico.</p><a href="/legal#datos-mercado">Origen y alcance →</a></div></nav>
     <main>
       <div class="intro-row"><div><p class="eyebrow">DATOS DE MERCADO · CONSULTA GRATUITA</p><h1>El mercado, con <em>datos reales.</em></h1><p>Consulta precios, variaciones y gráficos suministrados por TradingView.</p></div><a class="pulse-link" href="/panel">Panel demo <span>↗</span></a></div>
+      <section class="detector-launch surface" aria-labelledby="detector-launch-title"><div><p class="eyebrow">SUBIDAS · CAÍDAS · TUS REGLAS</p><h2 id="detector-launch-title">Detecta movimientos y revisa tu idea</h2><p>Activa el radar de Bitcoin, Ethereum y Solana en esta pestaña o configura reglas sobre tus históricos. Abre el gráfico para revisar cada movimiento.</p><span class="source-pill">Radar cripto en esta pestaña · históricos para otros activos</span></div><div class="detector-launch-actions"><a class="detector-primary" href="/radar">◎ Activar radar de cripto en directo</a><a href="#mi-detector">Analizar mi histórico de subidas y caídas →</a><a href="#movimientos">↗ Ver movimientos del mercado</a><a href="/practica">Probar una operación con capital virtual →</a></div></section>
       <section class="practice-promo-grid" aria-label="Nuevas herramientas de práctica"><a class="practice-promo" href="/practica"><img src="/images/practica-neon.webp" width="1672" height="941" alt="" loading="lazy"><div><span>CAPITAL VIRTUAL</span><h2>Tu cartera de práctica</h2><p>Compras, ventas y comisiones con los precios que introduces tú.</p><b>Probar mi idea ↗</b></div></a><a class="practice-promo journal-promo" href="/practica#diario"><img src="/images/diario-neon.webp" width="1672" height="940" alt="" loading="lazy"><div><span>DECISIONES CON HISTORIA</span><h2>Mi diario de práctica</h2><p>Guarda tus motivos, revisa resultados y conserva una copia.</p><b>Abrir mi diario ↗</b></div></a></section>
       <div class="disclosure" role="note"><strong>Datos reales no siempre significa tiempo real.</strong> Las acciones se muestran con retraso. Divisas y criptomonedas usan la fuente indicada en el gráfico. Cuando un mercado está cerrado se muestra el último dato disponible.</div>
-      <nav class="market-jumps" aria-label="Herramientas de mercado"><a href="#movimientos">↗ Subidas y caídas</a><a href="#mapa">▦ Mapa del mercado</a><a href="#mi-detector">◎ Mi detector</a><a href="/comparar">⇄ Comparar históricos</a><a href="#cotizacion">▥ Ver un activo</a></nav>
+      <nav class="market-jumps" aria-label="Herramientas de mercado"><a class="workspace-jump" href="#seguimiento">★ Mi seguimiento</a><a href="#global">◉ Mercados globales</a><a href="#movimientos">↗ Subidas y caídas</a><a href="#mapa">▦ Mapa del mercado</a><a href="#mi-detector">◎ Mi detector</a><a href="/comparar">⇄ Comparar históricos</a><a href="#cotizacion">▥ Ver un activo</a></nav>
+      <section id="global" class="surface market-tool" aria-labelledby="global-title">
+        <p class="eyebrow">EXPLORADOR GLOBAL</p><h2 id="global-title">El mercado, en un solo lugar</h2>
+        <p>Selecciona una región o clase de activo para consultar una selección destacada. Los precios se actualizan según la fuente; las bolsas pueden tener retraso o estar cerradas. Esta selección no es un ranking de actividad.</p>
+        <div class="market-controls"><label for="global-group">Explorar<select id="global-group"></select></label><label for="global-search">Buscar empresa o símbolo<input id="global-search" type="search" placeholder="Apple, Bitcoin, SAP…" maxlength="80"></label><button type="button" id="global-retry">Reintentar cotizaciones</button></div>
+        <p id="global-status" class="market-status" role="status"></p>
+        <div id="global-widget" class="global-widget" aria-label="Cotizaciones de la selección"></div>
+        <p>Abre un activo de la lista siguiente para ver su gráfico, guardarlo y escribir notas.</p><div id="global-assets" class="global-assets"></div>
+        <p><a href="https://www.tradingview.com/markets/" target="_blank" rel="noopener noreferrer">Explorar más mercados en TradingView ↗</a></p>
+      </section>
       <section id="movimientos" class="surface market-tool" aria-labelledby="movers-title">
         <div class="surface-heading"><div><p class="eyebrow">MOVIMIENTOS · FUENTE TRADINGVIEW</p><h2 id="movers-title">Qué sube, qué baja y qué se mueve más</h2></div><span class="source-pill">Bolsa de Estados Unidos</span></div>
         <p class="workspace-hint">Explora las pestañas de mayores subidas, mayores caídas y más actividad. Son variaciones observadas del proveedor, con retraso; con el mercado cerrado se conserva la última sesión disponible.</p>
@@ -61,6 +73,7 @@
               </optgroup>
             </select>
           </label>
+          <a class="detector-primary" href="#mi-detector">◎ Analizar un histórico</a>
           <button type="button" id="market-retry">Reintentar gráfico</button>
           <button type="button" id="market-favorite" aria-pressed="false">☆ Guardar favorito</button>
         </div>
@@ -70,14 +83,24 @@
         <p class="provider-fallback">Si el proveedor no muestra datos, <a id="market-source" href="https://www.tradingview.com/symbols/NASDAQ-NVDA/" target="_blank" rel="noopener noreferrer">consulta Nvidia en TradingView ↗</a>. No sustituimos una cotización ausente por un precio de ejemplo.</p>
         <noscript><p>Activa JavaScript para cargar el gráfico o consulta la fuente mediante el enlace anterior.</p></noscript>
       </section>
-      <section class="surface market-workspace" aria-labelledby="workspace-title">
-        <div class="surface-heading"><div><p class="eyebrow">TU SEGUIMIENTO</p><h2 id="workspace-title">Mis favoritos y notas</h2></div><span id="market-favorite-count">0 favoritos</span></div>
+      <section id="seguimiento" class="surface market-workspace" aria-labelledby="workspace-title">
+        <div class="surface-heading"><div><p class="eyebrow">TU SEGUIMIENTO · FAVORITOS, NOTAS Y COPIAS</p><h2 id="workspace-title">Mis favoritos y notas</h2></div><span id="market-favorite-count">0 favoritos</span></div>
         <p class="workspace-hint">Se guardan en este navegador. No se sincronizan con otros dispositivos ni crean alertas automáticas. Si borras los datos del navegador, se perderán.</p>
         <div class="workspace-grid">
-          <div><h3>Activos que sigo</h3><ul id="market-favorites" class="market-favorites" aria-label="Mis activos favoritos"></ul><p id="market-favorites-empty">Pulsa «Guardar favorito» junto al selector para añadir tu primer activo.</p></div>
+          <div><h3>Activos que sigo</h3><div class="workspace-filters"><label for="favorites-search">Buscar favorito<input id="favorites-search" type="search" placeholder="Empresa o símbolo…"></label><label for="favorites-order">Ordenar<select id="favorites-order"><option value="added">Orden de guardado</option><option value="name">Nombre A–Z</option></select></label><label class="workspace-notes-filter"><input id="favorites-notes-only" type="checkbox"> Solo favoritos con nota</label></div><p id="favorites-results" class="workspace-hint" role="status" aria-live="polite"></p><ul id="market-favorites" class="market-favorites" aria-label="Mis activos favoritos"></ul><p id="market-favorites-empty">Pulsa «Guardar favorito» junto al selector para añadir tu primer activo.</p></div>
           <div><label class="market-note-label" for="market-note">Mi nota sobre <span id="market-note-name">Nvidia</span></label><textarea id="market-note" rows="5" maxlength="2000" placeholder="Qué quiero seguir, qué dudas tengo y qué revisar…" aria-describedby="market-note-help workspace-status"></textarea><p id="market-note-help" class="workspace-hint">Hasta 2.000 caracteres. Se guarda al escribir. Es una nota tuya, sin análisis de IA.</p></div>
         </div>
+        <details class="workspace-all-notes"><summary>✎ Ver todas mis notas guardadas</summary><p class="workspace-hint">También aparecen las notas de activos que no son favoritos. Pulsa un activo para abrir y editar su nota.</p><ul id="workspace-all-notes" class="market-favorites" aria-label="Todas mis notas"></ul><p id="workspace-notes-empty" class="workspace-hint">Todavía no tienes notas guardadas.</p></details>
         <p id="workspace-status" class="market-status" role="status" aria-live="polite">Tus favoritos y notas se guardan solo en este navegador.</p>
+        <details class="workspace-backup"><summary>⇄ Copia de seguridad de mis favoritos y notas</summary>
+          <p class="workspace-hint">Descarga una copia para guardarla o llevarla a otro navegador. Incluye todas tus notas, también las de activos que no son favoritos. El archivo puede contener información personal: guárdalo donde tú decidas.</p>
+          <div class="market-controls"><button type="button" id="workspace-export">↓ Descargar mi copia</button></div>
+          <label class="detector-file-label" for="workspace-file">Abrir una copia de MomentumVelo<input id="workspace-file" type="file" accept=".json,application/json"></label>
+          <label class="market-note-label" for="workspace-json">O pega el contenido de la copia</label>
+          <textarea id="workspace-json" rows="4" maxlength="256000" placeholder="Pega aquí tu copia JSON…"></textarea>
+          <div class="market-controls"><button type="button" id="workspace-preview">Revisar copia</button><button type="button" id="workspace-import" hidden>Añadir favoritos y notas</button></div>
+          <p id="workspace-transfer-status" class="market-status" role="status" aria-live="polite">La revisión no modifica tus datos. Al importar, se conservan las notas que ya existen. El archivo se procesa en tu navegador y no se envía a ningún servidor.</p>
+        </details>
       </section>
       <section id="mi-detector" class="surface market-tool" aria-labelledby="detector-title">
         <div class="surface-heading"><div><p class="eyebrow">TUS REGLAS · HISTÓRICO IMPORTADO</p><h2 id="detector-title">Mi detector de subidas y caídas</h2></div><span class="source-pill">Análisis al cargar datos</span></div>

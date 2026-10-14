@@ -1,6 +1,7 @@
 (function () {
   "use strict";
   let premiumSalesEnabled = false;
+  let managedTabsReady = false;
 
   function withTimeout(operation) {
     let timeout;
@@ -24,6 +25,7 @@
   }
 
   function showConnectionError() {
+    managedTabsReady = false;
     const connection = document.querySelector("[data-auth-connection]");
     const message = document.querySelector("[data-auth-connection-message]");
     const retry = document.querySelector("[data-auth-retry]");
@@ -33,13 +35,40 @@
     }
     if (message) message.textContent = "No hemos podido conectar con el acceso seguro. Reintenta la conexión o consulta la ayuda. No se ha creado ninguna cuenta local de prueba.";
     if (retry) retry.hidden = false;
+    const temporary = document.querySelector("[data-auth-temporary]");
+    const temporaryLink = document.querySelector("[data-auth-temporary-link]");
+    // Offer an explicit route to the same Clerk application, never an automatic
+    // cross-origin redirect or a destination supplied by query parameters.
+    if (temporary && temporaryLink && window.location.origin === "https://momentumvelo.app") {
+      const mode = new URLSearchParams(window.location.search).get("mode") === "signup" ? "signup" : "login";
+      temporaryLink.href = `https://momentum-velo.vercel.app/login?mode=${mode}`;
+      temporaryLink.textContent = mode === "signup" ? "Crear cuenta en el acceso temporal" : "Entrar en el acceso temporal";
+      temporary.hidden = false;
+    }
     document.querySelectorAll("[data-auth-view], [data-managed-auth], [data-account-view]").forEach((view) => {
       view.hidden = true;
     });
-    document.querySelectorAll("[data-auth-mode]").forEach((tab) => { tab.disabled = true; });
+    const canUseTemporary = temporary && temporaryLink && window.location.origin === "https://momentumvelo.app";
+    if (canUseTemporary && message) {
+      message.textContent += " Los botones Crear cuenta gratis e Iniciar sesión abren el acceso temporal de MomentumVelo.";
+    }
+    document.querySelectorAll("[data-auth-mode]").forEach((tab) => {
+      tab.disabled = !canUseTemporary;
+      if (!canUseTemporary) return;
+      const mode = tab.dataset.authMode === "signup" ? "signup" : "login";
+      tab.setAttribute("title", "Abrir el acceso temporal de MomentumVelo");
+      tab.addEventListener("click", () => {
+        // Navigation is explicit and carries only a fixed mode. Never forward
+        // emails, tokens, payment references or arbitrary redirect parameters.
+        window.location.assign(`https://momentum-velo.vercel.app/login?mode=${mode}`);
+      });
+    });
   }
 
   function finishConnection() {
+    managedTabsReady = true;
+    const temporary = document.querySelector("[data-auth-temporary]");
+    if (temporary) temporary.hidden = true;
     const connection = document.querySelector("[data-auth-connection]");
     if (connection) {
       connection.hidden = true;
@@ -307,6 +336,7 @@
         tab.setAttribute("aria-controls", mount.id);
         tab.tabIndex = 0;
         tab.addEventListener("click", () => {
+          if (!managedTabsReady) return;
           if (tab.dataset.authMode === activeMode) return;
           const url = new URL(window.location.href);
           url.searchParams.set("mode", tab.dataset.authMode);

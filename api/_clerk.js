@@ -78,4 +78,14 @@ async function setUserStripeCustomerId(userId, customerId) {
   return true;
 }
 
-module.exports = { getAuthenticatedUser, getUserStripeCustomerId, setUserStripeCustomerId, updateUserPlan };
+async function hasUserPremiumEntitlement(userId, customerId, subscriptionId) {
+  if (!process.env.CLERK_SECRET_KEY || !userId || !customerId || !subscriptionId) return false;
+  const clerk = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
+  const user = await clerk.users.getUser(userId);
+  return user.publicMetadata?.plan === "premium"
+    && user.publicMetadata?.premiumStatus === "active"
+    && user.privateMetadata?.stripeCustomerId === customerId
+    && user.privateMetadata?.stripeSubscriptionId === subscriptionId;
+}
+
+module.exports = { getAuthenticatedUser, getUserStripeCustomerId, setUserStripeCustomerId, updateUserPlan, hasUserPremiumEntitlement };
