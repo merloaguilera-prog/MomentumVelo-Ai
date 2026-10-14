@@ -4,3 +4,11 @@ node_modules/
 .env.local
 .env.*.local
 npm-debug.log*
+android/.gradle/
+android/.tooling/
+android/local.properties
+android/**/build/
+android/private/
+android/*.jks
+android/*.keystore
+android/signing.properties

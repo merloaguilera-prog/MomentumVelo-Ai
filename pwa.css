@@ -1,0 +1,4 @@
+.offline-notice { margin: 0; padding: 14px 20px; background: #443315; color: #fff4d5; border-bottom: 2px solid #c69637; font-size: 1rem; line-height: 1.5; }
+.offline-notice[hidden] { display: none; }
+.offline-page { max-width: 680px; margin: 12vh auto; padding: 24px; }
+.offline-page nav { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 24px; }
