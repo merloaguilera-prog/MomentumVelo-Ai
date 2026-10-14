@@ -40,8 +40,9 @@ async function updateUserPlan(userId, plan, details = {}) {
   const clerk = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
   const user = await clerk.users.getUser(userId);
   const currentSubscriptionId = user.privateMetadata?.stripeSubscriptionId;
-  // A late event from an old subscription must not replace the current paid plan.
-  if (user.publicMetadata?.plan === "premium" && currentSubscriptionId
+  // Ignore revocation from another subscription, but allow a newly verified paid
+  // subscription to replace an old ID whose cancellation delivery is delayed.
+  if (plan !== "premium" && user.publicMetadata?.plan === "premium" && currentSubscriptionId
       && details.subscriptionId && currentSubscriptionId !== details.subscriptionId) return true;
   await clerk.users.updateUserMetadata(userId, {
     publicMetadata: {
@@ -65,6 +66,18 @@ async function getUserStripeCustomerId(userId) {
   return typeof customerId === "string" && customerId.startsWith("cus_") ? customerId : null;
 }
 
+async function setUserStripeCustomerId(userId, customerId) {
+  if (!process.env.CLERK_SECRET_KEY || !userId || !customerId?.startsWith("cus_")) {
+    throw new Error("La vinculación de facturación requiere una cuenta configurada.");
+  }
+  const clerk = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
+  const user = await clerk.users.getUser(userId);
+  const current = user.privateMetadata?.stripeCustomerId;
+  if (current && current !== customerId) throw new Error("La cuenta ya tiene otro cliente de facturación.");
+  if (!current) await clerk.users.updateUserMetadata(userId, { privateMetadata: { stripeCustomerId: customerId } });
+  return true;
+}
+
 async function hasUserPremiumEntitlement(userId, customerId, subscriptionId) {
   if (!process.env.CLERK_SECRET_KEY || !userId || !customerId || !subscriptionId) return false;
   const clerk = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
@@ -75,4 +88,4 @@ async function hasUserPremiumEntitlement(userId, customerId, subscriptionId) {
     && user.privateMetadata?.stripeSubscriptionId === subscriptionId;
 }
 
-module.exports = { getAuthenticatedUser, getUserStripeCustomerId, updateUserPlan, hasUserPremiumEntitlement };
+module.exports = { getAuthenticatedUser, getUserStripeCustomerId, setUserStripeCustomerId, updateUserPlan, hasUserPremiumEntitlement };

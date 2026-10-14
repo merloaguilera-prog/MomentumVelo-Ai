@@ -36,7 +36,7 @@ function load(name, dependencies) {
 function response() { return { headers: {}, code: 200,
   setHeader(key, value) { this.headers[key] = value; },
   status(code) { this.code = code; return this; }, json(body) { this.body = body; return this; } }; }
-function fixture() {
+function fixture(clerkOverrides = {}) {
   const f = { current: subscription(), checkout: { ...session }, writes: [], reads: 0, result: true, user: "user_fixture", provisioned: true, entitlementReads: 0 };
   const sdk = new Stripe(env.STRIPE_SECRET_KEY);
   class FakeStripe {
@@ -54,7 +54,8 @@ function fixture() {
       if (f.entitlementError) throw f.entitlementError;
       return f.provisioned;
     },
-    updateUserPlan: async (...args) => { if (f.error) throw f.error; f.writes.push(args); return f.result; }
+    updateUserPlan: async (...args) => { if (f.error) throw f.error; f.writes.push(args); return f.result; },
+    ...clerkOverrides
   };
   f.webhook = load("webhook", { stripe: FakeStripe, "./_clerk": clerk });
   f.verify = load("subscription", { stripe: FakeStripe, "./_clerk": clerk });
@@ -229,17 +230,50 @@ test("Clerk metadata failures throw while late old-subscription events preserve 
   assert.equal(writes.length, 1);
 }));
 
+test("a newly paid subscription replaces an old saved ID regardless of cancellation delivery order", () => environment(async () => {
+  for (const order of ["new-first", "old-first"]) {
+    const current = { publicMetadata: { plan: "premium", premiumStatus: "active" },
+      privateMetadata: { stripeCustomerId: "cus_fixture", stripeSubscriptionId: "sub_old" } };
+    const clerk = load("_clerk", { "@clerk/backend": { createClerkClient: () => ({ users: {
+      getUser: async () => structuredClone(current),
+      updateUserMetadata: async (_user, update) => {
+        Object.assign(current.publicMetadata, update.publicMetadata);
+        Object.assign(current.privateMetadata, update.privateMetadata);
+      }
+    } }) } });
+    const f = fixture({ updateUserPlan: clerk.updateUserPlan });
+    const oldCanceled = { ...subscription("canceled"), id: "sub_old" };
+    const newPaid = { ...subscription(), id: "sub_new" };
+    const cancelOld = async () => {
+      f.current = oldCanceled;
+      assert.equal((await f.send("customer.subscription.deleted", oldCanceled)).code, 200);
+    };
+    if (order === "old-first") await cancelOld();
+    f.current = newPaid;
+    const newCheckout = { ...session, subscription: "sub_new" };
+    assert.equal((await f.send("checkout.session.completed", newCheckout)).code, 200);
+    assert.equal(current.publicMetadata.plan, "premium");
+    assert.equal(current.privateMetadata.stripeSubscriptionId, "sub_new", order);
+    // A delayed cancellation or paid snapshot from the canceled old subscription must not revoke the new one.
+    await cancelOld();
+    assert.equal((await f.send("checkout.session.async_payment_succeeded", { ...session, subscription: "sub_old" })).code, 200);
+    assert.equal(current.publicMetadata.plan, "premium");
+    assert.equal(current.privateMetadata.stripeSubscriptionId, "sub_new");
+    assert.equal(current.privateMetadata.stripeCustomerId, "cus_fixture");
+  }
+}));
+
 test("return screen distinguishes unpaid, paid-but-unprovisioned and activated accounts", async () => {
   const nodes = {};
   for (const id of ["verification-message", "result-status", "portal-button", "retry-button"]) {
-    nodes[id] = { hidden: true, textContent: "", classList: { add() {}, remove() {} },
+    nodes[id] = { hidden: true, textContent: "", classList: { add() {}, remove() {} }, setAttribute() {},
       addEventListener(name, fn) { this[name] = fn; } };
   }
   let stage = 0;
   const ready = vm.runInNewContext(fs.readFileSync(require.resolve("../success.js"), "utf8"), {
     document: { getElementById: id => nodes[id] }, URLSearchParams, encodeURIComponent, Error,
-    window: { location: { search: "?session_id=cs_test_fixture" }, MomentumVeloAuthReady: Promise.resolve("managed"),
-      Clerk: { session: { getToken: async () => "fixture-token" } } },
+    window: { setTimeout, clearTimeout, location: { search: "?session_id=cs_test_fixture" }, MomentumVeloAuthReady: Promise.resolve("managed"),
+      Clerk: { isSignedIn: true, session: { getToken: async () => "fixture-token" } } },
     fetch: async (_url, options) => {
       assert.equal(options.headers.Authorization, "Bearer fixture-token");
       return { status: stage === 2 ? 200 : 202, ok: true,
@@ -264,20 +298,22 @@ test("return screen distinguishes unpaid, paid-but-unprovisioned and activated a
 test("an unavailable Clerk connection never uses a leftover session token on return", async () => {
   const nodes = {};
   for (const id of ["verification-message", "result-status", "portal-button", "retry-button"]) {
-    nodes[id] = { hidden: true, textContent: "", classList: { add() {}, remove() {} },
+    nodes[id] = { hidden: true, textContent: "", classList: { add() {}, remove() {} }, setAttribute() {},
       addEventListener(name, fn) { this[name] = fn; } };
   }
-  let tokenReads = 0;
+  let tokenReads = 0; let requests = 0;
   await vm.runInNewContext(fs.readFileSync(require.resolve("../success.js"), "utf8"), {
     document: { getElementById: id => nodes[id] }, URLSearchParams, encodeURIComponent, Error,
-    window: { location: { search: "?session_id=cs_test_fixture" }, MomentumVeloAuthReady: Promise.resolve("unavailable"),
+    window: { setTimeout, clearTimeout, location: { search: "?session_id=cs_test_fixture" }, MomentumVeloAuthReady: Promise.resolve("unavailable"),
       Clerk: { session: { getToken: async () => { tokenReads++; return "stale-token"; } } } },
     fetch: async (_url, options) => {
+      requests++;
       assert.equal(options.headers.Authorization, undefined);
       return { status: 401, ok: false, json: async () => ({ error: "Inicia sesión para verificar tu suscripción." }) };
     }
   });
   assert.equal(tokenReads, 0);
+  assert.equal(requests, 0);
   assert.equal(nodes["portal-button"].hidden, true);
   assert.equal(nodes["retry-button"].hidden, false);
   assert.doesNotMatch(nodes["result-status"].textContent, /Pago confirmado/);

@@ -24,13 +24,15 @@ function element(hidden = false) {
   };
 }
 
-async function account(metadata) {
-  const f = { portalAttempts: 0, tokenFailure: false, portalFailure: false, navigation: [] };
+async function account(metadata, premiumSalesEnabled = false) {
+  const f = { portalAttempts: 0, checkoutAttempts: 0, signoutAttempts: 0, tokenReads: 0,
+    tokenFailure: false, portalFailure: false, navigation: [] };
   const selectors = ["auth-view", "managed-auth", "account-view", "auth-connection", "auth-retry",
     "account-title", "account-message", "account-email", "account-plan", "premium-next",
     "premium-status", "manage-subscription", "signout"];
   const nodes = Object.fromEntries(selectors.map(name => [`[data-${name}]`, element(true)]));
   nodes["[data-manage-subscription]"].textContent = "Gestionar o cancelar Premium";
+  nodes["[data-signout]"].textContent = "Cerrar sesión";
   nodes["[data-account-view]"].querySelector = selector => nodes[selector];
   const key = `pk_test_${Buffer.from("test.clerk.accounts.dev$").toString("base64")}`;
   const window = {
@@ -38,8 +40,17 @@ async function account(metadata) {
     setTimeout, clearTimeout, atob: value => Buffer.from(value, "base64").toString(),
     Clerk: { isSignedIn: true, user: { firstName: "Prueba", publicMetadata: metadata,
       primaryEmailAddress: { emailAddress: "test@example.com" } },
-      load: async () => {}, session: { getToken: async () => {
+      load: async () => {}, signOut: async options => {
+        assert.equal(options.redirectUrl, "/");
+        f.signoutAttempts++;
+        if (f.waitSignout) await f.waitSignout;
+        if (f.signoutFailure) throw new Error("No se pudo cerrar la sesión.");
+        window.location.assign(options.redirectUrl);
+      }, session: { getToken: async () => {
+        f.tokenReads++;
+        if (f.waitToken) await f.waitToken;
         if (f.tokenFailure) throw new Error("Sesión temporalmente no disponible.");
+        if (f.missingToken) return null;
         return "fixture-token";
       } } }
   };
@@ -54,18 +65,31 @@ async function account(metadata) {
   } });
   vm.runInNewContext(source, { window, document, URL, URLSearchParams, console,
     fetch: async (url, options) => {
-      if (url === "/api/auth-config") return { ok: true, json: async () => ({ enabled: true, publishableKey: key }) };
+      if (url === "/api/auth-config") return { ok: true, json: async () => ({ enabled: true, publishableKey: key, premiumSalesEnabled }) };
+      if (url === "/api/checkout") {
+        assert.equal(options.headers.Authorization, "Bearer fixture-token");
+        assert.equal(options.body, "{}");
+        f.checkoutAttempts++;
+        if (f.waitCheckout) await f.waitCheckout;
+        return { ok: !f.checkoutFailure, json: async () => f.checkoutFailure
+          ? { error: "Hay una suscripción pendiente.", manageSubscription: true }
+          : { url: f.checkoutUrl || "https://checkout.stripe.com/c/pay/cs_test_fixture" } };
+      }
       assert.equal(url, "/api/portal");
-      assert.equal(options.headers.Authorization, "Bearer fixture-token");
       f.portalAttempts++;
-      return { ok: !f.portalFailure, json: async () => f.portalFailure
-        ? { error: "El portal no está disponible temporalmente." }
-        : { url: "https://billing.stripe.com/test-fixture" } };
+      assert.equal(options.headers.Authorization, "Bearer fixture-token");
+      if (f.waitPortal) await f.waitPortal;
+      return { ok: !f.portalFailure, json: async () => {
+        if (f.waitPortalBody) await f.waitPortalBody;
+        return f.portalFailure ? { error: "El portal no está disponible temporalmente." }
+          : { url: f.portalUrl || "https://billing.stripe.com/test-fixture" };
+      } };
     }
   });
   assert.equal(await window.MomentumVeloAuthReady, "managed");
-  return Object.assign(f, { nodes, portal: nodes["[data-manage-subscription]"],
-    upgrade: nodes["[data-premium-next]"], message: nodes["[data-account-message]"] });
+  return Object.assign(f, { window, nodes, portal: nodes["[data-manage-subscription]"],
+    upgrade: nodes["[data-premium-next]"], signout: nodes["[data-signout]"],
+    message: nodes["[data-account-message]"] });
 }
 
 test("past_due, unpaid and incomplete accounts keep payment management without Premium access", async () => {
@@ -90,7 +114,22 @@ test("a new free account has no billing management but can consult Premium prepa
 test("a canceled subscription retains access to its billing history without active Premium", async () => {
   const page = await account({ plan: "free", premiumStatus: "canceled" });
   assert.equal(page.portal.hidden, false);
+  assert.equal(page.upgrade.hidden, false);
   assert.doesNotMatch(page.message.textContent, /Premium está activa/);
+});
+
+test("ongoing unpaid, trialing or paused subscriptions offer management instead of another purchase", async () => {
+  for (const [status, description] of [["active", /vinculada|confirmar/i], ["trialing", /prueba/i], ["paused", /pausa/i]]) {
+    const page = await account({ plan: "free", premiumStatus: status }, true);
+    assert.equal(page.upgrade.hidden, true, status);
+    assert.equal(page.portal.hidden, false, status);
+    assert.match(page.message.textContent, description);
+    assert.doesNotMatch(page.message.textContent, /suscripción Premium está activa/);
+    assert.match(page.nodes["[data-account-plan]"].textContent, /^Trader/);
+    assert.equal(page.checkoutAttempts, 0);
+    await page.portal.click();
+    assert.equal(page.portalAttempts, 1);
+  }
 });
 
 test("portal opening can be retried after a Stripe failure", async () => {
@@ -115,4 +154,162 @@ test("portal opening can be retried after a session-token failure", async () => 
   await page.portal.click();
   assert.equal(page.portalAttempts, 1);
   assert.deepEqual(page.navigation, ["https://billing.stripe.com/test-fixture"]);
+});
+
+test("Premium opens authenticated Checkout only when the configuration enables sales", async () => {
+  const page = await account({ plan: "free" }, true);
+  assert.match(page.upgrade.textContent, /49/);
+  await page.upgrade.click();
+  assert.equal(page.checkoutAttempts, 1);
+  assert.deepEqual(page.navigation, ["https://checkout.stripe.com/c/pay/cs_test_fixture"]);
+});
+
+test("simultaneous clicks send one request and a failed Checkout can be retried with a fresh token", async () => {
+  const page = await account({ plan: "free" }, true);
+  let release;
+  page.waitCheckout = new Promise(resolve => { release = resolve; });
+  const first = page.upgrade.click();
+  await page.upgrade.click();
+  release(); await first;
+  assert.equal(page.checkoutAttempts, 1);
+
+  const retry = await account({ plan: "free" }, true);
+  retry.checkoutFailure = true;
+  await retry.upgrade.click();
+  assert.equal(retry.upgrade.disabled, false);
+  assert.equal(retry.portal.hidden, false);
+  assert.equal(retry.navigation.length, 0);
+  retry.checkoutFailure = false;
+  await retry.upgrade.click();
+  assert.equal(retry.tokenReads, 2);
+  assert.equal(retry.checkoutAttempts, 2);
+  assert.equal(retry.navigation.length, 1);
+});
+
+test("a missing session token sends no Checkout request and exposes a retryable error", async () => {
+  const page = await account({ plan: "free" }, true);
+  page.missingToken = true;
+  await page.upgrade.click();
+  assert.equal(page.checkoutAttempts, 0);
+  assert.equal(page.upgrade.disabled, false);
+  assert.match(page.nodes["[data-premium-status]"].textContent, /sesión/);
+});
+
+test("closed sales never request Checkout even with an active managed account", async () => {
+  const page = await account({ plan: "free" });
+  // Avoid a navigation timer in this unit test: the public state itself stays in preparation.
+  assert.match(page.upgrade.textContent, /preparación/);
+  assert.equal(page.checkoutAttempts, 0);
+});
+
+test("Checkout cannot navigate to a URL outside the Stripe HTTPS hosted page", async () => {
+  for (const url of ["https://attacker.invalid/pay", "javascript:alert(1)", "https://user:password@checkout.stripe.com/pay",
+    "https://checkout.stripe.com:8443/pay"]) {
+    const page = await account({ plan: "free" }, true);
+    page.checkoutUrl = url;
+    await page.upgrade.click();
+    assert.equal(page.navigation.length, 0);
+    assert.equal(page.upgrade.disabled, false);
+    assert.match(page.nodes["[data-premium-status]"].textContent, /segura/);
+  }
+});
+
+test("an expired session never sends a portal request and permits a signed-in retry", async () => {
+  const page = await account({ plan: "premium", premiumStatus: "active" });
+  page.missingToken = true;
+  await page.portal.click();
+  assert.equal(page.portalAttempts, 0);
+  assert.equal(page.portal.disabled, false);
+  assert.match(page.nodes["[data-premium-status]"].textContent, /sesión/i);
+  page.missingToken = false;
+  await page.portal.click();
+  assert.equal(page.portalAttempts, 1);
+  assert.equal(page.navigation.length, 1);
+});
+
+test("an unavailable portal token, request or response body times out and can be retried", async () => {
+  for (const stage of ["waitToken", "waitPortal", "waitPortalBody"]) {
+    const page = await account({ plan: "premium", premiumStatus: "active" });
+    let release;
+    page[stage] = new Promise(resolve => { release = resolve; });
+    page.window.setTimeout = fn => setTimeout(fn, 10);
+    const attempt = page.portal.click();
+    let guard;
+    try {
+      await Promise.race([attempt, new Promise((_, reject) => {
+        guard = setTimeout(() => reject(new Error(`Portal remained blocked at ${stage}`)), 150);
+      })]);
+      assert.equal(page.portal.disabled, false);
+      assert.equal(page.navigation.length, 0);
+      assert.match(page.nodes["[data-premium-status]"].textContent, /tardado demasiado/);
+    } finally { clearTimeout(guard); release(); await attempt; }
+    page[stage] = null;
+    await page.portal.click();
+    assert.deepEqual(page.navigation, ["https://billing.stripe.com/test-fixture"]);
+  }
+});
+
+test("the portal rejects non-Stripe destinations and allows a subsequent correct response", async () => {
+  const page = await account({ plan: "premium", premiumStatus: "active" });
+  for (const url of ["javascript:alert(1)", "http://billing.stripe.com/pay", "https://attacker.invalid/pay",
+    "https://billing.stripe.com.attacker.invalid/pay", "https://user:password@billing.stripe.com/pay"]) {
+    page.portalUrl = url;
+    await page.portal.click();
+    assert.equal(page.portal.disabled, false);
+    assert.equal(page.navigation.length, 0);
+  }
+  page.portalUrl = null;
+  await page.portal.click();
+  assert.deepEqual(page.navigation, ["https://billing.stripe.com/test-fixture"]);
+});
+
+test("a rejected signout displays an error and remains usable for a successful retry", async () => {
+  const page = await account({ plan: "free" });
+  page.signoutFailure = true;
+  await page.signout.click();
+  assert.equal(page.signoutAttempts, 1);
+  assert.equal(page.signout.disabled, false);
+  assert.equal(page.signout.textContent, "Cerrar sesión");
+  assert.equal(page.signout.attributes["aria-busy"], "false");
+  assert.match(page.nodes["[data-premium-status]"].textContent, /cerrar.*sesión/i);
+  assert.equal(page.navigation.length, 0);
+  page.signoutFailure = false;
+  await page.signout.click();
+  assert.equal(page.signoutAttempts, 2);
+  assert.deepEqual(page.navigation, ["/"]);
+});
+
+test("a stalled signout times out and permits a later retry", async () => {
+  const page = await account({ plan: "free" });
+  let release, guard;
+  page.waitSignout = new Promise(resolve => { release = resolve; });
+  page.window.setTimeout = fn => setTimeout(fn, 10);
+  const attempt = page.signout.click();
+  try {
+    await Promise.race([attempt, new Promise((_, reject) => {
+      guard = setTimeout(() => reject(new Error("Signout remained blocked")), 150);
+    })]);
+    assert.equal(page.signout.disabled, false);
+    assert.equal(page.signout.attributes["aria-busy"], "false");
+    assert.match(page.nodes["[data-premium-status]"].textContent, /tardado demasiado/);
+    assert.equal(page.navigation.length, 0);
+    page.waitSignout = null;
+    await page.signout.click();
+    assert.equal(page.signoutAttempts, 2);
+    assert.deepEqual(page.navigation, ["/"]);
+  } finally { clearTimeout(guard); release(); await attempt; }
+});
+
+test("repeated signout clicks keep one in-flight request and a busy button", async () => {
+  const page = await account({ plan: "free" });
+  let release;
+  page.waitSignout = new Promise(resolve => { release = resolve; });
+  const attempt = page.signout.click();
+  try {
+    await page.signout.click();
+    assert.equal(page.signoutAttempts, 1);
+    assert.equal(page.signout.disabled, true);
+    assert.equal(page.signout.attributes["aria-busy"], "true");
+  } finally { release(); await attempt; }
+  assert.deepEqual(page.navigation, ["/"]);
 });
