@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "app.momentumvelo",
+      "sha256_cert_fingerprints": [
+        "B2:CD:28:64:CE:CE:2E:BC:FA:FA:A7:A9:61:FE:C1:CE:17:FC:A0:71:2E:20:C9:98:C1:4B:7B:A4:E6:43:A6:84"
+      ]
+    }
+  }
+]

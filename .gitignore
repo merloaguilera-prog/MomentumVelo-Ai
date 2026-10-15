@@ -11,4 +11,8 @@ android/**/build/
 android/private/
 android/*.jks
 android/*.keystore
+android/*.p12
+android/*.pfx
 android/signing.properties
+android/release-output/
+__pycache__/
