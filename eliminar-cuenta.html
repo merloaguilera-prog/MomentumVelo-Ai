@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#050b11">
+  <meta name="description" content="Elimina tu cuenta de MomentumVelo y gestiona los datos guardados. Disponible desde la web, sin reinstalar la aplicación.">
+  <title>Eliminar mi cuenta y mis datos — MomentumVelo</title>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/neon.css?v=20261011">
+  <link rel="stylesheet" href="/eliminar-cuenta.css">
+  <script src="/site.js" defer></script>
+  <script src="/auth-provider.js" defer></script>
+  <script src="/account-data.js" defer></script>
+  <script src="/eliminar-cuenta.js" defer></script>
+</head>
+<body>
+  <header class="site-header simple-header">
+    <a class="brand" href="/"><span class="brand-mark" aria-hidden="true">↗</span><span>MomentumVelo<span class="accent">-AI</span></span></a>
+    <nav aria-label="Navegación"><a href="/mercados">Mercados</a><a href="/login?mode=account">Mi cuenta</a><a href="/ayuda">Ayuda</a></nav>
+  </header>
+  <main class="deletion-main">
+    <p class="eyebrow">Tu privacidad, bajo tu control</p>
+    <h1>Eliminar mi cuenta <span>y mis datos.</span></h1>
+    <p class="deletion-intro">Puedes iniciar la eliminación de tu cuenta de MomentumVelo desde esta página, también si ya has desinstalado la app. Primero comprobaremos que la cuenta es tuya.</p>
+    <div class="deletion-grid">
+      <section class="deletion-card" aria-labelledby="deletion-title">
+        <p class="eyebrow">1 · Cuenta y acceso</p>
+        <h2 id="deletion-title">Una decisión definitiva</h2>
+        <ul class="deletion-list">
+          <li>Se eliminan tu perfil de acceso, correo, credenciales y referencias de Premium guardadas en Clerk. Tus sesiones dejan de estar disponibles.</li>
+          <li>Si tienes un perfil de facturación vinculado, se cierran las compras pendientes y se elimina ese perfil de Stripe, cancelando las suscripciones asociadas.</li>
+          <li>Perderás el acceso a Premium inmediatamente. Esta acción no solicita un reembolso de los pagos anteriores.</li>
+        </ul>
+        <p class="deletion-retention">Los justificantes de pagos anteriores y los registros necesarios por obligaciones legales, seguridad o reclamaciones pueden conservarse durante el plazo que corresponda. Consulta la <a href="/legal#privacidad">política de privacidad</a> para conocer el alcance y los datos pendientes de completar antes de la apertura pública.</p>
+        <p class="deletion-status" data-deletion-status role="status" aria-live="polite">Comprobando el acceso seguro…</p>
+        <div data-deletion-access hidden>
+          <a class="button" href="/login?mode=login&amp;returnTo=delete-account">Identificarme para continuar</a>
+          <p><a href="/login?mode=login&amp;returnTo=delete-account">Recuperar el acceso a mi cuenta</a></p>
+        </div>
+        <p data-deletion-temporary hidden><a href="https://momentum-velo.vercel.app/eliminar-cuenta" rel="noreferrer">Intentar la eliminación desde el acceso temporal de MomentumVelo</a></p>
+        <button class="button button-secondary" type="button" data-deletion-reauth hidden>Volver a identificarme</button>
+        <form class="deletion-form" data-deletion-form hidden>
+          <p>Cuenta identificada: <strong data-deletion-email></strong></p>
+          <label>Confirma tu correo principal<input type="email" name="email" autocomplete="email" maxlength="180" required></label>
+          <label>Escribe ELIMINAR<input type="text" name="confirmation" autocomplete="off" spellcheck="false" pattern="ELIMINAR" maxlength="8" required></label>
+          <label class="deletion-check"><input type="checkbox" name="acceptConsequences" required><span>Entiendo que perderé mi cuenta y Premium y que se borrarán los datos locales de MomentumVelo de este navegador, incluidas las demostraciones de las personas que lo compartan. He guardado lo que necesito conservar.</span></label>
+          <button class="button deletion-danger" type="submit">Eliminar mi cuenta definitivamente</button>
+        </form>
+        <noscript><p>Activa JavaScript para identificarte y enviar la eliminación. La información de esta página está disponible sin instalar la app.</p></noscript>
+      </section>
+      <section class="deletion-card" aria-labelledby="local-data-title">
+        <p class="eyebrow">2 · Solo en este navegador</p>
+        <h2 id="local-data-title">Borrar mis datos locales</h2>
+        <p>Los favoritos, las notas, las reglas del detector y la cartera y diario de práctica se guardan en el navegador. Este botón los borra sin eliminar tu cuenta ni cancelar Premium.</p>
+        <p>También se borran las demostraciones locales guardadas. Afecta a todas las personas que compartan este navegador. Los datos de otros navegadores y dispositivos deben borrarse desde cada uno de ellos.</p>
+        <p>Si quieres conservar la cartera y el diario, <a href="/practica">expórtalos desde Práctica</a> antes de continuar.</p>
+        <form class="deletion-form" data-local-delete-form>
+          <label class="deletion-check"><input type="checkbox" name="confirmLocal" required><span>Confirmo que quiero borrar los datos locales de MomentumVelo de este navegador.</span></label>
+          <button class="button button-secondary" type="submit">Borrar los datos de este navegador</button>
+        </form>
+        <p class="deletion-status" data-local-delete-status role="status" aria-live="polite"></p>
+        <div class="deletion-help"><h3>¿Necesitas ayuda?</h3><p>Si no puedes identificarte, usa la recuperación de contraseña del acceso seguro. Para otras consultas, <a href="/ayuda?tema=seguridad#contacto">abre Privacidad y seguridad</a>. No envíes contraseñas ni datos de tarjeta.</p></div>
+      </section>
+    </div>
+    <p class="deletion-footer"><a href="/legal#eliminacion">Cómo se eliminan los datos</a> · <a href="/login?mode=account">Volver a mi cuenta</a></p>
+  </main>
+</body>
+</html>

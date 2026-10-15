@@ -316,6 +316,11 @@
       if (!managedView) return "managed";
 
       if (window.Clerk.isSignedIn) {
+        if (new URLSearchParams(window.location.search).get("returnTo") === "delete-account") {
+          window.location.assign("/eliminar-cuenta");
+          finishConnection();
+          return "managed";
+        }
         showManagedAccount();
         finishConnection();
         return "managed";
@@ -324,7 +329,10 @@
       if (localView) localView.hidden = true;
       managedView.hidden = false;
       const mount = managedView.querySelector("[data-clerk-mount]");
-      const mode = new URLSearchParams(window.location.search).get("mode");
+      const params = new URLSearchParams(window.location.search);
+      const mode = params.get("mode");
+      // A fixed destination only: query parameters never supply redirect URLs.
+      const deletionReturn = params.get("returnTo") === "delete-account" ? "/eliminar-cuenta" : null;
       const activeMode = mode === "signup" ? "signup" : "login";
       mount.id = "managed-auth-mount";
       mount.setAttribute("role", "tabpanel");
@@ -355,9 +363,11 @@
         }
       };
       if (activeMode === "signup") {
-        window.Clerk.mountSignUp(mount, { appearance, signInUrl: "/login?mode=login" });
+        window.Clerk.mountSignUp(mount, { appearance, signInUrl: deletionReturn ? "/login?mode=login&returnTo=delete-account" : "/login?mode=login",
+          ...(deletionReturn ? { forceRedirectUrl: deletionReturn, signInForceRedirectUrl: deletionReturn } : {}) });
       } else {
-        window.Clerk.mountSignIn(mount, { appearance, signUpUrl: "/login?mode=signup" });
+        window.Clerk.mountSignIn(mount, { appearance, signUpUrl: deletionReturn ? "/login?mode=signup&returnTo=delete-account" : "/login?mode=signup",
+          ...(deletionReturn ? { forceRedirectUrl: deletionReturn, signUpForceRedirectUrl: deletionReturn } : {}) });
       }
       finishConnection();
       return "managed";

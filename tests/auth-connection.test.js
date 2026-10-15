@@ -19,7 +19,7 @@ function element(hidden = false) {
   };
 }
 
-function browser({ config = { enabled: true, publishableKey }, responseOk = true, fetchFailure = false, scriptFailure = false, loadFailure = false, pendingConfig = false, origin = 'https://momentumvelo.app', search = '?mode=login', tabMode = 'login' } = {}) {
+function browser({ config = { enabled: true, publishableKey }, responseOk = true, fetchFailure = false, scriptFailure = false, loadFailure = false, pendingConfig = false, signedIn = false, origin = 'https://momentumvelo.app', search = '?mode=login', tabMode = 'login' } = {}) {
   const nodes = {
     '[data-auth-view]': element(true), '[data-managed-auth]': element(true),
     '[data-account-view]': element(true), '[data-auth-connection]': element(),
@@ -33,7 +33,7 @@ function browser({ config = { enabled: true, publishableKey }, responseOk = true
   tab.dataset = { authMode: tabMode };
   tab.classList = { toggle() {} };
   const scripts = [], requests = [], redirects = [], timers = new Map();
-  let timerId = 0, reloads = 0, storageReads = 0, storageWrites = 0, mounted = '';
+  let timerId = 0, reloads = 0, storageReads = 0, storageWrites = 0, mounted = '', mountOptions;
   const window = {
     location: { origin, href: `${origin}/login${search}`, search, reload() { reloads++; }, assign(url) { redirects.push(url); } },
     atob: (value) => Buffer.from(value, 'base64').toString('utf8'),
@@ -60,13 +60,13 @@ function browser({ config = { enabled: true, publishableKey }, responseOk = true
           // before load(), whose UI options cannot change this constructor value.
           const proxyUrl = script.getAttribute('data-clerk-proxy-url');
           window.Clerk = {
-            isSignedIn: false,
+            isSignedIn: signedIn,
             async load() {
               requests.push(`${proxyUrl || 'https://clerk.example.com'}/v1/client`);
               if (loadFailure) throw new Error('host_invalid');
             },
-            mountSignIn() { mounted = 'login'; },
-            mountSignUp() { mounted = 'signup'; }
+            mountSignIn(_target, options) { mounted = 'login'; mountOptions = options; },
+            mountSignUp(_target, options) { mounted = 'signup'; mountOptions = options; }
           };
         }
         script.listeners.load();
@@ -85,7 +85,7 @@ function browser({ config = { enabled: true, publishableKey }, responseOk = true
   vm.runInContext(providerSource, context);
   return {
     window, nodes, tab, scripts, requests, redirects, timers, context,
-    get mounted() { return mounted; }, get reloads() { return reloads; },
+    get mounted() { return mounted; }, get mountOptions() { return mountOptions; }, get reloads() { return reloads; },
     get storageReads() { return storageReads; }, get storageWrites() { return storageWrites; }
   };
 }
@@ -106,6 +106,20 @@ test('Clerk session requests use the current origin proxy from SDK construction'
   await Promise.resolve();
   assert.equal(page.storageReads, 0);
   assert.equal(page.storageWrites, 0);
+});
+
+test('deletion login returns only to the fixed deletion page and cannot accept an arbitrary redirect', async () => {
+  for (const mode of ['login', 'signup']) {
+    const page = browser({ search: `?mode=${mode}&returnTo=delete-account&redirect=https://attacker.example` });
+    assert.equal(await page.window.MomentumVeloAuthReady, 'managed');
+    assert.equal(page.mountOptions.forceRedirectUrl, '/eliminar-cuenta');
+  }
+  const other = browser({ search: '?mode=login&returnTo=https://attacker.example' });
+  assert.equal(await other.window.MomentumVeloAuthReady, 'managed');
+  assert.equal(other.mountOptions.forceRedirectUrl, undefined);
+  const signedIn = browser({ signedIn: true, search: '?mode=login&returnTo=delete-account' });
+  assert.equal(await signedIn.window.MomentumVeloAuthReady, 'managed');
+  assert.deepEqual(signedIn.redirects, ['/eliminar-cuenta']);
 });
 
 for (const [name, options] of Object.entries({
