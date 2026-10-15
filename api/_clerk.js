@@ -18,7 +18,7 @@ function authorizedParties() {
   return [...new Set(values.filter(Boolean).map((value) => value.replace(/\/$/, "")))];
 }
 
-async function getAuthenticatedUser(req) {
+async function getAuthenticatedUser(req, { includeSessionClaims = false } = {}) {
   if (!process.env.CLERK_SECRET_KEY) return null;
   const token = getBearerToken(req);
   if (!token) return null;
@@ -27,7 +27,9 @@ async function getAuthenticatedUser(req) {
       secretKey: process.env.CLERK_SECRET_KEY,
       authorizedParties: authorizedParties()
     });
-    return payload && payload.sub ? { userId: payload.sub, sessionId: payload.sid || null } : null;
+    if (!payload?.sub) return null;
+    const identity = { userId: payload.sub, sessionId: payload.sid || null };
+    return includeSessionClaims ? { ...identity, factorVerificationAge: payload.fva, actor: payload.act || null } : identity;
   } catch (_error) {
     return null;
   }
@@ -38,7 +40,15 @@ async function updateUserPlan(userId, plan, details = {}) {
     throw new Error("La actualización de Premium requiere una cuenta Clerk configurada.");
   }
   const clerk = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
-  const user = await clerk.users.getUser(userId);
+  let user;
+  try { user = await clerk.users.getUser(userId); }
+  catch (error) {
+    // A delayed, signed Stripe event must not recreate or endlessly retry a
+    // user who has deleted their account. All other failures remain retryable.
+    if (error?.status === 404) return true;
+    throw error;
+  }
+  if (user.privateMetadata?.accountDeletionStartedAt) return true;
   const currentSubscriptionId = user.privateMetadata?.stripeSubscriptionId;
   // Ignore revocation from another subscription, but allow a newly verified paid
   // subscription to replace an old ID whose cancellation delivery is delayed.
@@ -62,6 +72,7 @@ async function getUserStripeCustomerId(userId) {
   if (!process.env.CLERK_SECRET_KEY || !userId) return null;
   const clerk = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
   const user = await clerk.users.getUser(userId);
+  if (user.privateMetadata?.accountDeletionStartedAt) throw new Error("La eliminación de esta cuenta está en curso. Continúa desde Eliminar mi cuenta.");
   const customerId = user.privateMetadata?.stripeCustomerId;
   return typeof customerId === "string" && customerId.startsWith("cus_") ? customerId : null;
 }
@@ -72,6 +83,7 @@ async function setUserStripeCustomerId(userId, customerId) {
   }
   const clerk = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
   const user = await clerk.users.getUser(userId);
+  if (user.privateMetadata?.accountDeletionStartedAt) throw new Error("La eliminación de esta cuenta está en curso.");
   const current = user.privateMetadata?.stripeCustomerId;
   if (current && current !== customerId) throw new Error("La cuenta ya tiene otro cliente de facturación.");
   if (!current) await clerk.users.updateUserMetadata(userId, { privateMetadata: { stripeCustomerId: customerId } });
@@ -82,10 +94,10 @@ async function hasUserPremiumEntitlement(userId, customerId, subscriptionId) {
   if (!process.env.CLERK_SECRET_KEY || !userId || !customerId || !subscriptionId) return false;
   const clerk = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
   const user = await clerk.users.getUser(userId);
-  return user.publicMetadata?.plan === "premium"
+  return !user.privateMetadata?.accountDeletionStartedAt && user.publicMetadata?.plan === "premium"
     && user.publicMetadata?.premiumStatus === "active"
     && user.privateMetadata?.stripeCustomerId === customerId
     && user.privateMetadata?.stripeSubscriptionId === subscriptionId;
 }
 
-module.exports = { getAuthenticatedUser, getUserStripeCustomerId, setUserStripeCustomerId, updateUserPlan, hasUserPremiumEntitlement };
+module.exports = { getAuthenticatedUser, authorizedParties, getUserStripeCustomerId, setUserStripeCustomerId, updateUserPlan, hasUserPremiumEntitlement };
