@@ -142,19 +142,22 @@
       <div>
         <p class="eyebrow">Contacto</p>
         <h2>Cuéntanos qué necesitas.</h2>
-        <p class="section-intro">Cuenta, Premium, facturación, privacidad o una solución a medida. El formulario enviará la consulta cuando el canal de correo esté configurado; si no lo está, te mostrará una alternativa sin fingir que el mensaje se ha enviado.</p>
+        <p class="section-intro">Cuenta, Premium, facturación, privacidad o una solución a medida. Comprueba la disponibilidad del envío antes de continuar. Si hay un problema, puedes conservar tu consulta como borrador en este dispositivo.</p>
         <div class="contact-assurance"><strong>No envíes contraseñas ni datos completos de tarjeta.</strong><span>Para localizar un pago basta con el correo utilizado y, si lo tienes, el identificador de Stripe.</span></div>
       </div>
       <form class="contact-form" data-contact-form novalidate>
+        <p class="contact-status" data-contact-availability role="status" aria-live="polite">Comprobando la disponibilidad del envío…</p>
         <label>Nombre<input name="name" type="text" autocomplete="name" maxlength="80" required></label>
         <label>Correo<input name="email" type="email" autocomplete="email" maxlength="180" required></label>
         <label>Tema<select name="topic" data-contact-topic><option>Ayuda general</option><option>Cuenta y acceso</option><option>Premium y pagos</option><option>Cancelación de Premium</option><option>Plan Fondo / empresas</option><option>Privacidad y seguridad</option></select></label>
         <label>Tu consulta<textarea name="message" rows="6" maxlength="3000" minlength="10" required placeholder="Explícanos qué quieres hacer y en qué punto necesitas ayuda."></textarea></label>
         <label class="honeypot" aria-hidden="true">Sitio web<input name="website" type="text" tabindex="-1" autocomplete="off"></label>
         <label class="privacy-check"><input name="privacy" type="checkbox" required><span>Acepto que se usen estos datos para responder a mi consulta según la <a href="/legal#privacidad">política de privacidad</a>.</span></label>
-        <button class="button" type="submit">Enviar consulta</button>
+        <button class="button" type="submit" disabled>Comprobando envío…</button>
+        <button class="button button-secondary" type="button" data-contact-retry hidden>Volver a comprobar el envío</button>
+        <button class="button button-secondary" type="button" data-contact-draft>Guardar consulta como borrador</button>
         <p class="contact-status" data-contact-status role="status" aria-live="polite"></p>
-        <p class="contact-fallback">Canal provisional: <a href="mailto:hola@momentumvelo.ai">hola@momentumvelo.ai</a>. Comprueba que tu aplicación de correo se abre antes de considerar el mensaje enviado.</p>
+        <p class="contact-fallback">El borrador se guarda solo en el dispositivo donde lo descargas. Para una consulta enviada, conserva la referencia de confirmación. Las solicitudes de eliminación de cuenta se tramitan desde <a href="/eliminar-cuenta">Eliminar mi cuenta y mis datos</a>.</p><noscript><p>Activa JavaScript para comprobar la disponibilidad y enviar la consulta. Puedes consultar las respuestas de ayuda sin activarlo.</p></noscript>
       </form>
     </section>
   </main>
