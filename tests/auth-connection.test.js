@@ -231,7 +231,7 @@ test('a missing auth provider cannot enable local signup', async () => {
 test('auth config rejects either missing key and never returns the secret', async () => {
   const previous = [process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY, process.env.CLERK_SECRET_KEY];
   try {
-    for (const [publicKey, secretKey, expectedCode] of [[publishableKey, '', 503], ['', 'sk_test_secret', 503], [publishableKey, 'sk_test_secret', 200], ['', '', 200]]) {
+    for (const [publicKey, secretKey, expectedCode] of [[publishableKey, '', 503], ['', 'sk_test_secret', 503], [publishableKey, 'sk_live_fixture', 200], ['', '', 200]]) {
       process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = publicKey;
       process.env.CLERK_SECRET_KEY = secretKey;
       const res = { status(code) { this.code = code; return this; }, json(body) { this.body = body; }, setHeader() {} };
@@ -244,6 +244,27 @@ test('auth config rejects either missing key and never returns the secret', asyn
     const names = ['NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY', 'CLERK_SECRET_KEY'];
     names.forEach((name, index) => { if (previous[index] === undefined) delete process.env[name]; else process.env[name] = previous[index]; });
   }
+});
+
+
+test('mixed live and test Clerk keys stop login bootstrap without exposing credentials', async () => {
+  const previous = { ...process.env };
+  try {
+    for (const [publicKey, secretKey] of [
+      [publishableKey, 'sk_test_secret'],
+      [publishableKey.replace('pk_live_', 'pk_test_'), 'sk_live_secret']
+    ]) {
+      process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = publicKey;
+      process.env.CLERK_SECRET_KEY = secretKey;
+      const res = { status(code) { this.code = code; return this; }, json(body) { this.body = body; }, setHeader() {} };
+      await authConfig({ method: 'GET' }, res);
+      assert.equal(res.code, 503);
+      assert.match(res.body.error, /configuración de acceso seguro/);
+      assert.equal(res.body.enabled, undefined);
+      assert.equal(res.body.publishableKey, undefined);
+      assert.equal(JSON.stringify(res.body).includes(secretKey), false);
+    }
+  } finally { process.env = previous; }
 });
 
 
