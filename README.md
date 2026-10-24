@@ -27,6 +27,10 @@ La asociación de dominio y proxy de la instancia de producción está gestionad
 
 El 13 de octubre de 2026 se confirmó la recepción de una actualización de la incidencia desde el formulario oficial de soporte de Clerk. La comprobación pública posterior seguía dando HTTP 400 `host_invalid` en `momentumvelo.app/__clerk/v1/environment`. La recepción del mensaje no acredita la corrección del dominio o del proxy.
 
+El 24 de octubre se recuperó la respuesta de soporte de Clerk: el formulario de Marketplace no puede actualizar dominio y proxy conjuntamente. Con autorización expresa se creó un espacio Hobby independiente y una aplicación para `momentumvelo.app`; producción seguía sin usuarios. Los cinco CNAME nuevos están verificados. El cambio de claves y la prueba real de acceso siguen pendientes de la verificación por correo que exige Clerk antes de crear la clave de servidor.
+
+Para conectar la instancia independiente, configurar `CLERK_USE_PROXY=false` junto con sus claves nuevas. El navegador obtiene el dominio del Frontend API de la clave pública y carga directamente sus bundles; acepta `clerk.momentumvelo.app` en producción y dominios `*.clerk.accounts.dev` en desarrollo. La CSP permite el dominio exacto de producción. En este modo nunca se ofrece el acceso temporal de la aplicación anterior si falla la conexión. La configuración predeterminada conserva el proxy actual, para poder preparar el cambio sin interrumpir el despliegue existente. Mantener `PREMIUM_SALES_ENABLED=false` hasta verificar el ciclo real de facturación.
+
 Antes de considerar resuelto el acceso, verificar environment/client en el navegador, las claves de la misma instancia, el registro con verificación de correo, inicio, persistencia, cierre y recuperación. Un despliegue READY o pruebas locales correctas no acreditan estos pasos reales.
 
 El cierre de sesión gestionado espera hasta 15 segundos y muestra un aviso si falla. El botón permite reintentar después del error y evita peticiones simultáneas mientras el cierre está en curso; se mantiene el retorno al inicio tras un cierre correcto.

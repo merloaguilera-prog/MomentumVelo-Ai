@@ -21,6 +21,7 @@ module.exports = async function handler(req, res) {
   return res.status(200).json({
     enabled: Boolean(publishableKey && secretKey),
     publishableKey: publishableKey || null,
+    proxyEnabled: process.env.CLERK_USE_PROXY !== "false",
     premiumSalesEnabled
   });
 };

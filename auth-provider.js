@@ -2,6 +2,7 @@
   "use strict";
   let premiumSalesEnabled = false;
   let managedTabsReady = false;
+  let temporaryAccessAllowed = false;
 
   function withTimeout(operation) {
     let timeout;
@@ -39,7 +40,7 @@
     const temporaryLink = document.querySelector("[data-auth-temporary-link]");
     // Offer an explicit route to the same Clerk application, never an automatic
     // cross-origin redirect or a destination supplied by query parameters.
-    if (temporary && temporaryLink && window.location.origin === "https://momentumvelo.app") {
+    if (temporaryAccessAllowed && temporary && temporaryLink && window.location.origin === "https://momentumvelo.app") {
       const mode = new URLSearchParams(window.location.search).get("mode") === "signup" ? "signup" : "login";
       temporaryLink.href = `https://momentum-velo.vercel.app/login?mode=${mode}`;
       temporaryLink.textContent = mode === "signup" ? "Crear cuenta en el acceso temporal" : "Entrar en el acceso temporal";
@@ -48,7 +49,7 @@
     document.querySelectorAll("[data-auth-view], [data-managed-auth], [data-account-view]").forEach((view) => {
       view.hidden = true;
     });
-    const canUseTemporary = temporary && temporaryLink && window.location.origin === "https://momentumvelo.app";
+    const canUseTemporary = temporaryAccessAllowed && temporary && temporaryLink && window.location.origin === "https://momentumvelo.app";
     if (canUseTemporary && message) {
       message.textContent += " Los botones Crear cuenta gratis e Iniciar sesión abren el acceso temporal de MomentumVelo.";
     }
@@ -301,11 +302,21 @@
         : "";
       if (!domain) throw new Error("La configuración de acceso seguro está incompleta.");
 
-      const proxyUrl = new URL("/__clerk", window.location.origin).href;
-      await loadScript(`${proxyUrl}/npm/@clerk/ui@1/dist/ui.browser.js`);
+      // Keep the old route available only for the existing proxied instance.
+      // A new direct instance must never send a failed login to another app.
+      const proxyEnabled = config.proxyEnabled !== false;
+      temporaryAccessAllowed = proxyEnabled;
+      if (!proxyEnabled && domain !== "clerk.momentumvelo.app"
+          && !/^[a-z0-9-]+\.clerk\.accounts\.dev$/.test(domain)) {
+        throw new Error("El dominio del acceso seguro no es válido.");
+      }
+      const proxyUrl = proxyEnabled ? new URL("/__clerk", window.location.origin).href : null;
+      const sdkUrl = proxyUrl || `https://${domain}`;
+      await loadScript(`${sdkUrl}/npm/@clerk/ui@1/dist/ui.browser.js`);
       await loadScript(
-        `${proxyUrl}/npm/@clerk/clerk-js@6/dist/clerk.browser.js`,
-        { "data-clerk-publishable-key": config.publishableKey, "data-clerk-proxy-url": proxyUrl }
+        `${sdkUrl}/npm/@clerk/clerk-js@6/dist/clerk.browser.js`,
+        { "data-clerk-publishable-key": config.publishableKey,
+          ...(proxyUrl ? { "data-clerk-proxy-url": proxyUrl } : {}) }
       );
       // ClerkJS reads proxyUrl when its script creates the Clerk instance, before load().
       await withTimeout(window.Clerk.load({ ui: { ClerkUI: window.__internal_ClerkUICtor } }));
