@@ -8,7 +8,8 @@ module.exports = async function handler(req, res) {
   if (!process.env.STRIPE_SECRET_KEY || !clerkKeys().secretKey) return res.status(503).json({ error: "La gestión segura de Premium no está configurada." });
   const mode = billingMode();
   if (mode === null) return res.status(503).json({ error: "La configuración de facturación no corresponde a este entorno." });
-  const sessionId = typeof req.body?.sessionId === "string" ? req.body.sessionId : "";
+  if (req.body?.sessionId != null && typeof req.body.sessionId !== "string") return res.status(400).json({ error: "Referencia no válida." });
+  const sessionId = req.body?.sessionId || "";
   try {
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2026-07-29.dahlia" });
     const authenticatedUser = await getAuthenticatedUser(req);
@@ -25,7 +26,6 @@ module.exports = async function handler(req, res) {
         return res.status(403).json({ error: "La referencia no pertenece a esta cuenta." });
       }
     }
-    if (!customerId) return res.status(400).json({ error: "No se encontró el cliente de Stripe." });
     const returnPath = sessionId ? `/success?session_id=${encodeURIComponent(sessionId)}` : "/login?mode=account";
     const portal = await stripe.billingPortal.sessions.create({ customer: customerId, return_url: `${siteUrl}${returnPath}` });
     return res.status(200).json({ url: portal.url });
