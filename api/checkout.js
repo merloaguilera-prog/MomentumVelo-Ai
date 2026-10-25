@@ -1,3 +1,4 @@
+const { clerkKeys } = require("./_clerk-config");
 const Stripe = require("stripe");
 const clerk = require("./_clerk");
 const { getAuthenticatedUser } = clerk;
@@ -23,7 +24,7 @@ module.exports = async function handler(req, res) {
   const priceId = process.env.STRIPE_PREMIUM_PRICE_ID;
   const mode = billingMode();
   if (mode === null) return res.status(503).json({ error: "La configuración de facturación no corresponde a este entorno." });
-  const managedAuthRequired = Boolean(process.env.CLERK_SECRET_KEY);
+  const managedAuthRequired = Boolean(clerkKeys().secretKey);
   const authenticatedUser = managedAuthRequired ? await getAuthenticatedUser(req) : null;
 
   if (managedAuthRequired && !authenticatedUser) {

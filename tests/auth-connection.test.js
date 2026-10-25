@@ -301,17 +301,18 @@ test('direct SDK loading rejects untrusted or malformed domains before loading a
 });
 
 test('public config enables direct Clerk only with an explicit false proxy flag', async () => {
-  const previous = process.env.CLERK_USE_PROXY;
+  const previous = { ...process.env };
   try {
     for (const flag of ['true', '', 'false']) {
       process.env.CLERK_USE_PROXY = flag;
+      process.env.MOMENTUM_CLERK_SECRET_KEY = 'sk_live_direct_fixture';
+      process.env.NEXT_PUBLIC_MOMENTUM_CLERK_PUBLISHABLE_KEY = publishableKey;
       const res = { status(code) { this.code = code; return this; }, json(body) { this.body = body; }, setHeader() {} };
       await authConfig({ method: 'GET' }, res);
       assert.equal(res.body.proxyEnabled, flag !== 'false');
     }
   } finally {
-    if (previous === undefined) delete process.env.CLERK_USE_PROXY;
-    else process.env.CLERK_USE_PROXY = previous;
+    process.env = previous;
   }
 });
 

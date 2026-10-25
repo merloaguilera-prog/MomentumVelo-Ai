@@ -1,3 +1,4 @@
+const { clerkKeys } = require("./_clerk-config");
 const { billingMode, getBillingSiteUrl } = require("./_billing");
 
 module.exports = async function handler(req, res) {
@@ -7,9 +8,10 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: "Método no permitido." });
   }
 
-  const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || "";
-  const secretKey = process.env.CLERK_SECRET_KEY || "";
-  if (Boolean(publishableKey) !== Boolean(secretKey)) {
+  const publishableKey = clerkKeys().publishableKey || "";
+  const secretKey = clerkKeys().secretKey || "";
+  if (Boolean(publishableKey) !== Boolean(secretKey)
+      || (process.env.CLERK_USE_PROXY === "false" && (!publishableKey || !secretKey))) {
     return res.status(503).json({ error: "La configuración de acceso seguro está incompleta." });
   }
   if (publishableKey && secretKey) {

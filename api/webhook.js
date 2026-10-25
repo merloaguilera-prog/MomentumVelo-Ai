@@ -1,3 +1,4 @@
+const { clerkKeys } = require("./_clerk-config");
 const Stripe = require("stripe");
 const { updateUserPlan } = require("./_clerk");
 const { hasPremiumAccess, stripeId, billingMode } = require("./_billing");
@@ -28,7 +29,7 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: "Método no permitido." });
   }
   if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBHOOK_SECRET
-      || !process.env.CLERK_SECRET_KEY || !process.env.STRIPE_PREMIUM_PRICE_ID) {
+      || !clerkKeys().secretKey || !process.env.STRIPE_PREMIUM_PRICE_ID) {
     return res.status(503).json({ error: "Webhook de suscripciones no configurado." });
   }
   const mode = billingMode();

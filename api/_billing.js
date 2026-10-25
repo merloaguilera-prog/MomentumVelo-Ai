@@ -1,3 +1,4 @@
+const { clerkKeys } = require("./_clerk-config");
 function isPremiumPrice(price, configuredPriceId, requireActive = true) {
   return Boolean(price && configuredPriceId && price.id === configuredPriceId
     && (!requireActive || price.active === true)
@@ -21,9 +22,9 @@ function stripeId(value, prefix) {
 
 function billingMode(env = process.env) {
   const stripe = /^(?:sk|rk)_(test|live)_/.exec(env.STRIPE_SECRET_KEY || "");
-  const clerk = /^sk_(test|live)_/.exec(env.CLERK_SECRET_KEY || "");
+  const clerk = /^sk_(test|live)_/.exec(clerkKeys(env).secretKey || "");
   if (!stripe || !clerk || stripe[1] !== clerk[1]) return null;
-  const publicKey = env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  const publicKey = clerkKeys(env).publishableKey;
   if (publicKey && !publicKey.startsWith(`pk_${clerk[1]}_`)) return null;
   if (["preview", "development"].includes(env.VERCEL_ENV) && stripe[1] !== "test") return null;
   return stripe[1] === "live";
