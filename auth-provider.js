@@ -54,15 +54,21 @@
       message.textContent += " Los botones Crear cuenta gratis e Iniciar sesión abren el acceso temporal de MomentumVelo.";
     }
     document.querySelectorAll("[data-auth-mode]").forEach((tab) => {
-      tab.disabled = !canUseTemporary;
-      if (!canUseTemporary) return;
+      // Never leave the visible login/signup tabs inert after a Clerk outage.
+      // Without a verified legacy fallback, a click retries the same instance.
+      tab.disabled = false;
       const mode = tab.dataset.authMode === "signup" ? "signup" : "login";
-      tab.setAttribute("title", "Abrir el acceso temporal de MomentumVelo");
-      tab.addEventListener("click", () => {
-        // Navigation is explicit and carries only a fixed mode. Never forward
-        // emails, tokens, payment references or arbitrary redirect parameters.
-        window.location.assign(`https://momentum-velo.vercel.app/login?mode=${mode}`);
-      });
+      tab.setAttribute("title", canUseTemporary ? "Abrir el acceso temporal de MomentumVelo" : "Reintentar el acceso seguro");
+      tab.onclick = () => {
+        if (canUseTemporary) {
+          // Only fixed modes are forwarded, never credentials or tokens.
+          window.location.assign(`https://momentum-velo.vercel.app/login?mode=${mode}`);
+          return;
+        }
+        const url = new URL(window.location.href);
+        url.searchParams.set("mode", mode);
+        window.location.assign(url.href);
+      };
     });
   }
 
