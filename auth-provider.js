@@ -34,7 +34,7 @@
       connection.hidden = false;
       connection.setAttribute("aria-busy", "false");
     }
-    if (message) message.textContent = "No hemos podido conectar con el acceso seguro. Reintenta la conexión o consulta la ayuda. No se ha creado ninguna cuenta local de prueba.";
+    if (message) message.textContent = "El registro y el inicio de sesión están temporalmente bloqueados porque no se ha podido conectar con Clerk. Pulsa Reintentar conexión; no se ha creado ninguna cuenta local de prueba ni se ha realizado ningún cobro.";
     if (retry) retry.hidden = false;
     const temporary = document.querySelector("[data-auth-temporary]");
     const temporaryLink = document.querySelector("[data-auth-temporary-link]");
@@ -54,21 +54,15 @@
       message.textContent += " Los botones Crear cuenta gratis e Iniciar sesión abren el acceso temporal de MomentumVelo.";
     }
     document.querySelectorAll("[data-auth-mode]").forEach((tab) => {
-      // Never leave the visible login/signup tabs inert after a Clerk outage.
-      // Without a verified legacy fallback, a click retries the same instance.
-      tab.disabled = false;
+      tab.disabled = !canUseTemporary;
+      if (!canUseTemporary) return;
       const mode = tab.dataset.authMode === "signup" ? "signup" : "login";
-      tab.setAttribute("title", canUseTemporary ? "Abrir el acceso temporal de MomentumVelo" : "Reintentar el acceso seguro");
-      tab.onclick = () => {
-        if (canUseTemporary) {
-          // Only fixed modes are forwarded, never credentials or tokens.
-          window.location.assign(`https://momentum-velo.vercel.app/login?mode=${mode}`);
-          return;
-        }
-        const url = new URL(window.location.href);
-        url.searchParams.set("mode", mode);
-        window.location.assign(url.href);
-      };
+      tab.setAttribute("title", "Abrir el acceso temporal de MomentumVelo");
+      tab.addEventListener("click", () => {
+        // Navigation is explicit and carries only a fixed mode. Never forward
+        // emails, tokens, payment references or arbitrary redirect parameters.
+        window.location.assign(`https://momentum-velo.vercel.app/login?mode=${mode}`);
+      });
     });
   }
 
