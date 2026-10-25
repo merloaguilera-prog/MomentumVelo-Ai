@@ -34,7 +34,7 @@
       connection.hidden = false;
       connection.setAttribute("aria-busy", "false");
     }
-    if (message) message.textContent = "El registro y el inicio de sesión están temporalmente bloqueados porque no se ha podido conectar con Clerk. Pulsa Reintentar conexión; no se ha creado ninguna cuenta local de prueba ni se ha realizado ningún cobro.";
+    if (message) message.textContent = "No hemos podido conectar con el acceso seguro. Reintenta la conexión o consulta la ayuda. No se ha creado ninguna cuenta local de prueba.";
     if (retry) retry.hidden = false;
     const temporary = document.querySelector("[data-auth-temporary]");
     const temporaryLink = document.querySelector("[data-auth-temporary-link]");
