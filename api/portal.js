@@ -1,10 +1,11 @@
+const { clerkKeys } = require("./_clerk-config");
 const Stripe = require("stripe");
 const { getAuthenticatedUser, getUserStripeCustomerId } = require("./_clerk");
 const { billingMode, getBillingSiteUrl } = require("./_billing");
 module.exports = async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
   if (req.method !== "POST") { res.setHeader("Allow", "POST"); return res.status(405).json({ error: "Método no permitido." }); }
-  if (!process.env.STRIPE_SECRET_KEY || !process.env.CLERK_SECRET_KEY) return res.status(503).json({ error: "La gestión segura de Premium no está configurada." });
+  if (!process.env.STRIPE_SECRET_KEY || !clerkKeys().secretKey) return res.status(503).json({ error: "La gestión segura de Premium no está configurada." });
   const mode = billingMode();
   if (mode === null) return res.status(503).json({ error: "La configuración de facturación no corresponde a este entorno." });
   const sessionId = typeof req.body?.sessionId === "string" ? req.body.sessionId : "";

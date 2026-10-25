@@ -1,3 +1,4 @@
+const { clerkKeys } = require("./_clerk-config");
 const Stripe = require("stripe");
 const { getAuthenticatedUser, hasUserPremiumEntitlement } = require("./_clerk");
 const { isPremiumSubscription, hasPremiumAccess, billingMode } = require("./_billing");
@@ -5,7 +6,7 @@ module.exports = async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
   if (req.method !== "GET") { res.setHeader("Allow", "GET"); return res.status(405).json({ error: "Método no permitido." }); }
   if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_PREMIUM_PRICE_ID) return res.status(503).json({ error: "Stripe no está configurado." });
-  if (!process.env.CLERK_SECRET_KEY) return res.status(503).json({ error: "La verificación de cuenta no está configurada." });
+  if (!clerkKeys().secretKey) return res.status(503).json({ error: "La verificación de cuenta no está configurada." });
   const mode = billingMode();
   if (mode === null) return res.status(503).json({ error: "La configuración de facturación no corresponde a este entorno." });
   const sessionId = typeof req.query.session_id === "string" ? req.query.session_id : "";

@@ -1,3 +1,4 @@
+const { clerkKeys } = require("./_clerk-config");
 const { createClerkClient, verifyToken } = require("@clerk/backend");
 
 function getBearerToken(req) {
@@ -19,12 +20,12 @@ function authorizedParties() {
 }
 
 async function getAuthenticatedUser(req, { includeSessionClaims = false } = {}) {
-  if (!process.env.CLERK_SECRET_KEY) return null;
+  if (!clerkKeys().secretKey) return null;
   const token = getBearerToken(req);
   if (!token) return null;
   try {
     const payload = await verifyToken(token, {
-      secretKey: process.env.CLERK_SECRET_KEY,
+      secretKey: clerkKeys().secretKey,
       authorizedParties: authorizedParties()
     });
     if (!payload?.sub) return null;
@@ -36,10 +37,10 @@ async function getAuthenticatedUser(req, { includeSessionClaims = false } = {}) 
 }
 
 async function updateUserPlan(userId, plan, details = {}) {
-  if (!process.env.CLERK_SECRET_KEY || !userId) {
+  if (!clerkKeys().secretKey || !userId) {
     throw new Error("La actualización de Premium requiere una cuenta Clerk configurada.");
   }
-  const clerk = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
+  const clerk = createClerkClient({ secretKey: clerkKeys().secretKey });
   let user;
   try { user = await clerk.users.getUser(userId); }
   catch (error) {
@@ -69,8 +70,8 @@ async function updateUserPlan(userId, plan, details = {}) {
 }
 
 async function getUserStripeCustomerId(userId) {
-  if (!process.env.CLERK_SECRET_KEY || !userId) return null;
-  const clerk = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
+  if (!clerkKeys().secretKey || !userId) return null;
+  const clerk = createClerkClient({ secretKey: clerkKeys().secretKey });
   const user = await clerk.users.getUser(userId);
   if (user.privateMetadata?.accountDeletionStartedAt) throw new Error("La eliminación de esta cuenta está en curso. Continúa desde Eliminar mi cuenta.");
   const customerId = user.privateMetadata?.stripeCustomerId;
@@ -78,10 +79,10 @@ async function getUserStripeCustomerId(userId) {
 }
 
 async function setUserStripeCustomerId(userId, customerId) {
-  if (!process.env.CLERK_SECRET_KEY || !userId || !customerId?.startsWith("cus_")) {
+  if (!clerkKeys().secretKey || !userId || !customerId?.startsWith("cus_")) {
     throw new Error("La vinculación de facturación requiere una cuenta configurada.");
   }
-  const clerk = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
+  const clerk = createClerkClient({ secretKey: clerkKeys().secretKey });
   const user = await clerk.users.getUser(userId);
   if (user.privateMetadata?.accountDeletionStartedAt) throw new Error("La eliminación de esta cuenta está en curso.");
   const current = user.privateMetadata?.stripeCustomerId;
@@ -91,8 +92,8 @@ async function setUserStripeCustomerId(userId, customerId) {
 }
 
 async function hasUserPremiumEntitlement(userId, customerId, subscriptionId) {
-  if (!process.env.CLERK_SECRET_KEY || !userId || !customerId || !subscriptionId) return false;
-  const clerk = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
+  if (!clerkKeys().secretKey || !userId || !customerId || !subscriptionId) return false;
+  const clerk = createClerkClient({ secretKey: clerkKeys().secretKey });
   const user = await clerk.users.getUser(userId);
   return !user.privateMetadata?.accountDeletionStartedAt && user.publicMetadata?.plan === "premium"
     && user.publicMetadata?.premiumStatus === "active"

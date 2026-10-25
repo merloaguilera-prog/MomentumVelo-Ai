@@ -1,3 +1,4 @@
+const { clerkKeys } = require("./_clerk-config");
 const { createClerkClient } = require("@clerk/backend");
 const Stripe = require("stripe");
 const { getAuthenticatedUser, authorizedParties } = require("./_clerk");
@@ -6,10 +7,10 @@ const { STRIPE_API_VERSION } = require("./_stripe-config");
 
 const recent = age => Number.isInteger(age) && age >= 0 && age < 10;
 function accountMode() {
-  const mode = /^sk_(test|live)_/.exec(process.env.CLERK_SECRET_KEY || "")?.[1];
+  const mode = /^sk_(test|live)_/.exec(clerkKeys().secretKey || "")?.[1];
   if (!mode || (["preview", "development"].includes(process.env.VERCEL_ENV) && mode !== "test")) return null;
-  if (process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
-      && !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY.startsWith(`pk_${mode}_`)) return null;
+  if (clerkKeys().publishableKey
+      && !clerkKeys().publishableKey.startsWith(`pk_${mode}_`)) return null;
   return mode;
 }
 
@@ -51,7 +52,7 @@ module.exports = async function handler(req, res) {
     return res.status(403).json({ code: "REAUTHENTICATION_REQUIRED", error: "Por seguridad, vuelve a identificarte antes de eliminar tu cuenta." });
   }
 
-  const clerk = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
+  const clerk = createClerkClient({ secretKey: clerkKeys().secretKey });
   let stage = "account";
   try {
     let user;

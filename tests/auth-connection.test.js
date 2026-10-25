@@ -62,7 +62,8 @@ function browser({ config = { enabled: true, publishableKey }, responseOk = true
           window.Clerk = {
             isSignedIn: signedIn,
             async load() {
-              requests.push(`${proxyUrl || 'https://clerk.example.com'}/v1/client`);
+              const sdkOrigin = new URL(script.src).origin;
+              requests.push(`${proxyUrl || sdkOrigin}/v1/client`);
               if (loadFailure) throw new Error('host_invalid');
             },
             mountSignIn(_target, options) { mounted = 'login'; mountOptions = options; },
@@ -142,7 +143,7 @@ for (const [name, options] of Object.entries({
     assert.equal(page.nodes['[data-auth-connection]'].hidden, false);
     assert.match(page.nodes['[data-auth-connection-message]'].textContent, /No hemos podido conectar/);
     assert.equal(page.nodes['[data-auth-retry]'].hidden, false);
-    assert.equal(page.tab.disabled, false);
+    assert.equal(page.tab.disabled, !['script failure', 'Clerk host rejection'].includes(name));
     assert.equal(page.storageReads, 0);
     assert.equal(page.storageWrites, 0);
     page.nodes['[data-auth-retry]'].listeners.click();
@@ -230,7 +231,7 @@ test('a missing auth provider cannot enable local signup', async () => {
 test('auth config rejects either missing key and never returns the secret', async () => {
   const previous = [process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY, process.env.CLERK_SECRET_KEY];
   try {
-    for (const [publicKey, secretKey, expectedCode] of [[publishableKey, '', 503], ['', 'sk_test_secret', 503], [publishableKey, 'sk_test_secret', 200], ['', '', 200]]) {
+    for (const [publicKey, secretKey, expectedCode] of [[publishableKey, '', 503], ['', 'sk_test_secret', 503], [publishableKey, 'sk_live_fixture', 200], ['', '', 200]]) {
       process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = publicKey;
       process.env.CLERK_SECRET_KEY = secretKey;
       const res = { status(code) { this.code = code; return this; }, json(body) { this.body = body; }, setHeader() {} };
@@ -242,5 +243,84 @@ test('auth config rejects either missing key and never returns the secret', asyn
   } finally {
     const names = ['NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY', 'CLERK_SECRET_KEY'];
     names.forEach((name, index) => { if (previous[index] === undefined) delete process.env[name]; else process.env[name] = previous[index]; });
+  }
+});
+
+
+test('mixed live and test Clerk keys stop login bootstrap without exposing credentials', async () => {
+  const previous = { ...process.env };
+  try {
+    for (const [publicKey, secretKey] of [
+      [publishableKey, 'sk_test_secret'],
+      [publishableKey.replace('pk_live_', 'pk_test_'), 'sk_live_secret']
+    ]) {
+      process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = publicKey;
+      process.env.CLERK_SECRET_KEY = secretKey;
+      const res = { status(code) { this.code = code; return this; }, json(body) { this.body = body; }, setHeader() {} };
+      await authConfig({ method: 'GET' }, res);
+      assert.equal(res.code, 503);
+      assert.match(res.body.error, /configuración de acceso seguro/);
+      assert.equal(res.body.enabled, undefined);
+      assert.equal(res.body.publishableKey, undefined);
+      assert.equal(JSON.stringify(res.body).includes(secretKey), false);
+    }
+  } finally { process.env = previous; }
+});
+
+
+test('direct Clerk loads bundles and sessions from the configured domain without a proxy', async () => {
+  for (const domain of ['clerk.momentumvelo.app', 'dev-example.clerk.accounts.dev']) {
+    const key = `pk_live_${Buffer.from(`${domain}$`).toString('base64')}`;
+    const page = browser({ config: { enabled: true, publishableKey: key, proxyEnabled: false } });
+    assert.equal(await page.window.MomentumVeloAuthReady, 'managed');
+    assert.ok(page.scripts.every(script => new URL(script.src).origin === `https://${domain}`));
+    assert.ok(page.scripts.every(script => script.getAttribute('data-clerk-proxy-url') === null));
+    assert.ok(page.requests.includes(`https://${domain}/v1/client`));
+    assert.equal(page.mounted, 'login');
+  }
+});
+
+test('direct auth failure never offers login to the old separate Clerk application', async () => {
+  const key = `pk_live_${Buffer.from('clerk.momentumvelo.app$').toString('base64')}`;
+  const page = browser({ config: { enabled: true, publishableKey: key, proxyEnabled: false }, loadFailure: true });
+  assert.equal(await page.window.MomentumVeloAuthReady, 'unavailable');
+  assert.equal(page.nodes['[data-auth-temporary]'].hidden, true);
+  assert.equal(page.nodes['[data-auth-temporary-link]'].href, undefined);
+  assert.equal(page.tab.disabled, true);
+  assert.deepEqual(page.redirects, []);
+});
+
+test('direct SDK loading rejects untrusted or malformed domains before loading a script', async () => {
+  for (const domain of ['evil.example', 'clerk.momentumvelo.app.evil.example', 'clerk.momentumvelo.app/path', 'clerk.momentumvelo.app@evil.example']) {
+    const key = `pk_live_${Buffer.from(`${domain}$`).toString('base64')}`;
+    const page = browser({ config: { enabled: true, publishableKey: key, proxyEnabled: false } });
+    assert.equal(await page.window.MomentumVeloAuthReady, 'unavailable');
+    assert.equal(page.scripts.length, 0);
+    assert.equal(page.nodes['[data-auth-temporary]'].hidden, true);
+  }
+});
+
+test('public config enables direct Clerk only with an explicit false proxy flag', async () => {
+  const previous = { ...process.env };
+  try {
+    for (const flag of ['true', '', 'false']) {
+      process.env.CLERK_USE_PROXY = flag;
+      process.env.MOMENTUM_CLERK_SECRET_KEY = 'sk_live_direct_fixture';
+      process.env.NEXT_PUBLIC_MOMENTUM_CLERK_PUBLISHABLE_KEY = publishableKey;
+      const res = { status(code) { this.code = code; return this; }, json(body) { this.body = body; }, setHeader() {} };
+      await authConfig({ method: 'GET' }, res);
+      assert.equal(res.body.proxyEnabled, flag !== 'false');
+    }
+  } finally {
+    process.env = previous;
+  }
+});
+
+test('CSP permits the direct custom Clerk domain for SDK, network, images and frames', () => {
+  const config = JSON.parse(fs.readFileSync(path.join(__dirname, '../vercel.json'), 'utf8'));
+  const csp = config.headers[0].headers.find(header => header.key === 'Content-Security-Policy').value;
+  for (const directive of ['script-src', 'connect-src', 'frame-src', 'img-src']) {
+    const value = csp.split('; ').find(value => value.startsWith(`${directive} `));
+    assert.ok(value.split(' ').includes('https://clerk.momentumvelo.app'));
   }
 });
