@@ -1,0 +1,14 @@
+/* MomentumVelo · identidad bursátil neón unificada (fase 1) */
+:root{--mv-cyan:#04eaff;--mv-green:#00f6a2;--mv-magenta:#f03fff;--mv-bg:#020a13;--mv-panel:#071625;--mv-line:rgba(0,234,255,.55);color-scheme:dark}
+body{background:radial-gradient(ellipse 65% 42% at 85% 8%,rgba(18,25,77,.45),transparent 80%),radial-gradient(ellipse 60% 42% at 5% 28%,rgba(0,106,114,.21),transparent 80%),var(--mv-bg)!important;color:#eafaff}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--mv-cyan);outline-offset:3px}
+.site-header,body>header{background:linear-gradient(90deg,#030e1b,#061b26 50%,#090b24)!important;border-bottom:1px solid rgba(0,234,255,.45)!important;box-shadow:0 8px 28px rgba(0,234,255,.08)}
+.site-header nav a{border-color:rgba(0,234,255,.6)!important;background:linear-gradient(150deg,rgba(0,220,240,.16),rgba(7,17,35,.92))!important;color:#eaffff!important;font-style:normal!important}
+.site-header nav a:hover,.site-header nav a:focus-visible{box-shadow:0 0 20px rgba(0,234,255,.35)!important;border-color:var(--mv-green)!important}
+.header-premium,.button-primary{background:linear-gradient(100deg,#00efb3,#03d8f5)!important;color:#001519!important;border:1px solid #45ffce!important;box-shadow:0 0 20px rgba(0,244,171,.28)!important}
+.hero h1,.final-cta h2{letter-spacing:-.035em;text-wrap:balance}
+.hero,.feature-card,.pricing-card,.plan-card,.card,.tile,.video-frame{border-color:rgba(0,234,255,.38)!important;box-shadow:0 0 0 1px rgba(0,234,255,.05),0 14px 36px rgba(0,0,0,.25),0 0 22px rgba(0,234,255,.09)}
+.feature-card:hover,.pricing-card:hover,.plan-card:hover,.tile:hover{box-shadow:0 0 24px rgba(0,246,162,.23),0 16px 40px rgba(0,0,0,.32)!important}
+.accent{color:var(--mv-green)!important}
+@media(max-width:700px){.site-header nav{scrollbar-width:thin}.site-header nav a{min-height:42px}.hero h1{font-size:clamp(2.15rem,9vw,3.7rem)}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
