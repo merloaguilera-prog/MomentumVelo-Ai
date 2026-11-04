@@ -12,3 +12,19 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
 .accent{color:var(--mv-green)!important}
 @media(max-width:700px){.site-header nav{scrollbar-width:thin}.site-header nav a{min-height:42px}.hero h1{font-size:clamp(2.15rem,9vw,3.7rem)}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+/* Fase 2: mercados, radar, comparación, ayuda, acceso y Pulse.
+   Solo presentación: no modifica datos, señales, permisos ni pagos. */
+.topbar,.pulse-nav{border-color:rgba(0,234,255,.34)!important}
+.topbar{background:linear-gradient(100deg,#020c16,#061c2b 55%,#0a1026)!important;box-shadow:0 6px 24px rgba(0,234,255,.08)}
+.topbar a,.pulse-nav a{transition:border-color .2s ease,box-shadow .2s ease,color .2s ease}
+.topbar a:hover,.pulse-nav a:hover{color:#8cfff0!important;text-shadow:0 0 10px rgba(0,246,162,.4)}
+.surface,.radar-main section,.detector-launch,.help-hero,.help-card,.help-main section,.premium-double-frame,.market-card,.market-panel,.panel,.stat-card{border-color:rgba(0,234,255,.38)!important;box-shadow:0 12px 30px rgba(0,0,0,.28),0 0 17px rgba(0,234,255,.08)}
+main h1,main h2{letter-spacing:-.025em}
+main h1{text-wrap:balance}
+input,select,textarea{border-color:rgba(0,234,255,.5)!important;background-color:rgba(2,17,30,.82)!important;color:#efffff!important}
+input:focus,select:focus,textarea:focus{border-color:#00f6a2!important;box-shadow:0 0 0 3px rgba(0,246,162,.15)!important}
+button,.button,.ghost{transition:box-shadow .2s ease,border-color .2s ease,transform .2s ease}
+button:hover,.button:hover,.ghost:hover{box-shadow:0 0 18px rgba(0,234,255,.25)}
+button:disabled{box-shadow:none!important;opacity:.65}
+@media(max-width:720px){.topbar{gap:10px}.pulse-nav{max-width:100%;overflow-x:auto}.radar-main,.help-main{min-width:0}main h1{font-size:clamp(1.85rem,7vw,3.5rem)}}
