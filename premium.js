@@ -11,14 +11,26 @@ const alerts=[
 {symbol:"MELI",dir:"up",label:"Salto de volumen",score:88,reason:"Volumen anómalo y aceleración del movimiento en el escenario demo."},
 {symbol:"7203",dir:"down",label:"Presión bajista",score:65,reason:"Momentum bajo y persistencia negativa en la simulación."}];
 let selected=assets[1],important=false;
-const watched=new Set(assets.slice(0,5).map(a=>a.symbol));
+const WATCH_KEY="momentumvelo.premium.watchlist.v1";
+function loadWatched(){
+ try {
+  const raw=window.localStorage.getItem(WATCH_KEY);
+  if(raw===null)return assets.slice(0,5).map(a=>a.symbol);
+  const parsed=JSON.parse(raw);
+  if(!Array.isArray(parsed))return assets.slice(0,5).map(a=>a.symbol);
+  return parsed.filter(symbol=>typeof symbol==="string"&&assets.some(a=>a.symbol===symbol));
+ }catch(_error){return assets.slice(0,5).map(a=>a.symbol)}
+}
+const watched=new Set(loadWatched());
+function saveWatched(){try{window.localStorage.setItem(WATCH_KEY,JSON.stringify([...watched]))}catch(_error){/* Private browsing can disable storage. */}}
 const $=s=>document.querySelector(s);
 function renderWatch(filter=""){
  const reg=$("#region").value, q=filter.trim().toLowerCase();
  const list=assets.filter(a=>watched.has(a.symbol)&&(reg==="all"||a.region===reg)&&(!q||a.symbol.toLowerCase().includes(q)||a.name.toLowerCase().includes(q)));
- $("#watchlist").innerHTML=list.map(a=>`<button type="button" class="watchRow" data-symbol="${a.symbol}" aria-label="Ver ${a.symbol}, ${a.name}"><div><b>${a.symbol} · ${a.name}</b><small>${a.region}</small></div><span class="move ${a.move<0?"down":""}">${a.move>0?"+":""}${a.move.toFixed(1)}% DEMO</span></button>`).join("")||"<p class='note'>No hay activos vigilados con ese filtro.</p>";
+ $("#watchlist").innerHTML=list.map(a=>`<div class="watchEntry"><button type="button" class="watchRow" data-symbol="${a.symbol}" aria-label="Ver ${a.symbol}, ${a.name}"><div><b>${a.symbol} · ${a.name}</b><small>${a.region}</small></div><span class="move ${a.move<0?"down":""}">${a.move>0?"+":""}${a.move.toFixed(1)}% DEMO</span></button><button type="button" class="watchRemove" data-remove="${a.symbol}" aria-label="Quitar ${a.symbol} de mi vigilancia">×</button></div>`).join("")||"<p class='note'>No hay activos vigilados con ese filtro.</p>";
  $("#watchCount").textContent=watched.size+" vigilados";
  document.querySelectorAll(".watchRow").forEach(el=>el.onclick=()=>selectAsset(el.dataset.symbol));
+ document.querySelectorAll(".watchRemove").forEach(el=>el.onclick=()=>{watched.delete(el.dataset.remove);saveWatched();renderWatch($("#assetSearch").value)});
 }
 function chart(score,down=false){
  let pts=[],y=150; for(let x=0;x<=700;x+=35){y+=((x*13+score*7)%31-15)+(down?3:-3);y=Math.max(35,Math.min(215,y));pts.push(x+","+y)}
@@ -47,6 +59,7 @@ $("#addDemo").onclick=()=>{
  const candidate=q&&assets.find(a=>a.symbol.toLowerCase()===q||a.name.toLowerCase().includes(q));
  if(!candidate){$("#dataStatus").textContent="NO ENCONTRAMOS ESE ACTIVO EN LA DEMO";setTimeout(()=>$("#dataStatus").textContent="MODO DEMO · proveedor pendiente",2200);return}
  watched.add(candidate.symbol);
+ saveWatched();
  $("#dataStatus").textContent=candidate.symbol+" AÑADIDO A VIGILANCIA · DEMO";
  renderWatch($("#assetSearch").value);
  setTimeout(()=>$("#dataStatus").textContent="MODO DEMO · proveedor pendiente",2200);

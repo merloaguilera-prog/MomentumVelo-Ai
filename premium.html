@@ -5,9 +5,9 @@
 <meta name="theme-color" content="#05080d"><meta name="description" content="MomentumVelo Pulse — demostración en desarrollo del radar mundial de momentum y detección de movimientos de mercado.">
 <title>MomentumVelo Pulse — Demo del radar mundial</title>
 <link rel="stylesheet" href="/premium.css">
-<script src="/premium.js" defer></script>
+<script src="/premium.js?v=20261104b" defer></script>
 <link rel="stylesheet" href="/neon.css?v=20261011">
-  <link rel="stylesheet" href="/neon-unificado.css">
+<link rel="stylesheet" href="/neon-unificado.css?v=20261105"><link rel="stylesheet" href="/premium-terminal.css?v=20261104b">
 </head>
 <body>
 <header class="topbar">
@@ -17,6 +17,7 @@
   <a class="ghost" href="/#premium">Premium en preparación ↗</a>
 </header>
 <main>
+<section class="terminal-intro" aria-label="Herramientas financieras"><div class="terminal-head"><div><p class="kicker">MOMENTUMVELO · TERMINAL FINANCIERO</p><h2>Tu centro de análisis de mercados</h2><p>Gráficos del proveedor, vigilancia y herramientas de investigación. Las simulaciones se identifican claramente.</p></div><a class="terminal-primary" href="/mercados">◉ Abrir gráficos de mercado ↗</a></div><div class="terminal-tools"><a href="/mercados"><b>▥ Mercados y gráficos</b><span>Precios y gráficos del proveedor</span></a><a href="/radar"><b>◎ Radar de criptomonedas</b><span>Vigilancia en directo en esta pestaña</span></a><a href="/radar-resultados"><b>◈ Resultados y favoritos</b><span>Lista de seguimiento e investigación</span></a><a href="/comparar"><b>⌁ Comparar activos</b><span>Contrasta históricos</span></a><a href="/practica"><b>◇ Cartera virtual</b><span>Practica sin dinero real</span></a><a href="/centro-operaciones"><b>✦ Todas las herramientas</b><span>Accesos rápidos</span></a></div></section>
 <section class="hero">
   <div><p class="kicker">RADAR MUNDIAL · DEMO DE IA DE MOMENTUM</p><h1>Detecta el cambio.<br><span>Entiende la señal.</span></h1>
   <p>Esta simulación permite explorar cómo podría funcionar un radar de mercados. Usa escenarios ilustrativos: este detector no recibe cotizaciones, no detecta movimientos reales y no genera predicciones utilizables para invertir. <a href="/mercados">Consulta los precios del proveedor en Mercados reales →</a></p></div>
@@ -46,7 +47,7 @@
   </article>
 
   <article class="panel watch">
-    <div class="panelHead"><div><small>02 · VIGILANCIA</small><h2>Mi radar</h2></div><span id="watchCount">5 activos</span></div>
+    <div class="panelHead"><div><small>02 · VIGILANCIA</small><h2>Mi radar</h2><p class="terminal-disclaimer">Tu selección se guarda en este navegador. Los porcentajes de esta lista son demostrativos.</p></div><span id="watchCount">5 activos</span></div>
     <div id="watchlist"></div>
     <button class="wide" id="addDemo">＋ Añadir activo</button>
   </article>
@@ -54,13 +55,13 @@
 
 <section class="layout lower">
   <article class="panel">
-    <div class="panelHead"><div><small>03 · DETECCIÓN</small><h2>Detector de saltos</h2></div><span class="demo">SIMULACIÓN UI</span></div>
-    <div class="chart" id="chart" aria-label="Gráfico demostrativo"></div>
+    <div class="panelHead"><div><small>03 · DETECCIÓN</small><h2>Detector de saltos · escenario ilustrativo</h2></div><span class="demo">SIMULACIÓN UI</span></div>
+    <p class="terminal-disclaimer">Este dibujo es una simulación, no una cotización. Para analizar velas, fechas y precios del proveedor, utiliza los gráficos reales.</p><a class="terminal-chart-link" href="/mercados">Ver gráficos reales con escalas y periodos ↗</a><div class="chart" id="chart" aria-label="Gráfico ilustrativo sin datos de mercado"></div>
     <div class="metrics"><div><small>Precio</small><b id="mPrice">—</b></div><div><small>Momentum</small><b id="mMomentum">—</b></div><div><small>Volumen</small><b id="mVolume">—</b></div><div><small>Volatilidad</small><b id="mVolatility">—</b></div></div>
   </article>
 
   <article class="panel ai">
-    <div class="panelHead"><div><small>04 · IA EXPLICABLE</small><h2>¿Por qué me avisas?</h2></div><span class="aiBadge">AI</span></div>
+    <div class="panelHead"><div><small>04 · IA EXPLICABLE</small><h2>Explicación del escenario demo</h2></div><span class="aiBadge">AI</span></div>
     <div id="explanation"><h3>Selecciona una señal</h3><p>MomentumVelo mostrará aquí los factores observados, los factores que contradicen la hipótesis y el contexto de riesgo.</p></div>
     <div class="ask"><button data-q="why">¿Por qué?</button><button data-q="change">¿Qué cambió?</button><button data-q="against">¿Qué la contradice?</button><button data-q="compare">Compárala</button></div>
   </article>
