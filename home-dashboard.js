@@ -89,7 +89,7 @@
   embed("mv-ticker-widget", "ticker-tape", {
     symbols: [{ proName: "FOREXCOM:SPXUSD", title: "S&P 500 · CFD" }, { proName: "FOREXCOM:NSXUSD", title: "NASDAQ · CFD" },
       { proName: "XETR:DAX", title: "DAX" }, { proName: "BME:IBC", title: "IBEX 35" }, { proName: "COINBASE:BTCUSD", title: "BTC/USD" }],
-    showSymbolLogo: true, colorTheme: "dark", isTransparent: true, displayMode: "adaptive", locale: "es"
+    showSymbolLogo: true, colorTheme: "dark", isTransparent: false, displayMode: "adaptive", locale: "es"
   }, "https://www.tradingview.com/markets/");
   chart(selectedPeriod);
   window.addEventListener("pagehide", () => { timers.forEach(timer => clearTimeout(timer)); });

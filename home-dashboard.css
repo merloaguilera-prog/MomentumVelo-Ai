@@ -63,3 +63,5 @@ html:has(body.dashboard-home){overflow-x:clip}
 .dashboard-home .footer-grid{grid-template-columns:minmax(250px,1.6fr) repeat(3,minmax(120px,1fr))}
 @media(max-width:980px){.dashboard-home .footer-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:620px){.dashboard-home .video-showcase{padding:64px 14px 80px}.dashboard-home .footer-grid{grid-template-columns:minmax(0,1fr)}}
+
+.mv-chart-stage:has(iframe) .mv-chart-fallback{visibility:hidden}
