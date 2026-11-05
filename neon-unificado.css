@@ -76,6 +76,35 @@ button:disabled { box-shadow: none; }
 /* Espacio para el foco dentro de las navegaciones con desplazamiento. */
 .site-header:has(.header-actions) nav { padding: 7px; scrollbar-width: thin; }
 .pulse-nav { padding: 7px; }
+.tool-navigation {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 24px;
+  padding: 7px;
+}
+.tool-navigation a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 9px 14px;
+  border: 1px solid var(--mv-line);
+  border-radius: 10px;
+  background: #071625;
+  color: #eaffff;
+  font-size: 14px;
+  font-weight: 700;
+}
+.tool-navigation a:hover,.tool-navigation a[aria-current="page"] {
+  border-color: var(--mv-green);
+  background: #0c302c;
+  box-shadow: 0 0 18px #00f6a220;
+}
+#practice-setup { scroll-margin-top: 92px; }
+@media (max-width:480px) {
+  .topbar { flex-wrap: wrap; }
+  #practice-setup,#operacion,#diario,#evolucion { scroll-margin-top: 140px; }
+}
 @media (max-width:420px) {
   .site-header:has(.header-actions) { grid-template-columns: minmax(0,1fr); }
   .site-header .header-actions {
