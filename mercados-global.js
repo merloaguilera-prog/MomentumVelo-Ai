@@ -8,10 +8,11 @@
     ["Oceanía", [["ASX:BHP","BHP · Australia"]]],
     ["Criptomonedas", [["COINBASE:BTCUSD","Bitcoin / USD"],["COINBASE:ETHUSD","Ethereum / USD"],["COINBASE:SOLUSD","Solana / USD"]]],
     ["Divisas", [["FX_IDC:EURUSD","Euro / dólar"],["FX_IDC:GBPUSD","Libra / dólar"],["FX_IDC:USDJPY","Dólar / yen"],["FX_IDC:AUDUSD","Dólar australiano / dólar"]]],
-    ["Índices y CFD de índices", [["FOREXCOM:SPXUSD","S&P 500 · CFD"],["FOREXCOM:NSXUSD","US 100 · CFD"],["FOREXCOM:DJI","Dow Jones · CFD"]]],
+    ["Índices y CFD de índices", [["FOREXCOM:SPXUSD","S&P 500 · CFD"],["FOREXCOM:NSXUSD","US 100 · CFD"],["FOREXCOM:DJI","Dow Jones · CFD"],["XETR:DAX","DAX"],["BME:IBC","IBEX 35"]]],
     ["ETF", [["AMEX:SPY","SPDR S&P 500 ETF"],["NASDAQ:QQQ","Invesco QQQ ETF"],["AMEX:GLD","SPDR Gold Shares ETF"]]],
     ["Materias primas · CFD", [["OANDA:XAUUSD","Oro / USD · CFD"],["OANDA:XAGUSD","Plata / USD · CFD"]]],
-    ["Bonos · futuros", [["EUREX:FGBL1!","Euro Bund · futuro continuo"],["EUREX:FBTP1!","Euro BTP · futuro continuo"]]]
+    ["Bonos · futuros", [["EUREX:FGBL1!","Euro Bund · futuro continuo"],["EUREX:FBTP1!","Euro BTP · futuro continuo"]]],
+    ["Latinoamérica", [["NASDAQ:MELI","MercadoLibre"]]]
   ];
   const selector = document.querySelector("#market-symbol");
   const existing = new Set(Array.from(selector.options, o => o.value));
@@ -22,13 +23,19 @@
       existing.add(symbol);
       const option = document.createElement("option"); option.value = symbol;
       option.textContent = `${label} · ${symbol}`;
-      option.dataset.timing = index < 5 || index === 8 || index === 10 ? "delayed" : "realtime";
+      option.dataset.timing = ["América", "Europa", "Asia", "África", "Oceanía", "ETF", "Bonos · futuros", "Latinoamérica"].includes(name) || ["XETR:DAX", "BME:IBC"].includes(symbol) ? "delayed" : "realtime";
       group.append(option);
     });
     if (group.children.length) selector.append(group);
   });
   const filter = document.querySelector("#global-group");
   groups.forEach(([label], i) => { const option = document.createElement("option"); option.value = String(i); option.textContent = label; filter.append(option); });
+  const requestedRegion = new URLSearchParams(window.location.search).get("region");
+  if (requestedRegion) {
+    const normalize = value => value.toLocaleLowerCase("es").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const requestedIndex = groups.findIndex(([name]) => normalize(name) === normalize(requestedRegion));
+    if (requestedIndex >= 0) filter.value = String(requestedIndex);
+  }
   const search = document.querySelector("#global-search"), list = document.querySelector("#global-assets");
   function renderList() {
     const query = search.value.trim().toLocaleLowerCase("es");
