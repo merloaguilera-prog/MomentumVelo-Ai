@@ -7,6 +7,7 @@
   <title>Mercados reales — MomentumVelo-AI</title>
   <link rel="stylesheet" href="/panel.css"><link rel="stylesheet" href="/practica-promos.css"><link rel="stylesheet" href="/mercados.css">
   <script src="/workspace-core.js" defer></script>
+  <script src="/market-route-core.js" defer></script>
   <script src="/mercados-global.js" defer></script>
   <script src="/mercados.js" defer></script>
   <script src="/detector-core.js" defer></script>
@@ -54,9 +55,9 @@
         <div id="heatmap-widget" class="market-widget" hidden aria-label="Mapa de variaciones del S&P 500 por TradingView"></div>
       </details>
       <section id="cotizacion" class="surface quote-panel market-tool" aria-labelledby="quote-title">
-        <div class="surface-heading"><div><p class="eyebrow">COTIZACIÓN E HISTÓRICO</p><h2 id="quote-title">Nvidia · NASDAQ</h2></div><span class="source-pill">TradingView</span></div>
+        <div id="asset-view-tools" hidden><a href="/mercados#global">← Volver a Mercados</a><a href="/mercados#seguimiento">Mis favoritos y notas →</a><span>Ficha individual</span></div><p id="asset-error" role="alert" hidden>El activo solicitado no está disponible. No se ha abierto otro activo en su lugar.</p><div class="surface-heading"><div><p class="eyebrow">COTIZACIÓN E HISTÓRICO</p><h2 id="quote-title">Nvidia · NASDAQ</h2></div><span class="source-pill">TradingView</span></div>
         <div class="market-controls">
-          <label for="market-symbol">Elige un activo
+          <label class="asset-selector-label" for="market-symbol">Elige un activo
             <select id="market-symbol">
               <optgroup label="Acciones · datos con retraso">
                 <option value="NASDAQ:NVDA" data-timing="delayed">Nvidia · NASDAQ · USD</option>
@@ -77,7 +78,7 @@
               </optgroup>
             </select>
           </label>
-          <a class="detector-primary" href="#mi-detector">◎ Analizar un histórico</a>
+          <a class="detector-primary" href="/mercados#mi-detector">◎ Analizar un histórico</a>
           <button type="button" id="market-retry">Reintentar gráfico</button>
           <button type="button" id="market-favorite" aria-pressed="false">☆ Guardar favorito</button>
         </div>

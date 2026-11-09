@@ -3,8 +3,8 @@
   const groups = [
     ["América", [["NASDAQ:NVDA","Nvidia"],["NASDAQ:AAPL","Apple"],["NASDAQ:MSFT","Microsoft"],["NASDAQ:TSLA","Tesla"],["NASDAQ:ASML","ASML"],["NASDAQ:MELI","MercadoLibre"],["NYSE:KO","Coca-Cola"],["NYSE:JPM","JPMorgan"]]],
     ["Europa", [["BME:SAN","Santander"],["BME:IBE","Iberdrola"],["XETR:SAP","SAP"]]],
-    ["Asia", [["SSE:600519","Kweichow Moutai"],["SZSE:000001","Ping An Bank"]]],
-    ["África", [["EGX:COMI","Commercial International Bank · Egipto"],["CSEMA:IAM","Maroc Telecom · Marruecos"]]],
+    ["Asia", [["SSE:600519","Kweichow Moutai"],["SZSE:000001","Ping An Bank"],["TSE:7203","Toyota"]]],
+    ["África", [["EGX:COMI","Commercial International Bank · Egipto"],["CSEMA:IAM","Maroc Telecom · Marruecos"],["JSE:NPN","Naspers"]]],
     ["Oceanía", [["ASX:BHP","BHP · Australia"]]],
     ["Criptomonedas", [["COINBASE:BTCUSD","Bitcoin / USD"],["COINBASE:ETHUSD","Ethereum / USD"],["COINBASE:SOLUSD","Solana / USD"]]],
     ["Divisas", [["FX_IDC:EURUSD","Euro / dólar"],["FX_IDC:GBPUSD","Libra / dólar"],["FX_IDC:USDJPY","Dólar / yen"],["FX_IDC:AUDUSD","Dólar australiano / dólar"]]],
@@ -41,11 +41,10 @@
     const query = search.value.trim().toLocaleLowerCase("es");
     const pool = query ? groups.flatMap(([, assets]) => assets) : groups[Number(filter.value)][1];
     list.replaceChildren();
-    const found = pool.filter(([symbol, label]) => `${symbol} ${label}`.toLocaleLowerCase("es").includes(query));
+    const found = [...new Map(pool.filter(([symbol, label]) => `${symbol} ${label}`.toLocaleLowerCase("es").includes(query)).map(asset => [asset[0], asset])).values()];
     found.forEach(([symbol, label]) => {
-      const button = document.createElement("button"); button.type = "button"; button.textContent = label;
-      button.addEventListener("click", () => { selector.value = symbol; selector.dispatchEvent(new Event("change")); document.querySelector("#cotizacion").scrollIntoView({ behavior: "smooth" }); });
-      list.append(button);
+      const link = document.createElement("a"); link.href = window.MomentumMarketRoute.href(symbol); link.textContent = label;
+      list.append(link);
     });
     if (!found.length) list.textContent = "No hay coincidencias en esta selección. Explora más mercados en la fuente.";
   }
@@ -58,7 +57,7 @@
     const host = document.createElement("div"); host.className = "tradingview-widget-container__widget"; container.append(host);
     const attribution = document.createElement("a"); attribution.href = "https://www.tradingview.com/markets/"; attribution.target = "_blank"; attribution.rel = "noopener noreferrer"; attribution.textContent = "Cotizaciones por TradingView ↗"; container.append(attribution);
     const script = document.createElement("script"); script.src = "https://s3.tradingview.com/external-embedding/embed-widget-market-overview.js"; script.async = true;
-    script.textContent = JSON.stringify({ colorTheme: "dark", dateRange: "12M", locale: "es", width: "100%", height: "500", showChart: false, showSymbolLogo: true, isTransparent: false, largeChartUrl: `${location.origin}/mercados#cotizacion`, tabs: [{ title: groups[Number(filter.value)][0], symbols: groups[Number(filter.value)][1].map(([s, d]) => ({ s, d })) }] });
+    script.textContent = JSON.stringify({ colorTheme: "dark", dateRange: "12M", locale: "es", width: "100%", height: "500", showChart: false, showSymbolLogo: true, isTransparent: false, largeChartUrl: `${location.origin}/mercados`, tabs: [{ title: groups[Number(filter.value)][0], symbols: groups[Number(filter.value)][1].map(([s, d]) => ({ s, d })) }] });
     script.onerror = () => { if (current === generation) status.textContent = "No se pudo cargar la fuente. Reintenta o abre TradingView."; };
     container.append(script); target.replaceChildren(container);
     timer = setTimeout(() => { if (current === generation) status.textContent = target.querySelector("iframe") ? "Tabla del proveedor cargada. Comprueba la hora, moneda y disponibilidad de cada dato; un marco cargado no confirma que todos los símbolos tengan precio." : "La fuente tarda en responder. Puedes reintentar o abrir el activo mediante la lista."; }, 12000);
@@ -66,5 +65,6 @@
   filter.addEventListener("change", () => { search.value = ""; renderList(); renderQuotes(); });
   search.addEventListener("input", renderList);
   document.querySelector("#global-retry").addEventListener("click", renderQuotes);
-  renderList(); renderQuotes();
+  renderList();
+  if (!window.MomentumMarketRoute.parse(location.href, Array.from(selector.options, option => option.value)).requested) renderQuotes();
 })();
