@@ -27,3 +27,22 @@ body{background:radial-gradient(circle at 82% 8%,#07384077,transparent 24%),radi
 @media(max-width:800px){.visual-hero{grid-template-columns:1fr;min-height:auto;padding-block:50px}.hero-screen{max-width:650px}.help-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:620px){.visual-hero{padding:42px 18px}.screen-content{padding:16px}.screen-chart{height:170px}.screen-chart svg{height:145px}.screen-markets{gap:5px}.screen-markets div{padding:8px}.destination-grid,.help-grid{grid-template-columns:1fr}.destination-grid a{min-height:195px}.help-hero{padding-top:50px;text-align:left}.help-hero .lead{margin-left:0}}
 @media(prefers-reduced-motion:reduce){.hero-screen{transform:none}}
+
+/* MomentumVelo neon identity — cyan / electric blue / violet / magenta.
+   Green remains semantic for positive market movement. */
+:root{--primary:#23d9ff;--neon-cyan:#22e7ff;--neon-blue:#3d6bff;--neon-violet:#8b5cff;--neon-magenta:#ff3fd2}
+body{background:radial-gradient(circle at 82% 8%,#183b8a55,transparent 26%),radial-gradient(circle at 12% 37%,#681c8850,transparent 31%),#050711}
+.site-header{border-bottom-color:#294c8a;background:#050711ee}
+.site-header .brand-mark{background:linear-gradient(135deg,var(--neon-cyan),var(--neon-violet));box-shadow:0 0 26px #22e7ff77}
+.site-header nav a:hover,.site-header nav a:focus-visible{border-color:#22e7ff99;background:#101b39;color:#fff;box-shadow:0 0 20px #22e7ff55}
+.site-header .header-premium{border-color:#f5c75b!important;background:#211704!important;color:#ffe39a!important;box-shadow:0 0 20px #f5c75b88!important}
+.visual-hero .hero-actions .button:first-child{border-color:var(--neon-cyan);background:linear-gradient(135deg,#16cfff,#635bff);color:#fff;box-shadow:0 0 25px #22e7ff66}
+.visual-hero .hero-actions .button-secondary{border-color:#a55cff;background:#100b24;color:#f2eaff;box-shadow:0 0 20px #9c4dff55}
+.hero-screen{border-color:#2d7fff;background:linear-gradient(135deg,#071323,#090817 55%,#16091e);box-shadow:0 0 55px #1edcff38,0 0 75px #b53cff20,0 36px 80px #0009}
+.hero-screen::after{border-color:#d03cff55}
+.screen-top{border-bottom-color:#284b86}.screen-chart{border-color:#244a8a;background:linear-gradient(#21386a55 1px,transparent 1px),linear-gradient(90deg,#21386a55 1px,transparent 1px),#060b18;background-size:45px 45px}
+.screen-chart .line{stroke:var(--neon-cyan);filter:drop-shadow(0 0 7px var(--neon-cyan))}
+.screen-markets div{border-color:#2b4e8d;background:#0b1227}.screen-markets strong{color:var(--neon-cyan)}
+.destination-grid a{border-color:#275f9e;background:radial-gradient(circle at 100% 0,#35236f66,transparent 55%),#090d1b;box-shadow:0 15px 40px #0005,0 0 25px #22e7ff20}
+.destination-grid a:nth-child(2){border-color:#814cff}.destination-grid a:nth-child(3){border-color:#d743dc}.destination-grid a:nth-child(4){border-color:#277fff}.destination-grid a:hover,.destination-grid a:focus-visible{border-color:var(--neon-cyan);box-shadow:0 0 30px #22e7ff55,0 0 45px #a44cff22}.destination-grid b{color:var(--neon-cyan)}
+.auth-page .auth-card{border-color:#655cff;box-shadow:0 0 38px #22e7ff2e,0 0 55px #a23cff20,0 28px 65px #0009}.contact-section{border-color:#7e5cff99;box-shadow:0 0 36px #22e7ff22,0 0 50px #c13cff18,0 28px 65px #0008}
