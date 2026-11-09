@@ -14,6 +14,12 @@ function originalClientIp(req) {
 }
 
 module.exports = async function handler(req, res) {
+  // A direct Clerk instance must never silently use the legacy proxy identity.
+  // Keep the legacy credentials untouched until the migration is verified.
+  if (process.env.CLERK_USE_PROXY === "false") {
+    res.setHeader("Cache-Control", "no-store");
+    return res.status(410).json({ error: "Legacy Clerk proxy is disabled." });
+  }
   const secretKey = process.env.CLERK_SECRET_KEY || "";
   const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || "";
   // Clerk's proxy guide requires forwarding to the canonical Frontend API host.
