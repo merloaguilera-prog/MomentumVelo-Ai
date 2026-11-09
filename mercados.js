@@ -13,7 +13,8 @@
     if(route.valid){selector.value=route.symbol;window.history.replaceState(null,"",route.href);}
     else{document.querySelector("#asset-error").hidden=false;document.querySelector("#quote-title").textContent="Activo no disponible en esta selección";chart.hidden=true;status.textContent="Vuelve a Mercados para elegir un activo disponible.";}
   }
-  const workspaceKey = "momentumvelo.markets.workspace.v1";
+  const workspaceKey = window.MomentumWorkspace.STORAGE_KEY;
+  let store;
   const favorites = document.querySelector("#market-favorites");
   const favoriteButton = document.querySelector("#market-favorite");
   const note = document.querySelector("#market-note");
@@ -35,18 +36,8 @@
   let timer;
 
   function readWorkspace() {
-    const data = JSON.parse(window.localStorage.getItem(workspaceKey) || "null");
-    if (!data || data.version !== 1) return { version: 1, favorites: [], notes: {} };
-    const known = value => options.some(option => option.value === value);
-    const saved = Array.isArray(data.favorites) ? [...new Set(data.favorites.filter(known))] : [];
-    const notes = {};
-    if (data.notes && typeof data.notes === "object") {
-      options.forEach(option => {
-        const text = data.notes[option.value];
-        if (typeof text === "string") notes[option.value] = text.slice(0, 2000);
-      });
-    }
-    return { version: 1, favorites: saved, notes };
+    if (!store) store = workspaceCore.createStore(window.localStorage, window.MomentumMarketCatalog);
+    return store.read();
   }
 
   function storageError() {
@@ -63,7 +54,8 @@
     change(next);
     workspace = next;
     try {
-      window.localStorage.setItem(workspaceKey, JSON.stringify(workspace));
+      if (!store) store = workspaceCore.createStore(window.localStorage, window.MomentumMarketCatalog);
+      store.write(workspace);
       storageFailed = false;
       workspaceStatus.classList.remove("error");
       workspaceStatus.textContent = "Cambios guardados en este navegador.";

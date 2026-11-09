@@ -1,19 +1,6 @@
 (function () {
   "use strict";
-  const groups = [
-    ["América", [["NASDAQ:NVDA","Nvidia"],["NASDAQ:AAPL","Apple"],["NASDAQ:MSFT","Microsoft"],["NASDAQ:TSLA","Tesla"],["NASDAQ:ASML","ASML"],["NASDAQ:MELI","MercadoLibre"],["NYSE:KO","Coca-Cola"],["NYSE:JPM","JPMorgan"]]],
-    ["Europa", [["BME:SAN","Santander"],["BME:IBE","Iberdrola"],["XETR:SAP","SAP"]]],
-    ["Asia", [["SSE:600519","Kweichow Moutai"],["SZSE:000001","Ping An Bank"],["TSE:7203","Toyota"]]],
-    ["África", [["EGX:COMI","Commercial International Bank · Egipto"],["CSEMA:IAM","Maroc Telecom · Marruecos"],["JSE:NPN","Naspers"]]],
-    ["Oceanía", [["ASX:BHP","BHP · Australia"]]],
-    ["Criptomonedas", [["COINBASE:BTCUSD","Bitcoin / USD"],["COINBASE:ETHUSD","Ethereum / USD"],["COINBASE:SOLUSD","Solana / USD"]]],
-    ["Divisas", [["FX_IDC:EURUSD","Euro / dólar"],["FX_IDC:GBPUSD","Libra / dólar"],["FX_IDC:USDJPY","Dólar / yen"],["FX_IDC:AUDUSD","Dólar australiano / dólar"]]],
-    ["Índices y CFD de índices", [["FOREXCOM:SPXUSD","S&P 500 · CFD"],["FOREXCOM:NSXUSD","US 100 · CFD"],["FOREXCOM:DJI","Dow Jones · CFD"],["XETR:DAX","DAX"],["BME:IBC","IBEX 35"]]],
-    ["ETF", [["AMEX:SPY","SPDR S&P 500 ETF"],["NASDAQ:QQQ","Invesco QQQ ETF"],["AMEX:GLD","SPDR Gold Shares ETF"]]],
-    ["Materias primas · CFD", [["OANDA:XAUUSD","Oro / USD · CFD"],["OANDA:XAGUSD","Plata / USD · CFD"]]],
-    ["Bonos · futuros", [["EUREX:FGBL1!","Euro Bund · futuro continuo"],["EUREX:FBTP1!","Euro BTP · futuro continuo"]]],
-    ["Latinoamérica", [["NASDAQ:MELI","MercadoLibre"]]]
-  ];
+  const groups = window.MomentumMarketCatalog.groups;
   const selector = document.querySelector("#market-symbol");
   const existing = new Set(Array.from(selector.options, o => o.value));
   groups.forEach(([name, assets], index) => {

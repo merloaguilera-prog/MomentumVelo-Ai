@@ -60,5 +60,34 @@
     });
     return JSON.stringify({ format: "momentumvelo-workspace", version: 1, exportedAt: date.toISOString(), favorites, notes }, null, 2);
   }
-  return { MAX_BYTES, filterFavorites, listNotes, parseBackup, mergeBackup, serializeBackup };
+  const STORAGE_KEY = "momentumvelo.markets.workspace.v1";
+  const LEGACY_KEY = "momentumvelo.premium.watchlist.v1";
+  function createStore(storage, catalog) {
+    const known = new Set(catalog.assets.map(asset => asset.market));
+    function read() {
+      const raw = storage.getItem(STORAGE_KEY);
+      let data;
+      try { data = JSON.parse(raw); } catch (_) { data = null; }
+      const valid = data && data.version === 1;
+      const state = { version: 1, favorites: valid && Array.isArray(data.favorites)
+        ? [...new Set(data.favorites.filter(symbol => known.has(symbol)))] : [], notes: {}, pulseMigrated: true };
+      if (valid && data.notes && typeof data.notes === "object" && !Array.isArray(data.notes)) {
+        known.forEach(symbol => { if (typeof data.notes[symbol] === "string") state.notes[symbol] = data.notes[symbol].slice(0, 2000); });
+      }
+      if (!valid || data.pulseMigrated !== true) {
+        const legacyRaw = storage.getItem(LEGACY_KEY);
+        let legacy;
+        try { legacy = JSON.parse(legacyRaw); } catch (_) { legacy = null; }
+        const added = Array.isArray(legacy) ? legacy.map(symbol => catalog.legacy[symbol]).filter(symbol => known.has(symbol))
+          : raw === null && legacyRaw === null ? catalog.defaults : [];
+        state.favorites = [...new Set([...state.favorites, ...added])];
+        // Keep both old selections and notes. Mark the merge once so removed items stay removed.
+        try { write(state); } catch (_) { /* Callers report write failures on the next user change. */ }
+      }
+      return state;
+    }
+    function write(state) { storage.setItem(STORAGE_KEY, JSON.stringify({ ...state, pulseMigrated: true })); }
+    return { read, write };
+  }
+  return { STORAGE_KEY, LEGACY_KEY, createStore, MAX_BYTES, filterFavorites, listNotes, parseBackup, mergeBackup, serializeBackup };
 });
