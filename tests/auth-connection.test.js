@@ -19,7 +19,7 @@ function element(hidden = false) {
   };
 }
 
-function browser({ config = { enabled: true, publishableKey }, responseOk = true, fetchFailure = false, scriptFailure = false, loadFailure = false, pendingConfig = false, signedIn = false, origin = 'https://momentumvelo.app', search = '?mode=login', tabMode = 'login' } = {}) {
+function browser({ config = { enabled: true, publishableKey }, responseOk = true, fetchFailure = false, scriptFailure = false, loadFailure = false, pendingConfig = false, signedIn = false, origin = 'https://momentumvelo.app', search = '?mode=login', tabMode = 'login', stageDelays = {}, pendingLoad = false } = {}) {
   const nodes = {
     '[data-auth-view]': element(true), '[data-managed-auth]': element(true),
     '[data-account-view]': element(true), '[data-auth-connection]': element(),
@@ -33,11 +33,14 @@ function browser({ config = { enabled: true, publishableKey }, responseOk = true
   tab.dataset = { authMode: tabMode };
   tab.classList = { toggle() {} };
   const scripts = [], requests = [], redirects = [], timers = new Map();
+  const timerDurations = [];
+  let clock = 0;
+  class ClockDate extends Date { static now() { return clock; } }
   let timerId = 0, reloads = 0, storageReads = 0, storageWrites = 0, mounted = '', mountOptions;
   const window = {
     location: { origin, href: `${origin}/login${search}`, search, reload() { reloads++; }, assign(url) { redirects.push(url); } },
     atob: (value) => Buffer.from(value, 'base64').toString('utf8'),
-    setTimeout(callback) { timers.set(++timerId, callback); return timerId; },
+    setTimeout(callback, duration) { timerDurations.push(duration); timers.set(++timerId, callback); return timerId; },
     clearTimeout(id) { timers.delete(id); },
     localStorage: { getItem() { storageReads++; return null; }, setItem() { storageWrites++; } },
     __internal_ClerkUICtor: {}
@@ -53,6 +56,7 @@ function browser({ config = { enabled: true, publishableKey }, responseOk = true
     createElement: () => element(),
     head: { appendChild(script) {
       scripts.push(script);
+      clock += stageDelays[script.src.includes('ui.browser.js') ? 'ui' : 'sdk'] || 0;
       queueMicrotask(() => {
         if (scriptFailure) { script.listeners.error(); return; }
         if (script.src.includes('clerk.browser.js')) {
@@ -65,6 +69,7 @@ function browser({ config = { enabled: true, publishableKey }, responseOk = true
               const sdkOrigin = new URL(script.src).origin;
               requests.push(`${proxyUrl || sdkOrigin}/v1/client`);
               if (loadFailure) throw new Error('host_invalid');
+              if (pendingLoad) return new Promise(() => {});
             },
             mountSignIn(_target, options) { mounted = 'login'; mountOptions = options; },
             mountSignUp(_target, options) { mounted = 'signup'; mountOptions = options; }
@@ -75,17 +80,18 @@ function browser({ config = { enabled: true, publishableKey }, responseOk = true
     } }
   };
   const context = vm.createContext({
-    window, document, URL, URLSearchParams, console: { warn() {} },
+    window, document, URL, URLSearchParams, Date: ClockDate, console: { warn() {} },
     async fetch(url) {
       requests.push(url);
+      clock += stageDelays.config || 0;
       if (fetchFailure) throw new Error('offline');
       if (pendingConfig) return new Promise(() => {});
-      return { ok: responseOk, json: async () => config };
+      return { ok: responseOk, json: async () => { clock += stageDelays.json || 0; return config; } };
     }
   });
   vm.runInContext(providerSource, context);
   return {
-    window, nodes, tab, scripts, requests, redirects, timers, context,
+    window, nodes, tab, scripts, requests, redirects, timers, timerDurations, context,
     get mounted() { return mounted; }, get mountOptions() { return mountOptions; }, get reloads() { return reloads; },
     get storageReads() { return storageReads; }, get storageWrites() { return storageWrites; }
   };
@@ -322,5 +328,33 @@ test('CSP permits the direct custom Clerk domain for SDK, network, images and fr
   for (const directive of ['script-src', 'connect-src', 'frame-src', 'img-src']) {
     const value = csp.split('; ').find(value => value.startsWith(`${directive} `));
     assert.ok(value.split(' ').includes('https://clerk.momentumvelo.app'));
+  }
+});
+
+
+test('slow bootstrap stages share a 20-second budget instead of accumulating separate waits', async () => {
+  const page = browser({ stageDelays: { config: 7000, json: 1000, ui: 6000, sdk: 5000 }, pendingLoad: true });
+  for (let i = 0; i < 30; i++) await Promise.resolve();
+  assert.equal(page.timerDurations.at(-1), 1000);
+  assert.match(page.nodes['[data-auth-connection-message]'].textContent, /Conectando con tu cuenta/);
+  for (const callback of page.timers.values()) callback();
+  assert.equal(await page.window.MomentumVeloAuthReady, 'unavailable');
+  assert.equal(page.nodes['[data-auth-connection]'].getAttribute('data-stage'), 'session');
+  assert.match(page.nodes['[data-auth-connection-message]'].textContent, /proveedor no ha confirmado/);
+  assert.equal(page.timers.size, 0);
+  assert.equal(page.storageWrites, 0);
+});
+
+test('connection errors distinguish configuration, form download and session without exposing vendor details', async () => {
+  for (const [options, stage, phrase] of [
+    [{ responseOk: false }, 'configuration', /comprobar la configuración/],
+    [{ scriptFailure: true }, 'scripts', /cargar el formulario/],
+    [{ loadFailure: true }, 'session', /proveedor no ha confirmado/]
+  ]) {
+    const page = browser(options);
+    assert.equal(await page.window.MomentumVeloAuthReady, 'unavailable');
+    assert.equal(page.nodes['[data-auth-connection]'].getAttribute('data-stage'), stage);
+    assert.match(page.nodes['[data-auth-connection-message]'].textContent, phrase);
+    assert.doesNotMatch(page.nodes['[data-auth-connection-message]'].textContent, /host_invalid|pk_live|sk_live/);
   }
 });

@@ -4,15 +4,15 @@
   let managedTabsReady = false;
   let temporaryAccessAllowed = false;
 
-  function withTimeout(operation) {
+  function withTimeout(operation, timeoutMs = 15000) {
     let timeout;
     const expired = new Promise((_, reject) => {
-      timeout = window.setTimeout(() => reject(new Error("La conexión de acceso seguro ha tardado demasiado.")), 15000);
+      timeout = window.setTimeout(() => reject(new Error("La conexión de acceso seguro ha tardado demasiado.")), timeoutMs);
     });
     return Promise.race([operation, expired]).finally(() => window.clearTimeout(timeout));
   }
 
-  function loadScript(src, attributes = {}) {
+  function loadScript(src, attributes = {}, timeoutMs = 15000) {
     return withTimeout(new Promise((resolve, reject) => {
       const script = document.createElement("script");
       script.src = src;
@@ -22,10 +22,15 @@
       script.addEventListener("load", resolve, { once: true });
       script.addEventListener("error", () => reject(new Error("No se pudo cargar el acceso seguro.")), { once: true });
       document.head.appendChild(script);
-    }));
+    }), timeoutMs);
   }
 
-  function showConnectionError() {
+  function connectionProgress(message) {
+    const node = document.querySelector("[data-auth-connection-message]");
+    if (node) node.textContent = message;
+  }
+
+  function showConnectionError(stage = "configuration") {
     managedTabsReady = false;
     const connection = document.querySelector("[data-auth-connection]");
     const message = document.querySelector("[data-auth-connection-message]");
@@ -34,7 +39,14 @@
       connection.hidden = false;
       connection.setAttribute("aria-busy", "false");
     }
-    if (message) message.textContent = "No hemos podido conectar con el acceso seguro. Reintenta la conexión o consulta la ayuda. No se ha creado ninguna cuenta local de prueba.";
+    const detail = {
+      configuration: "No se pudo comprobar la configuración del acceso.",
+      scripts: "No se pudo cargar el formulario de acceso.",
+      session: "El proveedor no ha confirmado la conexión de la cuenta.",
+      form: "No se pudo abrir el formulario de la cuenta."
+    }[stage] || "";
+    if (connection) connection.setAttribute("data-stage", stage);
+    if (message) message.textContent = "No hemos podido conectar con el acceso seguro. Reintenta la conexión o consulta la ayuda. No se ha creado ninguna cuenta local de prueba." + (detail ? ` ${detail}` : "");
     if (retry) retry.hidden = false;
     const temporary = document.querySelector("[data-auth-temporary]");
     const temporaryLink = document.querySelector("[data-auth-temporary-link]");
@@ -284,10 +296,14 @@
   async function initializeManagedAuth() {
     const retry = document.querySelector("[data-auth-retry]");
     if (retry) retry.addEventListener("click", () => window.location.reload());
+    // Share a 20-second budget across successive network stages.
+    const deadline = Date.now() + 20000;
+    const remaining = () => Math.max(1, Math.min(15000, deadline - Date.now()));
+    let stage = "configuration";
     try {
-      const response = await withTimeout(fetch("/api/auth-config", { cache: "no-store" }));
+      const response = await withTimeout(fetch("/api/auth-config", { cache: "no-store" }), remaining());
       if (!response.ok) throw new Error("No se pudo consultar la configuración de acceso seguro.");
-      const config = await withTimeout(response.json());
+      const config = await withTimeout(response.json(), remaining());
       premiumSalesEnabled = config.premiumSalesEnabled === true;
       // Only an explicitly unconfigured instance may use the local demo.
       // An outage or a partial Clerk configuration must never create local accounts.
@@ -312,14 +328,19 @@
       }
       const proxyUrl = proxyEnabled ? new URL("/__clerk", window.location.origin).href : null;
       const sdkUrl = proxyUrl || `https://${domain}`;
-      await loadScript(`${sdkUrl}/npm/@clerk/ui@1/dist/ui.browser.js`);
+      stage = "scripts";
+      connectionProgress("Cargando el formulario de acceso seguro…");
+      await loadScript(`${sdkUrl}/npm/@clerk/ui@1/dist/ui.browser.js`, {}, remaining());
       await loadScript(
         `${sdkUrl}/npm/@clerk/clerk-js@6/dist/clerk.browser.js`,
         { "data-clerk-publishable-key": config.publishableKey,
-          ...(proxyUrl ? { "data-clerk-proxy-url": proxyUrl } : {}) }
+          ...(proxyUrl ? { "data-clerk-proxy-url": proxyUrl } : {}) }, remaining()
       );
       // ClerkJS reads proxyUrl when its script creates the Clerk instance, before load().
-      await withTimeout(window.Clerk.load({ ui: { ClerkUI: window.__internal_ClerkUICtor } }));
+      stage = "session";
+      connectionProgress("Conectando con tu cuenta segura…");
+      await withTimeout(window.Clerk.load({ ui: { ClerkUI: window.__internal_ClerkUICtor } }), remaining());
+      stage = "form";
 
       updatePublicHeader();
       const managedView = document.querySelector("[data-managed-auth]");
@@ -384,7 +405,7 @@
       return "managed";
     } catch (error) {
       console.warn("managed_auth_unavailable", error instanceof Error ? error.message : String(error));
-      showConnectionError();
+      showConnectionError(stage);
       return "unavailable";
     }
   }
