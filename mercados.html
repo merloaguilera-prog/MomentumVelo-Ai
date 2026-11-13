@@ -6,7 +6,9 @@
   <meta name="description" content="Consulta cotizaciones y gráficos de mercado suministrados por TradingView. Acciones con retraso, divisas y criptomonedas según el proveedor.">
   <title>Mercados reales — MomentumVelo-AI</title>
   <link rel="stylesheet" href="/panel.css"><link rel="stylesheet" href="/practica-promos.css"><link rel="stylesheet" href="/mercados.css">
+  <script src="/market-catalog.js" defer></script>
   <script src="/workspace-core.js" defer></script>
+  <script src="/market-route-core.js" defer></script>
   <script src="/mercados-global.js" defer></script>
   <script src="/mercados.js" defer></script>
   <script src="/detector-core.js" defer></script>
@@ -17,11 +19,12 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="stylesheet" href="/pwa.css">
 <script src="/pwa.js" defer></script>
+  <link rel="stylesheet" href="/neon-unificado.css">
 </head>
 <body>
   <header class="topbar"><a class="brand" href="/"><span class="brand-mark">↗</span><span>Momentum<span>Velo</span><small>AI</small></span></a><span class="top-note">COTIZACIONES · FUENTE TRADINGVIEW</span><a class="account-link" href="/ayuda">Ayuda →</a></header>
   <div class="app-shell">
-    <nav class="sidebar" aria-label="Secciones del panel"><a href="/comparar">⇄ <span>Comparar históricos</span></a><a href="/practica">◉ <span>Cartera de práctica</span></a><a class="current" href="/mercados" aria-current="page">▥ <span>Mercados reales</span></a><a href="/panel">⌂ <span>Panel demo</span></a><a href="/premium">⌁ <span>Radar Pulse · demo</span></a><a href="/#premium">♛ <span>Premium</span></a><a href="/ayuda">? <span>Ayuda</span></a><div class="sidebar-bottom"><strong>Precios con su fuente</strong><p>Consulta el estado del mercado, la moneda y el periodo del dato en el gráfico.</p><a href="/legal#datos-mercado">Origen y alcance →</a></div></nav>
+    <nav class="sidebar" aria-label="Secciones del panel"><a href="/centro-operaciones">✦ <span>Centro de operaciones</span></a><a href="/radar">◎ <span>Radar cripto en directo</span></a><a href="/comparar">⇄ <span>Comparar históricos</span></a><a href="/practica">◉ <span>Cartera de práctica</span></a><a class="current" href="/mercados" aria-current="page">▥ <span>Mercados reales</span></a><a href="/panel">⌂ <span>Panel demo</span></a><a href="/premium">⌁ <span>Radar Pulse · demo</span></a><a href="/#premium">♛ <span>Premium</span></a><a href="/ayuda">? <span>Ayuda</span></a><div class="sidebar-bottom"><strong>Precios con su fuente</strong><p>Consulta el estado del mercado, la moneda y el periodo del dato en el gráfico.</p><a href="/legal#datos-mercado">Origen y alcance →</a></div></nav>
     <main>
       <div class="intro-row"><div><p class="eyebrow">DATOS DE MERCADO · CONSULTA GRATUITA</p><h1>El mercado, con <em>datos reales.</em></h1><p>Consulta precios, variaciones y gráficos suministrados por TradingView.</p></div><a class="pulse-link" href="/panel">Panel demo <span>↗</span></a></div>
       <section class="detector-launch surface" aria-labelledby="detector-launch-title"><div><p class="eyebrow">SUBIDAS · CAÍDAS · TUS REGLAS</p><h2 id="detector-launch-title">Detecta movimientos y revisa tu idea</h2><p>Activa el radar de Bitcoin, Ethereum y Solana en esta pestaña o configura reglas sobre tus históricos. Abre el gráfico para revisar cada movimiento.</p><span class="source-pill">Radar cripto en esta pestaña · históricos para otros activos</span></div><div class="detector-launch-actions"><a class="detector-primary" href="/radar">◎ Activar radar de cripto en directo</a><a href="#mi-detector">Analizar mi histórico de subidas y caídas →</a><a href="#movimientos">↗ Ver movimientos del mercado</a><a href="/practica">Probar una operación con capital virtual →</a></div></section>
@@ -53,9 +56,9 @@
         <div id="heatmap-widget" class="market-widget" hidden aria-label="Mapa de variaciones del S&P 500 por TradingView"></div>
       </details>
       <section id="cotizacion" class="surface quote-panel market-tool" aria-labelledby="quote-title">
-        <div class="surface-heading"><div><p class="eyebrow">COTIZACIÓN E HISTÓRICO</p><h2 id="quote-title">Nvidia · NASDAQ</h2></div><span class="source-pill">TradingView</span></div>
+        <div id="asset-view-tools" hidden><a href="/mercados#global">← Volver a Mercados</a><a href="/mercados#seguimiento">Mis favoritos y notas →</a><a href="/premium#mi-lista">Mi lista en Pulse →</a><span>Ficha individual</span></div><p id="asset-error" role="alert" hidden>El activo solicitado no está disponible. No se ha abierto otro activo en su lugar.</p><div class="surface-heading"><div><p class="eyebrow">COTIZACIÓN E HISTÓRICO</p><h2 id="quote-title">Nvidia · NASDAQ</h2></div><span class="source-pill">TradingView</span></div>
         <div class="market-controls">
-          <label for="market-symbol">Elige un activo
+          <label class="asset-selector-label" for="market-symbol">Elige un activo
             <select id="market-symbol">
               <optgroup label="Acciones · datos con retraso">
                 <option value="NASDAQ:NVDA" data-timing="delayed">Nvidia · NASDAQ · USD</option>
@@ -76,7 +79,7 @@
               </optgroup>
             </select>
           </label>
-          <a class="detector-primary" href="#mi-detector">◎ Analizar un histórico</a>
+          <a class="detector-primary" href="/mercados#mi-detector">◎ Analizar un histórico</a>
           <button type="button" id="market-retry">Reintentar gráfico</button>
           <button type="button" id="market-favorite" aria-pressed="false">☆ Guardar favorito</button>
         </div>
@@ -88,7 +91,7 @@
       </section>
       <section id="seguimiento" class="surface market-workspace" aria-labelledby="workspace-title">
         <div class="surface-heading"><div><p class="eyebrow">TU SEGUIMIENTO · FAVORITOS, NOTAS Y COPIAS</p><h2 id="workspace-title">Mis favoritos y notas</h2></div><span id="market-favorite-count">0 favoritos</span></div>
-        <p class="workspace-hint">Se guardan en este navegador. No se sincronizan con otros dispositivos ni crean alertas automáticas. Si borras los datos del navegador, se perderán.</p>
+        <p class="workspace-hint">Son los mismos activos de «Mi lista» en Pulse. Se guardan en este navegador. No se sincronizan con otros dispositivos ni crean alertas automáticas. Si borras los datos del navegador, se perderán.</p>
         <div class="workspace-grid">
           <div><h3>Activos que sigo</h3><div class="workspace-filters"><label for="favorites-search">Buscar favorito<input id="favorites-search" type="search" placeholder="Empresa o símbolo…"></label><label for="favorites-order">Ordenar<select id="favorites-order"><option value="added">Orden de guardado</option><option value="name">Nombre A–Z</option></select></label><label class="workspace-notes-filter"><input id="favorites-notes-only" type="checkbox"> Solo favoritos con nota</label></div><p id="favorites-results" class="workspace-hint" role="status" aria-live="polite"></p><ul id="market-favorites" class="market-favorites" aria-label="Mis activos favoritos"></ul><p id="market-favorites-empty">Pulsa «Guardar favorito» junto al selector para añadir tu primer activo.</p></div>
           <div><label class="market-note-label" for="market-note">Mi nota sobre <span id="market-note-name">Nvidia</span></label><textarea id="market-note" rows="5" maxlength="2000" placeholder="Qué quiero seguir, qué dudas tengo y qué revisar…" aria-describedby="market-note-help workspace-status"></textarea><p id="market-note-help" class="workspace-hint">Hasta 2.000 caracteres. Se guarda al escribir. Es una nota tuya, sin análisis de IA.</p></div>

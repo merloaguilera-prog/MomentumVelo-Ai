@@ -1,82 +1,16 @@
-<!doctype html>
-<html lang="es">
-<head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#05080d"><meta name="description" content="MomentumVelo Pulse — demostración en desarrollo del radar mundial de momentum y detección de movimientos de mercado.">
-<title>MomentumVelo Pulse — Demo del radar mundial</title>
-<link rel="stylesheet" href="/premium.css">
-<script src="/premium.js?v=20261104b" defer></script>
-<link rel="stylesheet" href="/neon.css?v=20261011">
-<link rel="stylesheet" href="/premium-terminal.css?v=20261104b">
-</head>
-<body>
-<header class="topbar">
-  <a class="brand" href="/"><span class="brandmark">↗</span>MomentumVelo <b>Pulse</b></a>
-  <nav class="pulse-nav" aria-label="Navegación de MomentumVelo"><a href="/">Inicio</a><a href="/mercados">Mercados reales</a><a href="/practica">Cartera de práctica</a><a href="/panel">Panel demo</a><a href="/ayuda">Ayuda</a></nav>
-  <div class="status"><span class="dot"></span><span id="dataStatus">MODO DEMO · proveedor pendiente</span></div>
-  <a class="ghost" href="/#premium">Premium en preparación ↗</a>
-</header>
-<main>
-<section class="terminal-intro" aria-label="Herramientas financieras"><div class="terminal-head"><div><p class="kicker">MOMENTUMVELO · TERMINAL FINANCIERO</p><h2>Tu centro de análisis de mercados</h2><p>Gráficos del proveedor, vigilancia y herramientas de investigación. Las simulaciones se identifican claramente.</p></div><a class="terminal-primary" href="/mercados">◉ Abrir gráficos de mercado ↗</a></div><div class="terminal-tools"><a href="/mercados"><b>▥ Mercados y gráficos</b><span>Precios y gráficos del proveedor</span></a><a href="/radar"><b>◎ Radar de criptomonedas</b><span>Vigilancia en directo en esta pestaña</span></a><a href="/radar-resultados"><b>◈ Resultados y favoritos</b><span>Lista de seguimiento e investigación</span></a><a href="/comparar"><b>⌁ Comparar activos</b><span>Contrasta históricos</span></a><a href="/practica"><b>◇ Cartera virtual</b><span>Practica sin dinero real</span></a><a href="/centro-operaciones"><b>✦ Todas las herramientas</b><span>Accesos rápidos</span></a></div></section>
-<section class="hero">
-  <div><p class="kicker">RADAR MUNDIAL · DEMO DE IA DE MOMENTUM</p><h1>Detecta el cambio.<br><span>Entiende la señal.</span></h1>
-  <p>Esta simulación permite explorar cómo podría funcionar un radar de mercados. Usa escenarios ilustrativos: este detector no recibe cotizaciones, no detecta movimientos reales y no genera predicciones utilizables para invertir. <a href="/mercados">Consulta los precios del proveedor en Mercados reales →</a></p></div>
-  <div class="pulseOrb"><span>PULSE</span><strong id="pulseScore">72</strong><small>INTENSIDAD DEMO</small></div>
-</section>
-
-<section class="controls panel">
-  <label>Buscar empresa o ticker<input id="assetSearch" type="search" placeholder="Ej. Apple, AAPL, ASML…" autocomplete="off"></label>
-  <label>Región<select id="region"><option value="all">Todo el mundo</option><option>Europa</option><option>Norteamérica</option><option>Asia</option><option>Latinoamérica</option><option>África</option><option>Oceanía</option></select></label>
-  <label>Tipo de aviso<select id="alertMode"><option value="all">Todos</option><option value="up">Posible subida</option><option value="down">Posible bajada</option><option value="volume">Salto de volumen</option></select></label>
-  <button id="scanBtn">⚡ Escanear radar</button>
-</section>
-
-<section class="layout">
-  <article class="panel world">
-    <div class="panelHead"><div><small>01 · RADAR</small><h2>Radar mundial</h2></div><span class="demo">DEMO</span></div>
-    <div class="map" aria-label="Mapa estilizado de mercados">
-      <button data-region="Norteamérica" style="left:17%;top:35%">●<span>Norteamérica</span></button>
-      <button data-region="Latinoamérica" style="left:29%;top:69%">●<span>Latinoamérica</span></button>
-      <button data-region="Europa" style="left:49%;top:31%">●<span>Europa</span></button>
-      <button data-region="África" style="left:52%;top:59%">●<span>África</span></button>
-      <button data-region="Asia" style="left:72%;top:38%">●<span>Asia</span></button>
-      <button data-region="Oceanía" style="left:83%;top:72%">●<span>Oceanía</span></button>
-      <svg viewBox="0 0 900 430" role="img" aria-label="Visualización abstracta del mundo"><path d="M76 115l91-55 91 21 40 58-34 46-83 1-39 58-66-25-31-54zM235 242l48 22 33 79-23 67-36-25-22-86zM400 86l69-27 55 25 16 43-54 23-42-18-48 19-29-29zM438 166l62-4 42 46-12 110-57 49-42-78-26-66zM539 91l143-38 129 45 32 67-63 42-86-17-65 41-75-40-52-61zM722 286l87 17 36 57-58 40-77-29z"/></svg>
-    </div>
-    <div class="markets" id="marketChips"><button data-region="Europa">Europa</button><button data-region="Norteamérica">Norteamérica</button><button data-region="Asia">Asia</button><button data-region="Latinoamérica">Latinoamérica</button><button data-region="África">África</button><button data-region="Oceanía">Oceanía</button></div>
-  </article>
-
-  <article class="panel watch">
-    <div class="panelHead"><div><small>02 · VIGILANCIA</small><h2>Mi radar</h2><p class="terminal-disclaimer">Tu selección se guarda en este navegador. Los porcentajes de esta lista son demostrativos.</p></div><span id="watchCount">5 activos</span></div>
-    <div id="watchlist"></div>
-    <button class="wide" id="addDemo">＋ Añadir activo</button>
-  </article>
-</section>
-
-<section class="layout lower">
-  <article class="panel">
-    <div class="panelHead"><div><small>03 · DETECCIÓN</small><h2>Detector de saltos · escenario ilustrativo</h2></div><span class="demo">SIMULACIÓN UI</span></div>
-    <p class="terminal-disclaimer">Este dibujo es una simulación, no una cotización. Para analizar velas, fechas y precios del proveedor, utiliza los gráficos reales.</p><a class="terminal-chart-link" href="/mercados">Ver gráficos reales con escalas y periodos ↗</a><div class="chart" id="chart" aria-label="Gráfico ilustrativo sin datos de mercado"></div>
-    <div class="metrics"><div><small>Precio</small><b id="mPrice">—</b></div><div><small>Momentum</small><b id="mMomentum">—</b></div><div><small>Volumen</small><b id="mVolume">—</b></div><div><small>Volatilidad</small><b id="mVolatility">—</b></div></div>
-  </article>
-
-  <article class="panel ai">
-    <div class="panelHead"><div><small>04 · IA EXPLICABLE</small><h2>Explicación del escenario demo</h2></div><span class="aiBadge">AI</span></div>
-    <div id="explanation"><h3>Selecciona una señal</h3><p>MomentumVelo mostrará aquí los factores observados, los factores que contradicen la hipótesis y el contexto de riesgo.</p></div>
-    <div class="ask"><button data-q="why">¿Por qué?</button><button data-q="change">¿Qué cambió?</button><button data-q="against">¿Qué la contradice?</button><button data-q="compare">Compárala</button></div>
-  </article>
-</section>
-
-<section class="panel alerts">
-  <div class="panelHead"><div><small>05 · ALERTAS</small><h2>Movimientos que requieren atención</h2></div><button id="importantOnly" class="toggle" aria-pressed="false">Solo importantes</button></div>
-  <div id="alertsList"></div>
-</section>
-
-<section class="panel history">
- <div class="panelHead"><div><small>06 · DISEÑO FUTURO</small><h2>Historial de señales previsto</h2></div><span>sin historial real todavía</span></div>
- <p class="note">Cuando el motor real esté conectado, cada predicción quedará registrada antes de conocer el resultado. Así podremos medir anticipación, falsos positivos, drawdown y rendimiento sin ocultar fallos.</p>
- <div class="historyGrid"><div><b>Hora de señal</b><span>Registro previsto</span></div><div><b>Hipótesis</b><span>Alcista / bajista / neutral</span></div><div><b>Resultado</b><span>Pendiente / acertó / falló</span></div><div><b>Calidad</b><span>Métrica por verificar</span></div></div>
-</section>
-</main>
-<footer>MomentumVelo Pulse · interfaz en desarrollo · Ninguna señal constituye una garantía de rentabilidad.</footer>
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#020c12"><meta name="description" content="MomentumVelo Pulse: centro de mercados, gráficos, seguimiento y herramientas de análisis en desarrollo."><title>MomentumVelo Pulse · Inteligencia bursátil global</title><link rel="stylesheet" href="/pulse-terminal.css?v=20261109"><script src="/market-catalog.js" defer></script><script src="/workspace-core.js" defer></script><script src="/deferred-widget.js" defer></script><script src="/pulse-terminal.js?v=20261109" defer></script></head>
+<body class="pulse-terminal"><a class="pulse-skip" href="#pulse-main">Saltar al terminal</a><header class="pulse-header"><a class="pulse-brand" href="/" aria-label="MomentumVelo, inicio"><img src="/icons/icon-192.png" width="62" height="62" alt=""><span><strong>MOMENTUM<span>VELO</span></strong><small>INTELIGENCIA BURSÁTIL GLOBAL</small></span></a><nav class="pulse-main-nav" aria-label="Navegación del terminal"><a href="/">⌂<span>Inicio</span></a><a href="#radar-mundial" aria-current="page">◎<span>Radar</span></a><a href="/mercados">↗<span>Mercados</span></a><a href="/mercados#mapa">▥<span>Sectores</span></a><a href="#mi-lista">★<span>Mi lista</span></a><a href="/radar">♧<span>Alertas</span></a><a href="#pulse-ai">◈<span>IA</span></a><a class="pulse-premium-link" href="/#premium">♛<span>Premium</span></a></nav><a class="pulse-account" href="/login?mode=account" aria-label="Mi cuenta">◉</a></header>
+<main id="pulse-main"><div class="pulse-grid">
+<aside class="pulse-left"><section class="pulse-panel pulse-index-panel" aria-labelledby="pulse-market-title"><header class="pulse-panel-heading"><h2 id="pulse-market-title">MERCADO GLOBAL</h2><span class="pulse-tiny">FUENTE EXTERNA</span></header><div id="pulse-index-widget" class="pulse-index-widget"><p class="pulse-placeholder">Cargando cotizaciones…</p></div><a class="pulse-source-link" href="/mercados">Abrir todas las cotizaciones →</a></section>
+<section class="pulse-panel pulse-watch" id="mi-lista" aria-labelledby="pulse-list-title"><header class="pulse-panel-heading"><h2 id="pulse-list-title">MI LISTA</h2><span id="pulse-watch-count" class="pulse-tiny">0 activos</span></header><label class="pulse-search-label" for="assetSearch">Buscar empresa o ticker</label><input id="assetSearch" type="search" placeholder="Empresa, ticker…" autocomplete="off" maxlength="80"><div class="pulse-watch-tabs" role="group" aria-label="Filtrar lista"><button type="button" data-kind="all" aria-pressed="true">Todos</button><button type="button" data-kind="stock" aria-pressed="false">Empresas</button><button type="button" data-kind="crypto" aria-pressed="false">Criptos</button></div><div id="watchlist" class="pulse-watchlist"></div><button type="button" class="pulse-outline pulse-wide" id="pulse-add">＋ Añadir activo</button><p id="pulse-watch-status" class="pulse-help" role="status">La misma lista que tus favoritos de Mercados, guardada en este navegador.</p></section></aside>
+<div class="pulse-center"><section class="pulse-panel pulse-world" id="radar-mundial" aria-labelledby="pulse-world-title"><header class="pulse-panel-heading"><div><h1 id="pulse-world-title">◉ RADAR MUNDIAL</h1><p>MERCADOS EN MOVIMIENTO</p></div><span class="pulse-badge">EXPLORADOR GLOBAL</span></header><div class="pulse-world-art"><img src="/images/pulse-world-reference.webp" width="1536" height="1024" alt="" fetchpriority="high" decoding="async"><button type="button" class="pulse-hotspot america" data-region="america" aria-label="Seleccionar América"></button><button type="button" class="pulse-hotspot europa" data-region="europa" aria-label="Seleccionar Europa"></button><button type="button" class="pulse-hotspot asia" data-region="asia" aria-label="Seleccionar Asia"></button><button type="button" class="pulse-hotspot africa" data-region="africa" aria-label="Seleccionar África"></button><button type="button" class="pulse-hotspot oceania" data-region="oceania" aria-label="Seleccionar Oceanía"></button><span class="pulse-art-label">Ilustración conceptual · cifras de ejemplo</span></div><div class="pulse-region-tabs" role="group" aria-label="Explorar por región"><button type="button" data-region="all" aria-pressed="true">Mundo</button><button type="button" data-region="america" aria-pressed="false">América</button><button type="button" data-region="europa" aria-pressed="false">Europa</button><button type="button" data-region="asia" aria-pressed="false">Asia</button><button type="button" data-region="africa" aria-pressed="false">África</button><button type="button" data-region="oceania" aria-pressed="false">Oceanía</button></div><div class="pulse-world-bottom"><span id="pulse-region-status" role="status">Todo el mundo</span><a id="pulse-region-link" href="/mercados#global">Ver mercados de la región →</a></div></section>
+<section class="pulse-panel pulse-chart-panel" aria-labelledby="pulse-chart-title"><header class="pulse-panel-heading"><div><h2 id="pulse-chart-title">NVIDIA <span>(NVDA)</span></h2><p>GRÁFICO DEL PROVEEDOR · DATOS CON RETRASO</p></div><a id="pulse-detail" class="pulse-tag" href="/mercados?activo=NASDAQ%3ANVDA#cotizacion">Abrir ficha ↗</a></header><div class="pulse-chart-controls"><div class="pulse-periods" role="group" aria-label="Periodo del gráfico"><button type="button" data-period="1D" aria-pressed="false">1D</button><button type="button" data-period="5D" aria-pressed="false">5D</button><button type="button" data-period="1M" aria-pressed="true">1M</button><button type="button" data-period="3M" aria-pressed="false">3M</button><button type="button" data-period="1A" aria-pressed="false">1A</button><button type="button" data-period="2A" aria-pressed="false">2A</button></div><button type="button" id="pulse-chart-retry" class="pulse-mini-button">↻ Reintentar</button></div><div id="pulse-chart-widget" class="pulse-chart-widget"><p class="pulse-placeholder">Cargando el gráfico de NVIDIA…</p></div><p class="pulse-chart-status" id="pulse-chart-status" role="status">Precio, moneda y fecha se muestran en el gráfico del proveedor.</p><div class="pulse-chart-actions"><button id="pulse-watch-selected" type="button" class="pulse-primary">★ Vigilar NVIDIA</button><a class="pulse-outline" href="/radar">◎ Radar cripto</a><a class="pulse-outline" href="/comparar">⇄ Comparar históricos</a></div></section></div>
+<aside class="pulse-right"><section class="pulse-panel pulse-score-panel" aria-labelledby="pulse-score-title"><header class="pulse-panel-heading"><h2 id="pulse-score-title">MOMENTUMVELO <span>PULSE</span></h2><span class="pulse-tiny">EN DESARROLLO</span></header><div class="pulse-score-layout"><div class="pulse-gauge"><small>ÍNDICE GLOBAL</small><strong>—</strong><small>EN PREPARACIÓN</small></div><dl><div><dt>GRÁFICOS</dt><dd>DISPONIBLES</dd></div><div><dt>RADAR CRIPTO</dt><dd>CONECTABLE</dd></div><div><dt>SEGUIMIENTO</dt><dd>EN TU NAVEGADOR</dd></div><div><dt>ÍNDICE E IA</dt><dd class="pulse-pending">PENDIENTES</dd></div></dl></div><p class="pulse-score-caption">CONTEXTO PARA TUS MERCADOS</p></section>
+<section class="pulse-panel pulse-detector" aria-labelledby="pulse-detector-title"><header class="pulse-panel-heading"><h2 id="pulse-detector-title">DETECTOR DE MOVIMIENTOS</h2></header><p class="pulse-help">Vigilancia de criptomonedas mientras el radar está activo.</p><a href="/radar"><strong>₿ BTC</strong><span>Comparación ≈60 s</span><b>Abrir ↗</b></a><a href="/radar"><strong>Ξ ETH</strong><span>Comparación ≈60 s</span><b>Abrir ↗</b></a><a href="/radar"><strong>◎ SOL</strong><span>Comparación ≈60 s</span><b>Abrir ↗</b></a><a class="pulse-primary pulse-wide" href="/radar">Activar vigilancia →</a></section>
+<section class="pulse-panel pulse-ai" id="pulse-ai" aria-labelledby="pulse-ai-title"><header class="pulse-panel-heading"><div><h2 id="pulse-ai-title"><span>IA</span> MOMENTUMVELO</h2><p>ASISTENTE EN DESARROLLO</p></div></header><div class="pulse-ai-body"><div class="pulse-robot" aria-hidden="true"><img src="/images/pulse-world-reference.webp" width="1536" height="1024" alt="" loading="lazy"></div><p>La explicación automática de señales está en preparación. Puedes utilizar los gráficos, el comparador y el radar disponibles.</p></div><div class="pulse-questions"><button type="button" data-help="change">¿Qué ha cambiado? ›</button><button type="button" data-help="data">¿De dónde sale el dato? ›</button><button type="button" data-help="compare">Compáralo con otro ›</button><button type="button" data-help="scope">¿Qué hace Pulse? ›</button></div></section></aside>
+</div>
+<section class="pulse-bottom" aria-label="Más herramientas"><article class="pulse-panel"><h2>ALERTAS DE ESTA VISITA</h2><p>Los avisos se generan en el radar activo de BTC, ETH y SOL.</p><a class="pulse-outline" href="/radar">Abrir avisos →</a></article><article class="pulse-panel"><h2>TOP MOVIMIENTOS</h2><p>Consulta subidas, caídas y actividad de bolsa en la fuente.</p><a class="pulse-outline" href="/mercados#movimientos">Ver movimientos →</a></article><article class="pulse-panel"><h2>SECTORES Y MERCADOS</h2><p>Explora el mapa sectorial del S&amp;P 500 y sus compañías.</p><a class="pulse-outline" href="/mercados#mapa">Abrir mapa sectorial →</a></article><article class="pulse-panel pulse-explore"><h2>OPORTUNIDADES GLOBALES<br>EN UN SOLO LUGAR</h2><span class="pulse-growth" aria-hidden="true">⌁ ↗</span><a class="pulse-primary" href="/mercados">EXPLORAR MERCADOS →</a></article></section><p class="pulse-data-note">Cotizaciones y gráficos: TradingView, sujetos a disponibilidad y retrasos. El mapa es una ilustración del diseño. Pulse y sus métricas de IA siguen en preparación; no hay compras ni ventas reales desde este terminal.</p>
+</main><footer class="pulse-footer"><a href="/">↗ MOMENTUMVELO</a><span>DATOS CON SU FUENTE · GRÁFICOS · MERCADOS GLOBALES</span><a href="/legal#datos-mercado">Fuentes y alcance</a><a href="/ayuda">Ayuda</a></footer>
+<dialog id="pulse-add-dialog" class="pulse-dialog" aria-labelledby="pulse-add-title"><div class="pulse-dialog-heading"><h2 id="pulse-add-title">Añadir a mi lista</h2><button type="button" data-close aria-label="Cerrar selección">×</button></div><p>Selecciona los activos que quieres seguir. Aparecen también en tus favoritos de Mercados.</p><label class="pulse-search-label" for="pulse-add-search">Buscar en todos los activos</label><input id="pulse-add-search" type="search" placeholder="Empresa, símbolo o mercado…" maxlength="80"><div id="pulse-add-options" class="pulse-add-options"></div></dialog>
+<dialog id="pulse-help-dialog" class="pulse-dialog" aria-labelledby="pulse-help-title"><div class="pulse-dialog-heading"><h2 id="pulse-help-title">Guía de herramientas</h2><button type="button" data-close aria-label="Cerrar guía">×</button></div><div id="pulse-help-content"></div></dialog>
 </body></html>
