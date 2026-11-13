@@ -31,7 +31,7 @@
       view.change.textContent=!value?"Sin datos todavía":value.warming?"Preparando la comparación":`${value.change.toLocaleString("es-ES",{minimumFractionDigits:2,maximumFractionDigits:2,signDisplay:"exceptZero"})} % en ≈${periodLabel()}`;
       const history=series.get(product)||[],elapsed=history.length?Math.min(windowSeconds,Math.max(0,(history.at(-1).time-history[0].time)/1000)):0;
       view.progress.hidden=!value||!value.warming||paused||stale;view.progress.max=windowSeconds;view.progress.value=elapsed;
-      view.phase.textContent=!value?"Activa la vigilancia para recibir datos.":paused?"Último dato conservado; no es una señal actual.":stale?"Sin precio nuevo en más de 15 s.":value.warming?`Reuniendo datos: ${Math.floor(elapsed)} de ${windowSeconds} s.`:`Cambio observado sobre una ventana de aproximadamente ${periodLabel()}.`;
+      view.phase.textContent=!value?(['waiting','connecting','receiving'].includes(feedState)?"Esperando los primeros precios válidos de Coinbase…":"Activa la vigilancia para recibir datos."):paused?"Último dato conservado; no es una señal actual.":stale?"Sin precio nuevo en más de 15 s.":value.warming?`Reuniendo datos: ${Math.floor(elapsed)} de ${windowSeconds} s.`:`Cambio observado sobre una ventana de aproximadamente ${periodLabel()}.`;
       view.time.textContent=value?`Recibido ${stamp(value.time)}`:"Sin precio recibido";if(value)view.time.dateTime=new Date(value.time).toISOString();
       if(history.length<2){view.line.setAttribute("d","");return;}
       const low=Math.min(...history.map(row=>row.price)),high=Math.max(...history.map(row=>row.price)),duration=history.at(-1).time-history[0].time;

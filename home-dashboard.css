@@ -65,3 +65,6 @@ html:has(body.dashboard-home){overflow-x:clip}
 @media(max-width:620px){.dashboard-home .video-showcase{padding:64px 14px 80px}.dashboard-home .footer-grid{grid-template-columns:minmax(0,1fr)}}
 
 .mv-chart-stage:has(iframe) .mv-chart-fallback{visibility:hidden}
+
+/* The embed replaces its host; keep attribution inside the chart area. */
+.mv-chart-widget iframe{height:calc(100% - 22px)!important}
