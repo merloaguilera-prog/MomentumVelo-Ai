@@ -3,6 +3,7 @@
   const $ = id => document.getElementById(id);
   const timers = new Map();
   const initialized = new Set();
+  let chartTask;
   function embed(id, widget, config, attribution, statusId) {
     const target = $(id);
     clearTimeout(timers.get(id));
@@ -58,8 +59,8 @@
         "mainSeriesProperties.candleStyle.wickUpColor": "#1eeaff", "mainSeriesProperties.candleStyle.wickDownColor": "#e530ed" }
     }, "https://www.tradingview.com/symbols/NASDAQ-AAPL/", "mv-chart-status");
   }
-  document.querySelectorAll("[data-period]").forEach(button => button.addEventListener("click", () => chart(button.dataset.period)));
-  $("mv-chart-retry").addEventListener("click", () => chart(selectedPeriod));
+  document.querySelectorAll("[data-period]").forEach(button => button.addEventListener("click", () => { selectedPeriod = button.dataset.period; chartTask?.dispose(); chart(button.dataset.period); }));
+  $("mv-chart-retry").addEventListener("click", () => { chartTask?.dispose(); chart(selectedPeriod); });
   const dialogConfigs = {
     "mv-news": ["mv-news-widget", "timeline", { feedMode: "all_symbols", isTransparent: true, displayMode: "regular", width: "100%", height: "100%", colorTheme: "dark", locale: "es" }, "https://www.tradingview.com/news/"],
     "mv-calendar": ["mv-calendar-widget", "events", { colorTheme: "dark", isTransparent: true, width: "100%", height: "100%", locale: "es", importanceFilter: "-1,0,1", countryFilter: "us,eu,es,gb,jp,cn" }, "https://www.tradingview.com/economic-calendar/"]
@@ -86,11 +87,11 @@
     if (!symbol) { $("mv-search-status").textContent = "Escribe Apple, Nvidia, Microsoft, Bitcoin, Ethereum, Solana, Tesla, Santander o Iberdrola. Para más activos, abre Mercados."; return; }
     window.location.href = `/mercados?activo=${encodeURIComponent(symbol)}#cotizacion`;
   });
-  embed("mv-ticker-widget", "ticker-tape", {
+  const tickerTask = window.MomentumDeferredWidget.defer($("mv-ticker-widget"), () => embed("mv-ticker-widget", "ticker-tape", {
     symbols: [{ proName: "FOREXCOM:SPXUSD", title: "S&P 500 · CFD" }, { proName: "FOREXCOM:NSXUSD", title: "NASDAQ · CFD" },
       { proName: "XETR:DAX", title: "DAX" }, { proName: "BME:IBC", title: "IBEX 35" }, { proName: "COINBASE:BTCUSD", title: "BTC/USD" }],
     showSymbolLogo: true, colorTheme: "dark", isTransparent: false, displayMode: "adaptive", locale: "es"
-  }, "https://www.tradingview.com/markets/");
-  chart(selectedPeriod);
-  window.addEventListener("pagehide", () => { timers.forEach(timer => clearTimeout(timer)); });
+  }, "https://www.tradingview.com/markets/"));
+  chartTask = window.MomentumDeferredWidget.defer($("mv-chart-widget"), () => chart(selectedPeriod));
+  window.addEventListener("pagehide", event => { if (event.persisted) return; timers.forEach(timer => clearTimeout(timer)); tickerTask.dispose(); chartTask.dispose(); });
 })();

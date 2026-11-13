@@ -8,7 +8,7 @@
   catch(_){storageFailed=true;$('pulse-watch-status').textContent='No se puede acceder a los datos guardados. Los cambios duran esta visita.';}
   return new Set(workspace.favorites);
  }
- let watched=read(),region='all',kind='all',period='1M';const timers=new Map();
+ let watched=read(),region='all',kind='all',period='1M';const timers=new Map();let chartTask;
  const regionNames={all:'Todo el mundo',america:'América',europa:'Europa',asia:'Asia',africa:'África',oceania:'Oceanía'};
  const regionRoutes={america:'america',europa:'europa',asia:'asia',africa:'africa',oceania:'oceania'};
  const assetHref=market=>`/mercados?activo=${encodeURIComponent(market)}#cotizacion`;
@@ -64,9 +64,9 @@
  }
  const periods={'1D':['1D','5'],'5D':['5D','30'],'1M':['1M','60'],'3M':['3M','D'],'1A':['12M','D'],'2A':['24M','W']};
  function chart(next){if(!periods[next])return;period=next;document.querySelectorAll('[data-period]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.period===period)));$('pulse-chart-status').classList.remove('error');$('pulse-chart-status').textContent='Precio, moneda y fecha se muestran en el gráfico del proveedor.';embed('pulse-chart-widget','advanced-chart',{autosize:true,symbol:'NASDAQ:NVDA',interval:periods[period][1],range:periods[period][0],timezone:'Europe/Madrid',theme:'dark',style:'1',locale:'es',backgroundColor:'rgba(3,16,24,1)',gridColor:'rgba(11,71,78,.3)',hide_top_toolbar:true,hide_legend:false,allow_symbol_change:false,save_image:false,support_host:'https://www.tradingview.com'},'https://www.tradingview.com/symbols/NASDAQ-NVDA/','pulse-chart-status');}
- document.querySelectorAll('[data-period]').forEach(button=>button.addEventListener('click',()=>chart(button.dataset.period)));$('pulse-chart-retry').addEventListener('click',()=>chart(period));
- embed('pulse-index-widget','market-overview',{colorTheme:'dark',dateRange:'12M',locale:'es',width:'100%',height:'100%',showChart:false,showSymbolLogo:true,isTransparent:false,largeChartUrl:`${location.origin}/mercados`,tabs:[{title:'Índices',symbols:[{s:'FOREXCOM:SPXUSD',d:'S&P 500 · CFD'},{s:'FOREXCOM:NSXUSD',d:'NASDAQ · CFD'},{s:'FOREXCOM:DJI',d:'Dow Jones · CFD'},{s:'XETR:DAX',d:'DAX'},{s:'BME:IBC',d:'IBEX 35'}]}]},'https://www.tradingview.com/markets/');
- window.addEventListener('pagehide',()=>timers.forEach(timer=>clearTimeout(timer)));
+ document.querySelectorAll('[data-period]').forEach(button=>button.addEventListener('click',()=>{chartTask?.dispose();chart(button.dataset.period);}));$('pulse-chart-retry').addEventListener('click',()=>{chartTask?.dispose();chart(period);});
+ const indexTask=window.MomentumDeferredWidget.defer($('pulse-index-widget'),()=>embed('pulse-index-widget','market-overview',{colorTheme:'dark',dateRange:'12M',locale:'es',width:'100%',height:'100%',showChart:false,showSymbolLogo:true,isTransparent:false,largeChartUrl:`${location.origin}/mercados`,tabs:[{title:'Índices',symbols:[{s:'FOREXCOM:SPXUSD',d:'S&P 500 · CFD'},{s:'FOREXCOM:NSXUSD',d:'NASDAQ · CFD'},{s:'FOREXCOM:DJI',d:'Dow Jones · CFD'},{s:'XETR:DAX',d:'DAX'},{s:'BME:IBC',d:'IBEX 35'}]}]},'https://www.tradingview.com/markets/'));
+ window.addEventListener('pagehide',event=>{if(event.persisted)return;timers.forEach(timer=>clearTimeout(timer));indexTask.dispose();chartTask.dispose();});
  window.addEventListener('storage',event=>{if(event.key!==workspaceCore.STORAGE_KEY&&event.key!==null)return;watched=read();render();if($('pulse-add-dialog').open)choices();});
- render();chart(period);
+ render();chartTask=window.MomentumDeferredWidget.defer($('pulse-chart-widget'),()=>chart(period));
 })();
