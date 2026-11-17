@@ -1532,3 +1532,5 @@ window.MomentumVeloClerkLocale = {
     "noneAvailable": "No se detectaron carteras Solana Web3. Instala una {{ solanaWalletsLink || link(\"wallet extension\") }} compatible con Web3."
   }
 };
+// This registration placeholder is still untranslated in the upstream locale.
+window.MomentumVeloClerkLocale.formFieldInputPlaceholder__signUpPassword = "Crea una contraseña";

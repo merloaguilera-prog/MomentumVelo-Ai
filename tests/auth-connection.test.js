@@ -391,6 +391,7 @@ test('Spanish covers login, signup, verification, recovery and common validation
     assert.equal(locale.locale, 'es-ES');
     assert.equal(locale.formFieldLabel__emailAddress, 'Correo electrónico');
     assert.equal(locale.formButtonPrimary, 'Continuar');
+    assert.equal(locale.formFieldInputPlaceholder__signUpPassword, 'Crea una contraseña');
     assert.match(locale.signIn.start.title, /Entrar|sesión/);
     assert.match(locale.signUp.start.title, /cuenta/);
     assert.match(locale.signUp.emailCode.title, /correo/);
