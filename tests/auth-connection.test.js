@@ -5,6 +5,7 @@ const path = require('node:path');
 const vm = require('node:vm');
 
 const providerSource = fs.readFileSync(path.join(__dirname, '../auth-provider.js'), 'utf8');
+const localeSource = fs.readFileSync(path.join(__dirname, '../vendor/clerk-es-ES.js'), 'utf8');
 const localAuthSource = fs.readFileSync(path.join(__dirname, '../auth.js'), 'utf8');
 const headerSource = fs.readFileSync(path.join(__dirname, '../app.js'), 'utf8');
 const authConfig = require('../api/auth-config');
@@ -19,7 +20,7 @@ function element(hidden = false) {
   };
 }
 
-function browser({ config = { enabled: true, publishableKey }, responseOk = true, fetchFailure = false, scriptFailure = false, loadFailure = false, pendingConfig = false, signedIn = false, origin = 'https://momentumvelo.app', search = '?mode=login', tabMode = 'login', stageDelays = {}, pendingLoad = false } = {}) {
+function browser({ config = { enabled: true, publishableKey }, responseOk = true, fetchFailure = false, scriptFailure = false, loadFailure = false, pendingConfig = false, signedIn = false, origin = 'https://momentumvelo.app', search = '?mode=login', tabMode = 'login', stageDelays = {}, pendingLoad = false, pendingForm = false, mountFailure = false } = {}) {
   const nodes = {
     '[data-auth-view]': element(true), '[data-managed-auth]': element(true),
     '[data-account-view]': element(true), '[data-auth-connection]': element(),
@@ -27,21 +28,39 @@ function browser({ config = { enabled: true, publishableKey }, responseOk = true
     '[data-auth-temporary]': element(true), '[data-auth-temporary-link]': element()
   };
   const mount = element();
+  let formReady = false;
+  mount.querySelector = () => formReady ? element() : null;
   nodes['[data-managed-auth]'].querySelector = () => mount;
   const tab = element();
   tab.disabled = true;
   tab.dataset = { authMode: tabMode };
   tab.classList = { toggle() {} };
-  const scripts = [], requests = [], redirects = [], timers = new Map();
+  const scripts = [], requests = [], redirects = [], timers = new Map(), observers = new Set(), unmounted = [];
   const timerDurations = [];
   let clock = 0;
   class ClockDate extends Date { static now() { return clock; } }
-  let timerId = 0, reloads = 0, storageReads = 0, storageWrites = 0, mounted = '', mountOptions;
+  let timerId = 0, reloads = 0, storageReads = 0, storageWrites = 0, mounted = '', mountOptions, loadOptions;
+  function renderForm() {
+    formReady = true;
+    for (const observer of observers) observer.callback();
+  }
+  function mountForm(mode, options) {
+    mounted = mode;
+    mountOptions = options;
+    if (mountFailure) throw new Error('vendor render failure');
+    clock += stageDelays.form || 0;
+    if (!pendingForm) renderForm();
+  }
   const window = {
     location: { origin, href: `${origin}/login${search}`, search, reload() { reloads++; }, assign(url) { redirects.push(url); } },
     atob: (value) => Buffer.from(value, 'base64').toString('utf8'),
     setTimeout(callback, duration) { timerDurations.push(duration); timers.set(++timerId, callback); return timerId; },
     clearTimeout(id) { timers.delete(id); },
+    MutationObserver: class {
+      constructor(callback) { this.callback = callback; }
+      observe() { observers.add(this); }
+      disconnect() { observers.delete(this); }
+    },
     localStorage: { getItem() { storageReads++; return null; }, setItem() { storageWrites++; } },
     __internal_ClerkUICtor: {}
   };
@@ -65,14 +84,17 @@ function browser({ config = { enabled: true, publishableKey }, responseOk = true
           const proxyUrl = script.getAttribute('data-clerk-proxy-url');
           window.Clerk = {
             isSignedIn: signedIn,
-            async load() {
+            async load(options) {
+              loadOptions = options;
               const sdkOrigin = new URL(script.src).origin;
               requests.push(`${proxyUrl || sdkOrigin}/v1/client`);
               if (loadFailure) throw new Error('host_invalid');
               if (pendingLoad) return new Promise(() => {});
             },
-            mountSignIn(_target, options) { mounted = 'login'; mountOptions = options; },
-            mountSignUp(_target, options) { mounted = 'signup'; mountOptions = options; }
+            mountSignIn(_target, options) { mountForm('login', options); },
+            mountSignUp(_target, options) { mountForm('signup', options); },
+            unmountSignIn() { unmounted.push('login'); },
+            unmountSignUp() { unmounted.push('signup'); }
           };
         }
         script.listeners.load();
@@ -89,9 +111,11 @@ function browser({ config = { enabled: true, publishableKey }, responseOk = true
       return { ok: responseOk, json: async () => { clock += stageDelays.json || 0; return config; } };
     }
   });
+  vm.runInContext(localeSource, context);
   vm.runInContext(providerSource, context);
   return {
-    window, nodes, tab, scripts, requests, redirects, timers, timerDurations, context,
+    window, nodes, tab, scripts, requests, redirects, timers, timerDurations, context, observers, unmounted, mount, renderForm,
+    get loadOptions() { return loadOptions; },
     get mounted() { return mounted; }, get mountOptions() { return mountOptions; }, get reloads() { return reloads; },
     get storageReads() { return storageReads; }, get storageWrites() { return storageWrites; }
   };
@@ -357,4 +381,83 @@ test('connection errors distinguish configuration, form download and session wit
     assert.match(page.nodes['[data-auth-connection-message]'].textContent, phrase);
     assert.doesNotMatch(page.nodes['[data-auth-connection-message]'].textContent, /host_invalid|pk_live|sk_live/);
   }
+});
+
+test('Spanish covers login, signup, verification, recovery and common validation errors', async () => {
+  for (const mode of ['login', 'signup']) {
+    const page = browser({ search: `?mode=${mode}` });
+    assert.equal(await page.window.MomentumVeloAuthReady, 'managed');
+    const locale = page.loadOptions.localization;
+    assert.equal(locale.locale, 'es-ES');
+    assert.equal(locale.formFieldLabel__emailAddress, 'Correo electrónico');
+    assert.equal(locale.formButtonPrimary, 'Continuar');
+    assert.match(locale.signIn.start.title, /Entrar|sesión/);
+    assert.match(locale.signUp.start.title, /cuenta/);
+    assert.match(locale.signUp.emailCode.title, /correo/);
+    assert.match(locale.signIn.forgotPassword.title, /contraseña/);
+    assert.match(locale.unstable__errors.form_password_incorrect, /incorrecta/);
+    assert.match(locale.unstable__errors.form_code_incorrect, /incorrecto/);
+    assert.match(locale.unstable__errors.form_identifier_exists__email_address, /cuenta/);
+  }
+});
+
+test('both login entry pages provide the locale before the managed provider', () => {
+  for (const name of ['login.html', 'login/index.html']) {
+    const html = fs.readFileSync(path.join(__dirname, '..', name), 'utf8');
+    assert.ok(html.indexOf('src="/vendor/clerk-es-ES.js" defer') >= 0);
+    assert.ok(html.indexOf('src="/vendor/clerk-es-ES.js" defer') < html.indexOf('src="/auth-provider.js" defer'));
+  }
+});
+
+test('connection stays busy until the asynchronously mounted form has a control', async () => {
+  for (const mode of ['login', 'signup']) {
+    const page = browser({ search: `?mode=${mode}`, pendingForm: true });
+    for (let i = 0; i < 40; i++) await Promise.resolve();
+    assert.equal(page.mounted, mode);
+    assert.equal(page.nodes['[data-auth-connection]'].hidden, false);
+    assert.equal(page.mount.getAttribute('aria-busy'), 'true');
+    assert.equal(page.tab.disabled, true);
+    assert.equal(page.observers.size, 1);
+    page.renderForm();
+    assert.equal(await page.window.MomentumVeloAuthReady, 'managed');
+    assert.equal(page.nodes['[data-auth-connection]'].hidden, true);
+    assert.equal(page.mount.getAttribute('aria-busy'), 'false');
+    assert.equal(page.tab.disabled, false);
+    assert.equal(page.observers.size, 0);
+    assert.equal(page.timers.size, 0);
+  }
+});
+
+test('an empty vendor mount times out in the remaining budget and cannot revive after failure', async () => {
+  for (const mode of ['login', 'signup']) {
+    const page = browser({ search: `?mode=${mode}`, pendingForm: true,
+      stageDelays: { config: 7000, json: 1000, ui: 6000, sdk: 5000 } });
+    for (let i = 0; i < 40; i++) await Promise.resolve();
+    assert.equal(page.timerDurations.at(-1), 1000);
+    for (const callback of page.timers.values()) callback();
+    assert.equal(await page.window.MomentumVeloAuthReady, 'unavailable');
+    assert.equal(page.nodes['[data-auth-connection]'].getAttribute('data-stage'), 'form');
+    assert.match(page.nodes['[data-auth-connection-message]'].textContent, /abrir el formulario/);
+    assert.equal(page.nodes['[data-auth-retry]'].hidden, false);
+    assert.equal(page.nodes['[data-managed-auth]'].hidden, true);
+    assert.equal(page.nodes['[data-auth-view]'].hidden, true);
+    assert.equal(page.observers.size, 0);
+    assert.equal(page.timers.size, 0);
+    assert.deepEqual(page.unmounted, [mode]);
+    page.renderForm();
+    assert.equal(page.nodes['[data-auth-connection]'].hidden, false);
+    assert.equal(page.nodes['[data-managed-auth]'].hidden, true);
+    assert.equal(page.storageWrites, 0);
+  }
+});
+
+test('a synchronous mount error also cleans up and leaves an actionable form error', async () => {
+  const page = browser({ mountFailure: true });
+  assert.equal(await page.window.MomentumVeloAuthReady, 'unavailable');
+  assert.equal(page.nodes['[data-auth-connection]'].getAttribute('data-stage'), 'form');
+  assert.equal(page.nodes['[data-auth-retry]'].hidden, false);
+  assert.equal(page.observers.size, 0);
+  assert.equal(page.timers.size, 0);
+  assert.deepEqual(page.unmounted, ['login']);
+  assert.doesNotMatch(page.nodes['[data-auth-connection-message]'].textContent, /vendor render failure/);
 });

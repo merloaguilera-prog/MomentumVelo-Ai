@@ -25,6 +25,37 @@
     }), timeoutMs);
   }
 
+  function mountManagedForm(mount, mode, options, timeoutMs) {
+    let observer;
+    mount.setAttribute("aria-busy", "true");
+    return withTimeout(new Promise((resolve, reject) => {
+      // Mounting starts an asynchronous render. A loaded SDK alone does not
+      // guarantee that the user has a form to interact with.
+      const check = () => {
+        if (mount.querySelector("input:not([type='hidden']), button:not([disabled])")) resolve();
+      };
+      observer = new window.MutationObserver(check);
+      observer.observe(mount, { childList: true, subtree: true, attributes: true });
+      try {
+        if (mode === "signup") window.Clerk.mountSignUp(mount, options);
+        else window.Clerk.mountSignIn(mount, options);
+        check();
+      } catch (error) {
+        reject(error);
+      }
+    }), timeoutMs).catch(error => {
+      // Stop a late render from reviving an expired attempt behind the error.
+      try {
+        if (mode === "signup") window.Clerk.unmountSignUp(mount);
+        else window.Clerk.unmountSignIn(mount);
+      } catch (_error) {}
+      throw error;
+    }).finally(() => {
+      if (observer) observer.disconnect();
+      mount.setAttribute("aria-busy", "false");
+    });
+  }
+
   function connectionProgress(message) {
     const node = document.querySelector("[data-auth-connection-message]");
     if (node) node.textContent = message;
@@ -339,8 +370,12 @@
       // ClerkJS reads proxyUrl when its script creates the Clerk instance, before load().
       stage = "session";
       connectionProgress("Conectando con tu cuenta segura…");
-      await withTimeout(window.Clerk.load({ ui: { ClerkUI: window.__internal_ClerkUICtor } }), remaining());
+      await withTimeout(window.Clerk.load({
+        ui: { ClerkUI: window.__internal_ClerkUICtor },
+        localization: window.MomentumVeloClerkLocale
+      }), remaining());
       stage = "form";
+      connectionProgress("Abriendo el formulario de tu cuenta…");
 
       updatePublicHeader();
       const managedView = document.querySelector("[data-managed-auth]");
@@ -395,11 +430,11 @@
         }
       };
       if (activeMode === "signup") {
-        window.Clerk.mountSignUp(mount, { appearance, signInUrl: deletionReturn ? "/login?mode=login&returnTo=delete-account" : "/login?mode=login",
-          ...(deletionReturn ? { forceRedirectUrl: deletionReturn, signInForceRedirectUrl: deletionReturn } : {}) });
+        await mountManagedForm(mount, activeMode, { appearance, signInUrl: deletionReturn ? "/login?mode=login&returnTo=delete-account" : "/login?mode=login",
+          ...(deletionReturn ? { forceRedirectUrl: deletionReturn, signInForceRedirectUrl: deletionReturn } : {}) }, remaining());
       } else {
-        window.Clerk.mountSignIn(mount, { appearance, signUpUrl: deletionReturn ? "/login?mode=signup&returnTo=delete-account" : "/login?mode=signup",
-          ...(deletionReturn ? { forceRedirectUrl: deletionReturn, signUpForceRedirectUrl: deletionReturn } : {}) });
+        await mountManagedForm(mount, activeMode, { appearance, signUpUrl: deletionReturn ? "/login?mode=signup&returnTo=delete-account" : "/login?mode=signup",
+          ...(deletionReturn ? { forceRedirectUrl: deletionReturn, signUpForceRedirectUrl: deletionReturn } : {}) }, remaining());
       }
       finishConnection();
       return "managed";
