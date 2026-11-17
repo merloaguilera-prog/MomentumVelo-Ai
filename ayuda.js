@@ -95,8 +95,9 @@ if (!form) return;
     } finally {window.clearTimeout(timer);}
   }
   function setAvailability(value,message) {
-    available=value;availability.textContent=message;button.disabled=!available||sending;
-    button.textContent=available?"Enviar consulta":"Envío no disponible";retry.hidden=available;
+    available=value;availability.textContent=message;button.disabled=!available||sending;button.hidden=!available;
+    draft.classList.toggle("button-secondary",available);
+    button.textContent="Enviar consulta";retry.hidden=available;
   }
   async function checkAvailability() {
     if(checking||sending)return;checking=true;button.disabled=true;retry.disabled=true;
@@ -106,7 +107,7 @@ if (!form) return;
       if(!response.ok||typeof result?.available!=="boolean")throw new Error("unavailable");
       setAvailability(result.available,result.available
         ?"El formulario está habilitado. Al enviarlo recibirás una referencia si la consulta se acepta."
-        :"El envío de consultas todavía está en preparación. Puedes escribir tu consulta y guardarla como borrador.");
+        :"El envío por correo aún no está activo. Puedes preparar tu consulta y descargarla en este dispositivo. El archivo no se enviará automáticamente.");
     }catch(_){setAvailability(false,"No hemos podido comprobar la disponibilidad. Puedes volver a comprobarla y conservar tu consulta como borrador.");}
     finally{checking=false;retry.disabled=false;}
   }
@@ -142,7 +143,7 @@ if (!form) return;
       if(!edited)form.reset();
       showStatus(`Consulta aceptada para envío. Referencia: ${result.id}.${edited?" Los cambios que has escrito durante el envío siguen en el formulario como borrador.":" Conserva esta referencia para el seguimiento."}`);
     }catch(error){showStatus(error instanceof Error?error.message:"El envío no se ha confirmado. Conserva el borrador.",true);}
-    finally{sending=false;button.disabled=!available;button.textContent=available?"Enviar consulta":"Envío no disponible";retry.disabled=false;form.setAttribute("aria-busy","false");}
+    finally{sending=false;button.disabled=!available;button.textContent="Enviar consulta";button.hidden=!available;retry.disabled=false;form.setAttribute("aria-busy","false");}
   });
   checkAvailability();
 })();

@@ -12,13 +12,13 @@
   <script src="/site.js" defer></script>
 <link rel="stylesheet" href="/neon.css?v=20261011">
   <link rel="stylesheet" href="/neon-unificado.css">
-</head>
+<link rel="stylesheet" href="/responsive-shell.css?v=20261117"></head>
 <body>
   <header class="site-header simple-header">
-    <a class="brand" href="/" aria-label="MomentumVelo-AI, inicio"><span class="brand-mark" aria-hidden="true">↗</span><span>MomentumVelo<span class="accent">-AI</span></span></a>
+    <a class="brand" href="/" aria-label="MomentumVelo-AI, inicio"><img class="brand-mark" src="/icons/icon-192.png" width="34" height="34" alt=""><span>MomentumVelo<span class="accent">-AI</span></span></a>
     <nav aria-label="Navegación de ayuda"><a href="#respuestas">Respuestas</a><a href="#seguridad">Seguridad</a><a href="#contacto">Contactar</a></nav>
     <a class="button button-small button-secondary" href="/login?mode=login">Mi cuenta</a>
-  </header>
+  <details class="compact-menu"><summary>Menú</summary><nav aria-label="Menú móvil"><a href="#respuestas">Respuestas</a><a href="#seguridad">Seguridad</a><a href="#contacto">Contactar</a></nav></details></header>
 
   <main class="help-main">
     <section class="help-hero">
@@ -66,7 +66,7 @@
           <span class="help-topic">Cuenta</span>
           <h2>¿Cómo recupero el acceso?</h2>
           <p>En el acceso seguro, utiliza la opción de recuperación de acceso y sigue las indicaciones disponibles. Si tu cuenta pertenece a la versión local de prueba, escríbenos y te guiaremos en la migración.</p>
-          <a href="#contacto" data-topic-link="Cuenta y acceso">Necesito ayuda con mi cuenta →</a>
+          <a href="/login?mode=login">Abrir acceso y recuperación →</a>
         </article>
         <article class="help-item" data-help-item data-category="premium" data-keywords="premium precio 49 mensual qué incluye datos señales riesgo backtesting">
           <span class="help-topic">Premium</span>
@@ -143,7 +143,7 @@
       <div>
         <p class="eyebrow">Contacto</p>
         <h2>Cuéntanos qué necesitas.</h2>
-        <p class="section-intro">Cuenta, Premium, facturación, privacidad o una solución a medida. Comprueba la disponibilidad del envío antes de continuar. Si hay un problema, puedes conservar tu consulta como borrador en este dispositivo.</p>
+        <p class="section-intro">Cuenta, Premium, facturación, privacidad o una solución a medida. Aquí puedes preparar tu consulta. Si el envío está habilitado, recibirás una referencia de confirmación. También puedes descargar el texto como borrador.</p>
         <div class="contact-assurance"><strong>No envíes contraseñas ni datos completos de tarjeta.</strong><span>Para localizar un pago basta con el correo utilizado y, si lo tienes, el identificador de Stripe.</span></div>
       </div>
       <form class="contact-form" data-contact-form novalidate>
@@ -154,9 +154,9 @@
         <label>Tu consulta<textarea name="message" rows="6" maxlength="3000" minlength="10" required placeholder="Explícanos qué quieres hacer y en qué punto necesitas ayuda."></textarea></label>
         <label class="honeypot" aria-hidden="true">Sitio web<input name="website" type="text" tabindex="-1" autocomplete="off"></label>
         <label class="privacy-check"><input name="privacy" type="checkbox" required><span>Acepto que se usen estos datos para responder a mi consulta según la <a href="/legal#privacidad">política de privacidad</a>.</span></label>
-        <button class="button" type="submit" disabled>Comprobando envío…</button>
+        <button class="button" type="submit" disabled hidden>Enviar consulta</button>
         <button class="button button-secondary" type="button" data-contact-retry hidden>Volver a comprobar el envío</button>
-        <button class="button button-secondary" type="button" data-contact-draft>Guardar consulta como borrador</button>
+        <button class="button button-secondary" type="button" data-contact-draft>Descargar mi consulta</button>
         <p class="contact-status" data-contact-status role="status" aria-live="polite"></p>
         <p class="contact-fallback">El borrador se guarda solo en el dispositivo donde lo descargas. Para una consulta enviada, conserva la referencia de confirmación. Las solicitudes de eliminación de cuenta se tramitan desde <a href="/eliminar-cuenta">Eliminar mi cuenta y mis datos</a>.</p><noscript><p>Activa JavaScript para comprobar la disponibilidad y enviar la consulta. Puedes consultar las respuestas de ayuda sin activarlo.</p></noscript>
       </form>
@@ -164,7 +164,7 @@
   </main>
 
   <footer>
-    <div class="footer-grid compact-footer"><div><a class="brand" href="/"><span class="brand-mark">↗</span> MomentumVelo<span class="accent">-AI</span></a><p>Información clara para tomar decisiones con criterio.</p></div><div><b>Ayuda</b><a href="#respuestas">Buscar respuestas</a><a href="#contacto">Contactar</a></div><div><b>Legal</b><a href="/legal#privacidad">Privacidad</a><a href="/legal#condiciones">Condiciones</a><a href="/legal#riesgos">Riesgos</a></div></div>
+    <div class="footer-grid compact-footer"><div><a class="brand" href="/"><img class="brand-mark" src="/icons/icon-192.png" width="34" height="34" alt=""> MomentumVelo<span class="accent">-AI</span></a><p>Información clara para tomar decisiones con criterio.</p></div><div><b>Ayuda</b><a href="#respuestas">Buscar respuestas</a><a href="#contacto">Contactar</a></div><div><b>Legal</b><a href="/legal#privacidad">Privacidad</a><a href="/legal#condiciones">Condiciones</a><a href="/legal#riesgos">Riesgos</a></div></div>
     <div class="legal"><span>© 2026 MomentumVelo-AI.</span><span>Invertir conlleva riesgo de pérdida de capital.</span></div>
   </footer>
 </body>

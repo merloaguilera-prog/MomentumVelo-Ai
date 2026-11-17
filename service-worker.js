@@ -1,8 +1,8 @@
 "use strict";
-const CACHE = "momentumvelo-public-v6";
+const CACHE = "momentumvelo-public-v7";
 const PAGES = new Set(["/mercados", "/radar", "/practica", "/comparar", "/offline"]);
 const ASSETS = new Set([
-  "/panel.css", "/practica-promos.css", "/mercados.css", "/neon.css", "/neon-unificado.css", "/styles.css",
+  "/responsive-shell.css", "/panel.css", "/practica-promos.css", "/mercados.css", "/neon.css", "/neon-unificado.css", "/styles.css",
   "/practica.css", "/comparar.css", "/pwa.css", "/pwa.js", "/workspace-core.js",
   "/market-catalog.js", "/market-route-core.js", "/mercados-global.js", "/mercados.js", "/detector-core.js", "/detector-chart-core.js",
   "/detector-chart.js", "/mercados-detector.js", "/radar-feed.js", "/radar-core.js", "/radar.js", "/radar-enhancements.css",
