@@ -1,6 +1,6 @@
 # Cierre por fases de MomentumVelo
 
-Actualizado: 17 de noviembre de 2026. Rama de revisión; producción conserva su versión.
+Actualizado: 19 de noviembre de 2026. Rama de revisión; producción conserva su versión.
 
 | Punto | Avance comprobado | Para darlo por terminado |
 | --- | --- | --- |
@@ -23,3 +23,11 @@ Validación local: 210/210 pruebas superadas, `npm run check` y `git diff --chec
 La traducción incluida procede de `@clerk/localizations` 4.25.0, recurso `esES`, con su licencia MIT en `vendor/clerk-localizations-LICENSE.txt`. Se conservan las claves de plantilla del proveedor y se omiten sus traducciones indefinidas para mantener el comportamiento de reserva. Referencia de integración: https://clerk.com/docs/guides/customizing-clerk/localization.
 
 Los errores de renderizado se comprueban con un proveedor controlado; no se atribuye un fallo reproducido de Clerk a la observación puntual de un formulario todavía vacío durante su carga normal. No se ha iniciado una sesión, creado una cuenta ni enviado un correo de recuperación en esta revisión.
+
+## Presentación de herramientas — 19 de noviembre
+
+Mercados, Radar, Cartera, Comparador y Academia incorporan ilustraciones distintas, con menos detalles y reflejos cian y violeta suaves. Se separan las imágenes del texto. La hoja `neon-tools.css` aplica bordes finos, fondos despejados y controles legibles a las herramientas; en Inicio solo cambia la ventana de Academia. Se conservan el toro, el icono y la navegación móvil de la revisión anterior.
+
+Las ilustraciones se sirven en WebP de 1672 y 836 px. Cada versión móvil pesa entre 16 y 21 KB. La caché pública incorpora los nuevos recursos; no incluye respuestas de cuentas ni cotizaciones. El radar conserva sus identificadores, valores iniciales y reglas; la presentación separa su portada y los ajustes.
+
+Validación: 210/210 pruebas, comprobación de sintaxis e identificadores y referencias locales. En navegador se revisaron las cuatro herramientas en contenedores de 320, 390 y 768 px, sin desbordamiento horizontal y con imágenes cargadas. Se abrió Academia desde el menú móvil y se comprobó su cabecera, imagen y tarjetas. Estos controles visuales no sustituyen las pruebas de Android físico ni las mediciones LCP/INP.
