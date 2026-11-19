@@ -34,7 +34,7 @@ const test=require("node:test"),assert=require("node:assert/strict"),fs=require(
   }
   test("unavailable contact keeps sending disabled and preserves the draft",async()=>{
     for(const options of [{available:false},{availabilityFailure:true}]){
-      const f=await page(options);assert.equal(f.send.disabled,true);assert.equal(f.retry.hidden,false);await f.submit();
+      const f=await page(options);assert.equal(f.send.disabled,true);assert.equal(f.send.hidden,true);assert.equal(f.retry.hidden,false);await f.submit();
       assert.equal(f.requests.filter(r=>r.method==="POST").length,0);assert.equal(f.resetCount,0);assert.equal(f.values.message,"Consulta de prueba completa.");
     }
   });
@@ -42,7 +42,7 @@ const test=require("node:test"),assert=require("node:assert/strict"),fs=require(
     const f=await page();await f.submit();
     const sent=f.requests.find(r=>r.method==="POST");
     assert.equal(sent.cache,"no-store");assert.equal(JSON.parse(sent.body).acceptedPrivacy,true);
-    assert.equal(f.resetCount,1);assert.match(f.status.textContent,/Referencia: fixture-email-id/);assert.equal(f.send.disabled,false);
+    assert.equal(f.resetCount,1);assert.match(f.status.textContent,/Referencia: fixture-email-id/);assert.equal(f.send.disabled,false);assert.equal(f.send.hidden,false);
   });
   test("malformed success and literal HTML errors retain the message without injecting markup",async()=>{
     for(const reply of [{ok:true,status:200,body:{}},{ok:true,status:200,body:{received:true,id:"fixture-email-id"}},
@@ -68,8 +68,8 @@ const test=require("node:test"),assert=require("node:assert/strict"),fs=require(
   });
   test("a disabled channel after page load enables an availability recheck without clearing text",async()=>{
     const f=await page();f.reply={ok:false,status:503,body:{available:false,error:"Envío no disponible."}};
-    await f.submit();assert.equal(f.send.disabled,true);assert.equal(f.retry.hidden,false);assert.equal(f.resetCount,0);
-    await f.retry.events.click();assert.equal(f.send.disabled,false);
+    await f.submit();assert.equal(f.send.disabled,true);assert.equal(f.send.hidden,true);assert.equal(f.retry.hidden,false);assert.equal(f.resetCount,0);
+    await f.retry.events.click();assert.equal(f.send.disabled,false);assert.equal(f.send.hidden,false);
   });
   test("a downloaded draft is local, literal, and does not send or reset the query",async()=>{
     const f=await page({available:false});f.values.message="Texto literal <b>sin interpretar</b>.";f.window.setTimeout=fn=>{fn();return 0;};

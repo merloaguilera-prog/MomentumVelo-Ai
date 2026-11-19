@@ -5,7 +5,16 @@
   const status = document.querySelector("#market-status");
   const source = document.querySelector("#market-source");
   const options = Array.from(selector.options);
-  const workspaceKey = "momentumvelo.markets.workspace.v1";
+  const routeCore = window.MomentumMarketRoute;
+  const route = routeCore.parse(window.location.href, options.map(option => option.value));
+  window.addEventListener("hashchange", () => { const i=location.hash.indexOf("?"),params=new URLSearchParams(i>=0?location.hash.slice(i+1):""); if(params.has("activo")||params.has("tvwidgetsymbol"))location.reload(); });
+  if(route.requested){
+    document.body.classList.add("asset-view"); document.querySelector("#asset-view-tools").hidden=false;
+    if(route.valid){selector.value=route.symbol;window.history.replaceState(null,"",route.href);}
+    else{document.querySelector("#asset-error").hidden=false;document.querySelector("#quote-title").textContent="Activo no disponible en esta selección";chart.hidden=true;status.textContent="Vuelve a Mercados para elegir un activo disponible.";}
+  }
+  const workspaceKey = window.MomentumWorkspace.STORAGE_KEY;
+  let store;
   const favorites = document.querySelector("#market-favorites");
   const favoriteButton = document.querySelector("#market-favorite");
   const note = document.querySelector("#market-note");
@@ -27,18 +36,8 @@
   let timer;
 
   function readWorkspace() {
-    const data = JSON.parse(window.localStorage.getItem(workspaceKey) || "null");
-    if (!data || data.version !== 1) return { version: 1, favorites: [], notes: {} };
-    const known = value => options.some(option => option.value === value);
-    const saved = Array.isArray(data.favorites) ? [...new Set(data.favorites.filter(known))] : [];
-    const notes = {};
-    if (data.notes && typeof data.notes === "object") {
-      options.forEach(option => {
-        const text = data.notes[option.value];
-        if (typeof text === "string") notes[option.value] = text.slice(0, 2000);
-      });
-    }
-    return { version: 1, favorites: saved, notes };
+    if (!store) store = workspaceCore.createStore(window.localStorage, window.MomentumMarketCatalog);
+    return store.read();
   }
 
   function storageError() {
@@ -55,7 +54,8 @@
     change(next);
     workspace = next;
     try {
-      window.localStorage.setItem(workspaceKey, JSON.stringify(workspace));
+      if (!store) store = workspaceCore.createStore(window.localStorage, window.MomentumMarketCatalog);
+      store.write(workspace);
       storageFailed = false;
       workspaceStatus.classList.remove("error");
       workspaceStatus.textContent = "Cambios guardados en este navegador.";
@@ -83,7 +83,7 @@
       open.textContent = option.textContent;
       open.setAttribute("aria-label", `Ver ${option.textContent}`);
       open.setAttribute("aria-pressed", String(symbol === current));
-      open.addEventListener("click", () => { selector.value = symbol; render(); });
+      open.addEventListener("click", () => { window.location.assign(routeCore.href(symbol)); });
       const remove = document.createElement("button");
       remove.type = "button";
       remove.className = "favorite-remove";
@@ -126,6 +126,7 @@
   }
 
   function render() {
+    if(route.requested&&!route.valid)return;
     const option = options.find(item => item.value === selector.value) || options[0];
     selector.value = option.value;
     renderWorkspace(true);
@@ -135,6 +136,7 @@
     status.classList.remove("error");
     status.textContent = "Cargando el gráfico del proveedor…";
     document.querySelector("#quote-title").textContent = option.textContent;
+    if(route.requested)document.title=`${name} · ${option.value} · MomentumVelo IA`;
     document.querySelector("#market-timing").textContent = option.dataset.timing === "delayed"
       ? "Cotización con retraso o de cierre, según la bolsa. El estado del mercado y la moneda aparecen en el gráfico."
       : "Datos de la fuente seleccionada · consulta el estado y el periodo del dato en el gráfico.";
@@ -188,9 +190,7 @@
     container.appendChild(script);
   }
 
-  const requestedSymbol = new URLSearchParams(window.location.search).get("activo") || new URLSearchParams(window.location.search).get("tvwidgetsymbol");
-  if (options.some(option => option.value === requestedSymbol)) selector.value = requestedSymbol;
-  selector.addEventListener("change", render);
+  selector.addEventListener("change",()=>window.location.assign(routeCore.href(selector.value)));
   document.querySelector("#market-retry").addEventListener("click", render);
   favoriteButton.addEventListener("click", () => {
     saveWorkspace(state => {
