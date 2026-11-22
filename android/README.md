@@ -1,6 +1,12 @@
 # MomentumVelo para Android
 
-Proyecto Android real generado con Bubblewrap Core 1.27.0. Identificador previsto: `app.momentumvelo`; versión 1.0.0; mínimo Android 7 (API 24); objetivo Android 16 (API 36). Abre `https://momentumvelo.app/mercados?source=android` mediante Trusted Web Activity y conserva el navegador seguro para la web y sus datos locales.
+Proyecto Android real generado con Bubblewrap Core 1.27.0. Identificador registrado en Play Console el 22/11/2026: `app.momentumvelo`; versión 1.0.0; mínimo Android 7 (API 24); objetivo Android 16 (API 36). Abre `https://momentumvelo.app/mercados?source=android` mediante Trusted Web Activity y conserva el navegador seguro para la web y sus datos locales.
+
+## Icono elegido — 22/11/2026
+
+El icono confirmado por la titular muestra la flecha ascendente, velas neón y el nombre MomentumVelo. `icons/icon-512.png` y `android/store_icon.png` conservan el PNG original de 512 × 512 sin redibujarlo. Su SHA-256 es `5c55697aaaabbebebb1e185d43bb5e1791ff210b225d1aa29f1aeb5721bb714b`.
+
+Los recursos de lanzador, icono adaptativo y presentación inicial se han regenerado con Bubblewrap Core 1.27.0 desde ese original. La versión web de 192 px usa el recurso de lanzador de esa medida. El generador conserva la corrección revisada del lanzador. El icono también está guardado en el borrador español de Play Store; la creación de la ficha no implica aprobación ni publicación.
 
 ## Compilación
 
