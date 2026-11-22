@@ -7,6 +7,10 @@ const requireTool = createRequire(path.join(toolingRoot, "package.json"));
 const { TwaGenerator, TwaManifest, ConsoleLog } = requireTool("@bubblewrap/core");
 
 (async () => {
+  // Bubblewrap owns generated resources; the reviewed app launcher is custom.
+  // Preserve its optional-shortcut crash protection during regeneration.
+  const launcherPath = path.join(__dirname, "app/src/main/java/app/momentumvelo/LauncherActivity.java");
+  const appLauncher = fs.readFileSync(launcherPath, "utf8");
   const manifest = new TwaManifest(JSON.parse(fs.readFileSync(path.join(__dirname, "twa-manifest.json"), "utf8")));
   const error = manifest.validate();
   if (error) throw new Error(error);
@@ -17,6 +21,7 @@ const { TwaGenerator, TwaManifest, ConsoleLog } = requireTool("@bubblewrap/core"
     return { url, data: fs.readFileSync(path.join(__dirname, "../icons/icon-512.png")) };
   };
   await generator.createTwaProject(__dirname, manifest, new ConsoleLog("MomentumVelo"));
+  fs.writeFileSync(launcherPath, appLauncher);
   const buildFile = path.join(__dirname, "build.gradle");
   fs.writeFileSync(buildFile, fs.readFileSync(buildFile, "utf8").replaceAll("jcenter()", "mavenCentral()"));
   const appBuild = path.join(__dirname, "app/build.gradle");

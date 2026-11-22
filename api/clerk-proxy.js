@@ -14,6 +14,11 @@ function originalClientIp(req) {
 }
 
 module.exports = async function handler(req, res) {
+  // A direct instance must never fall back to the old Marketplace identity.
+  if (process.env.CLERK_USE_PROXY === "false") {
+    res.setHeader("Cache-Control", "no-store");
+    return res.status(410).json({ error: "Legacy Clerk proxy is disabled." });
+  }
   const secretKey = process.env.CLERK_SECRET_KEY || "";
   const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || "";
   // Clerk's proxy guide requires forwarding to the canonical Frontend API host.

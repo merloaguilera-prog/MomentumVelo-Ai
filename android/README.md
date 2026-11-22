@@ -42,13 +42,23 @@ Hasta completar esa asociación, la app de Play puede abrirse con la barra segur
 
 ## Bloqueos antes del envío público
 
-- Acceso seguro definitivo en momentumvelo.app y registro real: incidencia de dominio/proxy de Clerk pendiente; conservar la aplicación y sus usuarios al corregirla.
+- La configuración directa de Clerk está activa en momentumvelo.app; aún hay que completar registro, entrada, recuperación y salida con una cuenta y comprobarlos desde Android.
 - Generar y verificar la entrega firmada, configurar Play App Signing y verificar Digital Asset Links con el certificado real de Google y en un dispositivo real.
 - Revisar Premium para Google Play: el Checkout web de Stripe no acredita Google Play Billing ni la inscripción en un programa alternativo. Las ventas actuales siguen desactivadas; no habilitarlas en una app de Play sin completar esa integración o separar una versión de consumo sin compras ni enlaces prohibidos.
 - Completar y revisar la privacidad, el responsable, el canal de contacto real, la eliminación de cuentas y las declaraciones de seguridad de datos y funciones financieras. El texto legal actual sigue siendo provisional.
 - Verificar el estado de la cuenta personal de Play Console, realizar la prueba cerrada de 12 personas durante 14 días y solicitar acceso a producción.
 
 Los gráficos no ejecutan operaciones ni garantizan movimientos futuros. El radar de criptomonedas funciona con la app abierta y conexión; los históricos importados se analizan localmente. El paquete no añade avisos en segundo plano ni sincronización por cuenta.
+
+## Revisión técnica de publicación — 22/11/2026
+
+El lanzador de Android tolera únicamente la `IllegalArgumentException` originada en `ManageDataLauncherActivity.addSiteSettingsShortcut`, una operación opcional de Android Browser Helper 2.7.4 que ocurre después de abrir el navegador. Las demás excepciones de arranque se propagan. Esto reduce un riesgo conocido de cierre; no acredita que MomentumVelo haya fallado o se haya probado en un teléfono físico.
+
+`python3 android/test-launcher.py` compila el lanzador real con un JDK y cuatro escenarios controlados: arranque normal, rechazo del acceso directo opcional, error de configuración ajeno y otra clase de excepción. Son fixtures de Java, no una emulación de Android. `generate.cjs` conserva el lanzador revisado al regenerar recursos.
+
+El trabajo `android-checks` de GitHub compila APK de depuración y AAB sin firmar con SDK 36, ejecuta Android Lint y conserva los resultados durante siete días. Son artefactos de revisión: no subir la APK debug ni el AAB sin firmar como versión pública. La numeración y la firma se cerrarán después de comprobar la versión ya registrada en Play Console. No se han creado ni cambiado claves de firma.
+
+Antes de distribuir, instalar el paquete firmado en un móvil, probar apertura repetida y navegación con y sin conexión, y comprobar el certificado de Play en Digital Asset Links. La compilación y los fixtures no sustituyen estos recorridos.
 
 ## Fuentes oficiales consultadas el 14/10/2026
 

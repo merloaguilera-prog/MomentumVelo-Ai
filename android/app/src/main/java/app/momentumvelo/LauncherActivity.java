@@ -19,6 +19,7 @@ import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 
 
 
@@ -30,7 +31,15 @@ public class LauncherActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+        try {
+            super.onCreate(savedInstanceState);
+        } catch (IllegalArgumentException error) {
+            // ABH 2.7.4 launches the browser before creating this optional shortcut.
+            // Some launchers reject it; that must not close an already launched TWA.
+            // Propagate every other launch failure instead of hiding it.
+            if (!isSiteSettingsShortcutFailure(error)) throw error;
+            Log.w("MomentumVelo", "Site settings shortcut is unavailable", error);
+        }
         // Setting an orientation crashes the app due to the transparent background on Android 8.0
         // Oreo and below. We only set the orientation on Oreo and above. This only affects the
         // splash screen and Chrome will still respect the orientation.
@@ -40,6 +49,14 @@ public class LauncherActivity
         } else {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
         }
+    }
+
+    private static boolean isSiteSettingsShortcutFailure(IllegalArgumentException error) {
+        for (StackTraceElement frame : error.getStackTrace()) {
+            if ("com.google.androidbrowserhelper.trusted.ManageDataLauncherActivity".equals(frame.getClassName())
+                    && "addSiteSettingsShortcut".equals(frame.getMethodName())) return true;
+        }
+        return false;
     }
 
     @Override
