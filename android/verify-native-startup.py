@@ -26,6 +26,7 @@ def main():
     result = {
         "package": PACKAGE,
         "native_launches": [],
+        "launch_intent": "MAIN/LAUNCHER with NEW_TASK and RESET_TASK_IF_NEEDED",
         "passed": False,
         "web_content_verified": False,
         "authentication_verified": False,
@@ -79,7 +80,14 @@ def main():
         device("logcat", "-c")
         for number in range(1, 4):
             device("shell", "am", "force-stop", PACKAGE)
-            launched = device("shell", "am", "start", "-W", "-n", ACTIVITY)
+            # Match an icon tap. An unflagged shell intent can deliver to a
+            # background browser task without bringing that task to the front.
+            launched = device(
+                "shell", "am", "start", "-W",
+                "-a", "android.intent.action.MAIN",
+                "-c", "android.intent.category.LAUNCHER",
+                "-f", "0x10200000", "-n", ACTIVITY,
+            )
             (args.output / f"launch-{number}.txt").write_text(launched)
             if not re.search(r"^Status:\s*ok\s*$", launched, re.MULTILINE):
                 raise RuntimeError("Activity Manager did not confirm native launch")

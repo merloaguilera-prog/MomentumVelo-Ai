@@ -68,7 +68,7 @@ Antes de distribuir, instalar el paquete firmado en un móvil, probar apertura r
 
 ## Prueba automática de arranque nativo
 
-El trabajo `android-launch` instala la APK de ese mismo flujo en un emulador desechable Android 16 (API 36, x86_64), abre el lanzador tres veces y comprueba que Android confirma el inicio, que Chrome recibe el control y que no se registra un cierre o ANR de MomentumVelo. Guarda un informe JSON, registros y capturas del emulador durante siete días. El script rechaza dispositivos físicos y requiere una única instancia de emulador.
+El trabajo `android-launch` instala la APK de ese mismo flujo en un emulador desechable Android 16 (API 36, x86_64), abre el lanzador tres veces y comprueba que Android confirma el inicio, que Chrome recibe el control y que no se registra un cierre o ANR de MomentumVelo. Usa el intent `MAIN/LAUNCHER` con `NEW_TASK` y `RESET_TASK_IF_NEEDED`, como una pulsación en el icono; entre aperturas vuelve a Inicio y detiene únicamente MomentumVelo. Guarda un informe JSON, registros y capturas del emulador durante siete días. El script rechaza dispositivos físicos y requiere una única instancia de emulador.
 
 Esta comprobación verifica el arranque nativo y el paso al navegador. No introduce cuentas, no pulsa acuerdos de Chrome ni inicia sesión. El informe distingue el asistente inicial del navegador; un traspaso correcto no acredita que se hayan cargado los gráficos, el acceso de Clerk o la firma de Google Play.
 
