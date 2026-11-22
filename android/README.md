@@ -66,6 +66,12 @@ El trabajo `android-checks` de GitHub compila APK de depuración y AAB sin firma
 
 Antes de distribuir, instalar el paquete firmado en un móvil, probar apertura repetida y navegación con y sin conexión, y comprobar el certificado de Play en Digital Asset Links. La compilación y los fixtures no sustituyen estos recorridos.
 
+## Prueba automática de arranque nativo
+
+El trabajo `android-launch` instala la APK de ese mismo flujo en un emulador desechable Android 16 (API 36, x86_64), abre el lanzador tres veces y comprueba que Android confirma el inicio, que Chrome recibe el control y que no se registra un cierre o ANR de MomentumVelo. Guarda un informe JSON, registros y capturas del emulador durante siete días. El script rechaza dispositivos físicos y requiere una única instancia de emulador.
+
+Esta comprobación verifica el arranque nativo y el paso al navegador. No introduce cuentas, no pulsa acuerdos de Chrome ni inicia sesión. El informe distingue el asistente inicial del navegador; un traspaso correcto no acredita que se hayan cargado los gráficos, el acceso de Clerk o la firma de Google Play.
+
 ## Fuentes oficiales consultadas el 14/10/2026
 
 - https://developer.chrome.com/docs/android/trusted-web-activity/quick-start
