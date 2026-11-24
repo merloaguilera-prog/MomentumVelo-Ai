@@ -30,3 +30,38 @@ test('assets use separate windows and signal downward movements', () => {
   assert.equal(tick(engine, 60, 500, { product_id: 'ETH-USD' }).warming, true);
   assert.throws(() => create(0)); assert.throws(() => create(NaN));
 });
+
+test('5 and 15 minute comparisons warm their full selected window', () => {
+  for (const windowSeconds of [300,900]) {
+    const engine=create(0.5,{windowSeconds});
+    for(let i=0;i<windowSeconds;i++)assert.equal(tick(engine,i).warming,true);
+    const result=tick(engine,windowSeconds,101);
+    assert.equal(result.signal.windowSeconds,windowSeconds);
+    assert.equal(result.signal.baselinePrice,100);
+    assert.equal(result.warming,false);
+  }
+});
+test('confirmation rejects a brief spike and emits only after sustained observations', () => {
+  const engine=create(0.5,{confirmationMs:3000});
+  for(let i=0;i<60;i++)tick(engine,i);
+  assert.equal(tick(engine,60,101).signal,null);
+  assert.equal(tick(engine,61,100).signal,null);
+  for(let i=62;i<65;i++)assert.equal(tick(engine,i,101).signal,null);
+  const result=tick(engine,65,101);
+  assert.equal(result.signal.confirmationMs,3000);
+  assert.equal(tick(engine,66,101).signal,null);
+});
+test('within-second samples use the latest received price as a future baseline', () => {
+  const engine=create();tick(engine,0,100);
+  const time=start+500;
+  engine.ingest({type:'ticker',product_id:'BTC-USD',price:'110',time:new Date(time).toISOString(),sequence:2},time);
+  for(let i=1;i<=60;i++)tick(engine,i,110,{sequence:i+2});
+  const result=tick(engine,61,110,{sequence:64});
+  assert.equal(result.change,0);
+  assert.equal(result.signal,null);
+});
+test('window and confirmation options fail closed for unsupported values', () => {
+  assert.throws(()=>create(0.5,{windowSeconds:0}));
+  assert.throws(()=>create(0.5,{windowSeconds:NaN}));
+  assert.throws(()=>create(0.5,{confirmationMs:500}));
+});

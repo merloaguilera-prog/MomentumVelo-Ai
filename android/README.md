@@ -1,6 +1,12 @@
 # MomentumVelo para Android
 
-Proyecto Android real generado con Bubblewrap Core 1.27.0. Identificador previsto: `app.momentumvelo`; versión 1.0.0; mínimo Android 7 (API 24); objetivo Android 16 (API 36). Abre `https://momentumvelo.app/mercados?source=android` mediante Trusted Web Activity y conserva el navegador seguro para la web y sus datos locales.
+Proyecto Android real generado con Bubblewrap Core 1.27.0. Identificador registrado en Play Console el 22/11/2026: `app.momentumvelo`; versión 1.0.0; mínimo Android 7 (API 24); objetivo Android 16 (API 36). Abre `https://momentumvelo.app/mercados?source=android` mediante Trusted Web Activity y conserva el navegador seguro para la web y sus datos locales.
+
+## Icono elegido — 22/11/2026
+
+El icono confirmado por la titular muestra la flecha ascendente, velas neón y el nombre MomentumVelo. `icons/icon-512.png` y `android/store_icon.png` conservan el PNG original de 512 × 512 sin redibujarlo. Su SHA-256 es `5c55697aaaabbebebb1e185d43bb5e1791ff210b225d1aa29f1aeb5721bb714b`.
+
+Los recursos de lanzador, icono adaptativo y presentación inicial se han regenerado con Bubblewrap Core 1.27.0 desde ese original. La versión web de 192 px usa el recurso de lanzador de esa medida. El generador conserva la corrección revisada del lanzador. El icono también está guardado en el borrador español de Play Store; la creación de la ficha no implica aprobación ni publicación.
 
 ## Compilación
 
@@ -36,19 +42,37 @@ Produce `MomentumVelo-1.0.0-play.aab`, el certificado **público** de subida y u
 
 El proyecto no incluye claves privadas, contraseñas ni credenciales de Google Play. Con Play App Signing, usar la huella SHA-256 del **certificado de firma de la app** que Google indica para `.well-known/assetlinks.json`, además de cualquier certificado autorizado de pruebas. No confundirla con el certificado de subida.
 
-`.well-known/assetlinks.json` autoriza el certificado de subida/pruebas cuyo respaldo privado se conserva fuera del repositorio. Esto permite verificar las APK instaladas directamente con esa firma. Cuando Google genere el certificado de firma de la app, añadir también su huella SHA-256 a la lista, comprobar que la URL pública devuelve HTTP 200 con JSON y probar la versión descargada de Play. La firma de subida por sí sola no verifica la versión distribuida por Google.
+`.well-known/assetlinks.json` incluye el certificado de subida/pruebas y los tres certificados de distribución copiados de la página de firma de MomentumVelo en Play Console el 24/11/2026: clásico anterior, clásico del esquema híbrido y poscuántico. `play-signing-certificates-2026-11-24.json` registra las huellas públicas y el AAB observado. No contiene claves privadas. La firma de subida por sí sola no verifica la versión distribuida por Google.
+
+La asociación está preparada en PR #45; producción conserva el archivo anterior. Tras desplegar la versión web revisada, comprobar que `https://momentumvelo.app/.well-known/assetlinks.json` devuelve HTTP 200 sin redirecciones y que contiene esas huellas. Instalar después la versión descargada de Play y comprobar la verificación de la TWA. El JSON válido y su despliegue en Preview no acreditan esa instalación.
 
 Hasta completar esa asociación, la app de Play puede abrirse con la barra segura de Custom Tabs. No se anuncia verificación de pantalla completa, ejecución en un móvil real ni publicación en Google Play.
 
 ## Bloqueos antes del envío público
 
-- Acceso seguro definitivo en momentumvelo.app y registro real: incidencia de dominio/proxy de Clerk pendiente; conservar la aplicación y sus usuarios al corregirla.
-- Generar y verificar la entrega firmada, configurar Play App Signing y verificar Digital Asset Links con el certificado real de Google y en un dispositivo real.
+- La configuración directa de Clerk está activa en momentumvelo.app; aún hay que completar registro, entrada, recuperación y salida con una cuenta y comprobarlos desde Android.
+- El AAB firmado 1.0.0/código 1 ya está procesado y guardado en un borrador de prueba interna de Play. Falta revisar y distribuir ese borrador, desplegar Digital Asset Links con los certificados comprobados y verificar la instalación desde Play. No reutilizar el código 1 para un binario distinto.
 - Revisar Premium para Google Play: el Checkout web de Stripe no acredita Google Play Billing ni la inscripción en un programa alternativo. Las ventas actuales siguen desactivadas; no habilitarlas en una app de Play sin completar esa integración o separar una versión de consumo sin compras ni enlaces prohibidos.
 - Completar y revisar la privacidad, el responsable, el canal de contacto real, la eliminación de cuentas y las declaraciones de seguridad de datos y funciones financieras. El texto legal actual sigue siendo provisional.
 - Verificar el estado de la cuenta personal de Play Console, realizar la prueba cerrada de 12 personas durante 14 días y solicitar acceso a producción.
 
 Los gráficos no ejecutan operaciones ni garantizan movimientos futuros. El radar de criptomonedas funciona con la app abierta y conexión; los históricos importados se analizan localmente. El paquete no añade avisos en segundo plano ni sincronización por cuenta.
+
+## Revisión técnica de publicación — 22/11/2026
+
+El lanzador de Android tolera únicamente la `IllegalArgumentException` originada en `ManageDataLauncherActivity.addSiteSettingsShortcut`, una operación opcional de Android Browser Helper 2.7.4 que ocurre después de abrir el navegador. Las demás excepciones de arranque se propagan. Esto reduce un riesgo conocido de cierre; no acredita que MomentumVelo haya fallado o se haya probado en un teléfono físico.
+
+`python3 android/test-launcher.py` compila el lanzador real con un JDK y cuatro escenarios controlados: arranque normal, rechazo del acceso directo opcional, error de configuración ajeno y otra clase de excepción. Son fixtures de Java, no una emulación de Android. `generate.cjs` conserva el lanzador revisado al regenerar recursos.
+
+El trabajo `android-checks` de GitHub compila APK de depuración y AAB sin firmar con SDK 36, ejecuta Android Lint y conserva los resultados durante siete días. Son artefactos de revisión: no subir la APK debug ni el AAB sin firmar como versión pública. La entrega firmada con la clave de subida existente se preparó aparte, se verificó y se subió como 1.0.0/código 1 al borrador interno el 24/11/2026. No se han sustituido claves de subida ni solicitado cambios en las claves administradas por Google.
+
+Antes de distribuir, instalar el paquete firmado en un móvil, probar apertura repetida y navegación con y sin conexión, y comprobar el certificado de Play en Digital Asset Links. La compilación y los fixtures no sustituyen estos recorridos.
+
+## Prueba automática de arranque nativo
+
+El trabajo `android-launch` instala la APK de ese mismo flujo en un emulador desechable Android 16 (API 36, x86_64), abre el lanzador tres veces y comprueba que Android confirma el inicio, que Chrome recibe el control y que no se registra un cierre o ANR de MomentumVelo. Usa el intent `MAIN/LAUNCHER` con `NEW_TASK` y `RESET_TASK_IF_NEEDED`, como una pulsación en el icono; entre aperturas vuelve a Inicio y detiene únicamente MomentumVelo. Guarda un informe JSON, registros y capturas del emulador durante siete días. El script rechaza dispositivos físicos y requiere una única instancia de emulador.
+
+Esta comprobación verifica el arranque nativo y el paso al navegador. No introduce cuentas, no pulsa acuerdos de Chrome ni inicia sesión. El informe distingue el asistente inicial del navegador; un traspaso correcto no acredita que se hayan cargado los gráficos, el acceso de Clerk o la firma de Google Play.
 
 ## Fuentes oficiales consultadas el 14/10/2026
 

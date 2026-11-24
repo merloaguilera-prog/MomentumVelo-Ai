@@ -1,8 +1,8 @@
 # Ficha propuesta para Google Play
 
-Estado: borrador para una versión gratuita de pruebas. No enviada ni aprobada.
+Estado: aplicación creada y textos e icono guardados como borrador en Play Console el 22/11/2026 para una versión gratuita de pruebas. No enviada ni aprobada.
 
-**Nombre:** MomentumVelo
+**Nombre:** MomentumVelo IA
 
 **Descripción breve:** Mercados, radar de criptomonedas y cartera de práctica en un solo lugar.
 
@@ -15,6 +15,8 @@ Activa el radar de Bitcoin, Ethereum y Solana para observar movimientos mientras
 Guarda tus favoritos y notas. Prepara una cartera con capital virtual, anota tus motivos en el diario y revisa los resultados de tus operaciones de práctica. Puedes descargar copias de los datos locales para conservarlas o trasladarlas a otro navegador.
 
 Las cotizaciones dependen del proveedor y algunas bolsas muestran datos con retraso. La cartera de práctica utiliza los precios introducidos por ti. Los favoritos, notas y datos de práctica se conservan en el navegador del dispositivo; esta versión no ofrece sincronización automática entre dispositivos. Se necesita Internet para las cotizaciones y el radar.
+
+Las funciones de IA y Premium siguen en preparación. Esta versión de pruebas no incluye su contratación.
 
 MomentumVelo ofrece información y herramientas de práctica. No ejecuta inversiones ni garantiza rendimientos o movimientos futuros.
 

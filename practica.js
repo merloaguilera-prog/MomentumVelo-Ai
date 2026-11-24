@@ -5,8 +5,30 @@
   const money = value => (value / 100).toLocaleString("es-ES", { style: "currency", currency: current.currency });
   const decimal = value => value.toLocaleString("es-ES", { maximumFractionDigits: 8 });
   let current = null, previous = null, pending = null, baseline = null, importGeneration = 0;
+  let requestedSection = null;
+  const portfolioSections = new Set(["#operacion", "#diario", "#evolucion"]);
   const element = (tag, text, className) => { const node = document.createElement(tag); node.textContent = text; if (className) node.className = className; return node; };
   function message(text, error = false) { $("practice-status").textContent = text; $("practice-status").classList.toggle("error", error); }
+  function requirePortfolio(hash) {
+    if (current || !portfolioSections.has(hash)) { requestedSection = null; return false; }
+    requestedSection = hash;
+    $("practice-setup").open = true;
+    if (!$("practice-status").classList.contains("error")) {
+      message("Primero prepara tu cartera virtual. Después abriremos el apartado que has elegido.");
+    }
+    $("practice-setup").scrollIntoView({ block: "start" });
+    $("setup-capital").focus({ preventScroll: true });
+    return true;
+  }
+  function openRequestedSection() {
+    if (!current || !requestedSection) return;
+    const section = $(requestedSection.slice(1));
+    window.history.replaceState(null, "", requestedSection);
+    requestedSection = null;
+    section.scrollIntoView({ block: "start" });
+    const heading = section.querySelector("h2");
+    if (heading) { heading.tabIndex = -1; heading.focus({ preventScroll: true }); }
+  }
   function read(text) {
     if (!text) return { current: null, previous: null };
     if (new TextEncoder().encode(text).length > 2200000) throw new Error("El registro guardado es demasiado grande. Conserva tu copia antes de preparar otra cartera.");
@@ -31,6 +53,7 @@
     try { const text = JSON.stringify({ version: 1, current, previous }); localStorage.setItem(key, text); baseline = text; } catch (_) { saved = false; }
     clearPending(); render();
     message(saved ? `${text} Guardado en este navegador.` : `${text} El navegador no permite guardar: descarga una copia antes de salir.`, !saved);
+    openRequestedSection();
     return true;
   }
   function prepare(next, reason) {
@@ -172,8 +195,17 @@
     try { const stored = localStorage.getItem(key), fresh = read(stored); current = fresh.current; previous = fresh.previous; baseline = stored; clearPending(); render(); message("Cartera actualizada desde otra pestaña. Revisa el formulario antes de registrar otra operación."); }
     catch (_) { message("No se pudo leer la actualización de otra pestaña. Conserva tu copia antes de seguir.", true); }
   });
+  document.querySelectorAll('a[href^="#"]').forEach(link => {
+    link.addEventListener("click", event => {
+      if (event.defaultPrevented || event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+      if (requirePortfolio(link.getAttribute("href"))) event.preventDefault();
+    });
+  });
+  window.addEventListener("hashchange", () => requirePortfolio(window.location.hash));
   try {
     baseline = localStorage.getItem(key); const saved = read(baseline); current = saved.current; previous = saved.previous; render();
     if (current) message("Tu cartera de práctica está guardada en este navegador.");
   } catch (error) { render(); message(error.message || "Este navegador no permite guardar. Descarga una copia antes de salir.", true); }
+  if (document.readyState === "complete") requirePortfolio(window.location.hash);
+  else window.addEventListener("load", () => requirePortfolio(window.location.hash), { once: true });
 })();

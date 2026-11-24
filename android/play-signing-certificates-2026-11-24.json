@@ -1,0 +1,17 @@
+{
+  "package_name": "app.momentumvelo",
+  "observed_on": "2026-11-24",
+  "source": "Google Play Console > MomentumVelo IA > Firma de aplicaciones",
+  "app_signing": {
+    "previous_classical_sha256": "39:08:D3:ED:31:37:72:54:62:A1:17:48:6F:2F:BE:BD:E2:1A:F3:95:9D:D5:1C:3D:F6:D5:AE:E0:E3:2B:F8:EC",
+    "hybrid_classical_sha256": "5D:C6:4F:41:79:C5:93:C9:43:19:86:49:64:82:9E:71:E9:0C:FF:DA:79:82:D9:E2:1F:57:18:4F:86:62:6B:B7",
+    "post_quantum_sha256": "3F:F4:53:1A:6A:C1:74:04:3C:E2:2B:2B:C7:46:84:3B:19:AF:01:79:52:83:16:6E:5F:7C:5C:45:F2:2E:B6:2E"
+  },
+  "upload_certificate_sha256": "B2:CD:28:64:CE:CE:2E:BC:FA:FA:A7:A9:61:FE:C1:CE:17:FC:A0:71:2E:20:C9:98:C1:4B:7B:A4:E6:43:A6:84",
+  "internal_draft_version_code": 1,
+  "internal_draft_version_name": "1.0.0",
+  "uploaded_bundle_sha256": "cf99b999e465e532ab58eef19d4f4cf3ea4c33d80927f284e189db1728713b04",
+  "distributed_to_testers": false,
+  "production_website_updated": false,
+  "installed_from_play_verified": false
+}
